@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('distritos', function (Blueprint $table) {
-            $table->id();
+
+            $table->bigIncrements('idDist');
+            $table->string('distrito', 50)->nullable();
+            $table->unsignedBigInteger('idProv')->nullable();
+            $table->foreign('idProv')->references('idProv')->on('provincias');
             $table->timestamps();
         });
     }

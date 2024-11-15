@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('personal_academicos', function (Blueprint $table) {
-            $table->id();
+        Schema::create('provincias', function (Blueprint $table) {
+
+            $table->bigIncrements('idProv');
+            $table->string('provincia', 50)->nullable();
+            $table->unsignedBigInteger('idDepa')->nullable();
+            $table->foreign('idDepa')->references('idDepa')->on('departamentos');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -22,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('personal_academicos');
+        Schema::dropIfExists('provincias');
     }
 };

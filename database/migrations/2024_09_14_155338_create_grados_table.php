@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('grados', function (Blueprint $table) {
-            $table->id();
+
+            $table->bigIncrements('gra_id');
+            $table->string('gra_descripcion', 255)->default('');
+            $table->unsignedBigInteger('niv_id')->nullable();
+            $table->char('gra_estado', 1)->default('1')->comment('1: Activo; 2: Inactivo');
+            $table->char('gra_is_delete', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
+            $table->foreign('niv_id')->references('niv_id')->on('nivels');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

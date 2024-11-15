@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('alumnos', function (Blueprint $table) {
-    
+
             $table->bigIncrements('alu_id');
             $table->unsignedBigInteger('per_id');
             $table->unsignedBigInteger('apo_id');
@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('name_ficha_matricula')->nullable();
             $table->char('alu_estado', 1)->default('0')->comment('1: Activo; 2:Inactivo; 3:Retirado');
             $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
-            $table->foreign('per_id')->references('id')->on('personas');
-            $table->foreign('apo_id')->references('id')->on('apoderados');
+            $table->foreign('per_id')->references('per_id')->on('personas');
+            $table->foreign('apo_id')->references('apo_id')->on('apoderados');
             $table->softDeletes();
             $table->timestamps();
         });

@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tipos', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('tp_id');
+            $table->string('tp_tipo', 255)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('provincias', function (Blueprint $table) {
-            $table->id();
+        Schema::create('nivels', function (Blueprint $table) {
+            $table->bigIncrements('niv_id');
+            $table->string('niv_descripcion', 255)->default('');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -22,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('provincias');
+        Schema::dropIfExists('nivels');
     }
 };

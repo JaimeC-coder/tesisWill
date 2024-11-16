@@ -213,9 +213,12 @@ class ProvinciasSeeder extends Seeder
 
         foreach ($provincias as $provincia) {
             DB::table('provincias')->insert([
-                'id' => $provincia[0],
-                'nombre' => $provincia[1],
-                'departamento_id' => $provincia[2]
+                'idProv' => $provincia[0],
+                'provincia' => $provincia[1],
+                'idDepa' => $provincia[2],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

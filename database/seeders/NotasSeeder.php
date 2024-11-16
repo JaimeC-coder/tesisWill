@@ -551,17 +551,19 @@ class NotasSeeder extends Seeder
 
         foreach ($notas as $nota) {
             DB::table('notas')->insert([
-                'id' => $nota[0],
-                'id_aluno' => $nota[1],
-                'id_disciplina' => $nota[2],
-                'id_professor' => $nota[3],
-                'id_turma' => $nota[4],
-                'id_bimestre' => $nota[5],
-                'nota' => $nota[6],
-                'falta' => $nota[7],
-                'id_user' => $nota[8],
+                'nt_id' => $nota[0],
+                'per_id' => $nota[1],
+                'alu_id' => $nota[2],
+                'pa_id' => $nota[3],
+                'ags_id' => $nota[4],
+                'nt_bimestre' => $nota[5],
+                'nt_nota' => $nota[6],
+                'nt_is_deleted' => $nota[7],
+                'curso_id' => $nota[8],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
-
     }
 }

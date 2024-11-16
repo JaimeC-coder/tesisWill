@@ -30,15 +30,18 @@ class PersonalAcademicosSeeder extends Seeder
 
         foreach ($personal_academicos as $personal_academico) {
             DB::table('personal_academicos')->insert([
-                'id' => $personal_academico[0],
-                'persona_id' => $personal_academico[1],
-                'jornada' => $personal_academico[2],
-                'tipo' => $personal_academico[3],
-                'institucion_id' => $personal_academico[4],
-                'especialidad' => $personal_academico[5],
-                'grado_id' => $personal_academico[6],
-                'created_at' => $personal_academico[7],
-                'updated_at' => $personal_academico[8]
+                'pa_id' => $personal_academico[0],
+                'per_id' => $personal_academico[1],
+                'pa_turno' => $personal_academico[2],
+                'pa_condicion_laboral' => $personal_academico[3],
+                'niv_id' => $personal_academico[4],
+                'pa_especialidad' => $personal_academico[5],
+                'rol_id' => $personal_academico[6],
+                'pa_is_tutor' => $personal_academico[7],
+                'is_deleted' => $personal_academico[8],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

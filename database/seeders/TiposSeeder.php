@@ -23,11 +23,11 @@ class TiposSeeder extends Seeder
 
         foreach ($tipos as $tipo) {
             DB::table('tipos')->insert([
-                'id' => $tipo[0],
-                'nombre' => $tipo[1],
-                'estado' => $tipo[2],
-                'created_at' => $tipo[3],
-                'updated_at' => $tipo[4]
+                'tp_id' => $tipo[0],
+                'tp_tipo' => $tipo[1],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

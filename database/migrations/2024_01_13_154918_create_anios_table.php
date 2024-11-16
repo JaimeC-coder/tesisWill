@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('anios', function (Blueprint $table) {
 
-           
+
             $table->bigIncrements('anio_id');
             $table->string('anio_descripcion', 50)->default('0');
             $table->date('anio_fechaInicio')->nullable();
@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('anio_cantidadPersonal')->nullable();
             $table->char('anio_tallerSeleccionable', 1)->nullable()->comment('1: SI; 2: NO');
             $table->char('anio_estado', 1)->nullable()->comment('1: Activo; 2: Inactivo');
+            $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
             $table->softDeletes();
 
             $table->timestamps();

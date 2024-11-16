@@ -108,18 +108,20 @@ class MatriculasSeeder extends Seeder
 
         foreach ($matriculas as $matricula) {
             DB::table('matriculas')->insert([
-                'id' => $matricula[0],
-                'alumno_id' => $matricula[1],
-                'grado_id' => $matricula[2],
-                'seccion_id' => $matricula[3],
-                'fecha' => $matricula[4],
-                'tipo' => $matricula[5],
-                'procedencia' => $matricula[6],
-                'observacion' => $matricula[7],
-                'created_at' => $matricula[8],
-                'updated_at' => $matricula[9],
-                'estado' => $matricula[10],
-                'user_id' => $matricula[11]
+                'mat_id' => $matricula[0],
+                'per_id' => $matricula[1],
+                'alu_id' => $matricula[2],
+                'ags_id' => $matricula[3],
+                'mat_fecha' => $matricula[4],
+                'mat_situacion' => $matricula[5],
+                'mat_tipo_procedencia' => $matricula[6],
+                'mat_colegio_procedencia' => $matricula[7],
+                'mat_observacion' => $matricula[8],
+                'mat_estado' => $matricula[9],
+                'is_deleted' => $matricula[10],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

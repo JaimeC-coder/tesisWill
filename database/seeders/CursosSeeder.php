@@ -72,15 +72,18 @@ class CursosSeeder extends Seeder
 
         foreach ($cursos as $curso) {
             DB::table('cursos')->insert([
-                'id' => $curso[0],
-                'nombre' => $curso[1],
-                'abreviatura' => $curso[2],
-                'nivel_id' => $curso[3],
-                'grado_id' => $curso[4],
-                'periodo_id' => $curso[5],
-                'created_at' => $curso[6],
-                'updated_at' => $curso[7],
-                'deleted_at' => $curso[8],
+                'cur_id' => $curso[0],
+                'cur_nombre' => $curso[1],
+                'cur_abreviatura' => $curso[2],
+                'cur_horas' => $curso[3],
+                'gra_id' => $curso[4],
+                'niv_id' => $curso[5],
+                'per_id' => $curso[6],
+                'cur_estado' => $curso[7],
+                'is_deleted' => $curso[8],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

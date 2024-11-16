@@ -1698,11 +1698,14 @@ class NotaCapacidadsSeeder extends Seeder
 
         foreach ($nota_capacidads as $nota_capacidad) {
             DB::table('nota_capacidads')->insert([
-                'id' => $nota_capacidad[0],
-                'nombre' => $nota_capacidad[1],
-                'valor' => $nota_capacidad[2],
-                'capacidad_id' => $nota_capacidad[3],
-                'deleted_at' => $nota_capacidad[4],
+                'nc_id' => $nota_capacidad[0],
+                'nc_descripcion' => $nota_capacidad[1],
+                'nc_nota' => $nota_capacidad[2],
+                'nt_id' => $nota_capacidad[3],
+                'nc_is_deleted' => $nota_capacidad[4],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         };
     }

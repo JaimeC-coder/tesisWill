@@ -20,8 +20,8 @@ class NivelsSeeder extends Seeder
 
             foreach ($nivels as $nivel) {
                 DB::table('nivels')->insert([
-                    'id' => $nivel[0],
-                    'nombre' => $nivel[1]
+                    'niv_id' => $nivel[0],
+                    'niv_descripcion' => $nivel[1]
                 ]);
             }
     }

@@ -26,12 +26,15 @@ class AsignarGradosSeeder extends Seeder
 
         foreach ($asignarGrados as $asignarGrado) {
             DB::table('asignar_grados')->insert([
-                'id' => $asignarGrado[0],
-                'aula_id' => $asignarGrado[1],
-                'grado_id' => $asignarGrado[2],
-                'periodo_id' => $asignarGrado[3],
+                'asig_id' => $asignarGrado[0],
+                'pa_id' => $asignarGrado[1],
+                'niv_id' => $asignarGrado[2],
+                'gra_id' => $asignarGrado[3],
                 'seccion' => $asignarGrado[4],
-                'estado' => $asignarGrado[5]
+                'asig_is_deleted' => $asignarGrado[5],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

@@ -19,14 +19,17 @@ class PeriodosSeeder extends Seeder
 
         foreach ($periodos as $periodo) {
             DB::table('periodos')->insert([
-                'id' => $periodo[0],
+                'per_id' => $periodo[0],
                 'anio_id' => $periodo[1],
-                'fecha_inicio' => $periodo[2],
-                'fecha_fin' => $periodo[3],
-                'fecha_fin_matricula' => $periodo[4],
-                'estado' => $periodo[5],
-                'created_at' => $periodo[6],
-                'updated_at' => $periodo[7]
+                'per_inicio_matriculas' => $periodo[2],
+                'per_final_matricula' => $periodo[3],
+                'per_limite_cierre' => $periodo[4],
+                'per_tp_notas' => $periodo[5],
+                'per_estado' => $periodo[6],
+                'is_deleted' => $periodo[7],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

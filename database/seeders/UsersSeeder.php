@@ -22,18 +22,18 @@ class UsersSeeder extends Seeder
         foreach ($users as $user) {
             DB::table('users')->insert([
                 'id' => $user[0],
-                'rol_id' => $user[1],
-                'persona_id' => $user[2],
+                'per_id' => $user[1],
+                'rol_id' => $user[2],
                 'name' => $user[3],
                 'email' => $user[4],
-                'email_verified_at' => $user[5],
+                'email_verified_at' =>NULL,
                 'password' => $user[6],
                 'estado' => $user[7],
-                'created_at' => $user[8],
-                'updated_at' => $user[9],
-                'deleted_at' => $user[10],
-                'created_at' => $user[11],
-                'updated_at' => $user[12]
+                'is_deleted' => $user[8],
+                'remember_token' => NULL,
+                'created_at' => $user[10],
+                'updated_at' => $user[11],
+                'deleted_at' => NULL
             ]);
         }
 

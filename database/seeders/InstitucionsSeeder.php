@@ -19,25 +19,28 @@ class InstitucionsSeeder extends Seeder
 
         foreach ($institucions as $institucion) {
             DB::table('institucions')->insert([
-                'id' => $institucion[0],
-                'ruc' => $institucion[1],
-                'codigo_modular' => $institucion[2],
-                'nivel' => $institucion[3],
-                'nombre' => $institucion[4],
-                'gestion' => $institucion[5],
-                'departamento_id' => $institucion[6],
-                'provincia_id' => $institucion[7],
-                'distrito_id' => $institucion[8],
-                'direccion' => $institucion[9],
-                'dre' => $institucion[10],
-                'ugel' => $institucion[11],
-                'genero' => $institucion[12],
-                'jornada' => $institucion[13],
-                'dias' => $institucion[14],
-                'director' => $institucion[15],
-                'telefono' => $institucion[16],
-                'created_at' => $institucion[17],
-                'updated_at' => $institucion[18]
+                'ie_id' => $institucion[0],
+                'ie_codigo_modular' => $institucion[1],
+                'ie_anexo' => $institucion[2],
+                'ie_nivel' => $institucion[3],
+                'ie_nombre' => $institucion[4],
+                'ie_gestion' => $institucion[5],
+                'ie_departamento' => $institucion[6],
+                'ie_provincia' => $institucion[7],
+                'ie_distrito' => $institucion[8],
+                'ie_direccion' => $institucion[9],
+                'ie_dre' => $institucion[10],
+                'ie_ugel' => $institucion[11],
+                'ie_genero' => $institucion[12],
+                'ie_turno' => $institucion[13],
+                'ie_dias_laborales' => $institucion[14],
+                'ie_director' => $institucion[15],
+                'ie_telefono' => $institucion[16],
+                'ie_email' => $institucion[17],
+                'ie_web' => $institucion[18],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
 

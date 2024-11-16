@@ -229,10 +229,13 @@ class CapacidadsSeeder extends Seeder
 
         foreach ($capacidads as $asignarCurso) {
            DB::table('capacidads')->insert([
-                'id' => $asignarCurso[0],
-                'descripcion' => $asignarCurso[1],
-                'curso_id' => $asignarCurso[2],
-                'tipo' => $asignarCurso[3],
+                'cap_id' => $asignarCurso[0],
+                'cap_descripcion' => $asignarCurso[1],
+                'cur_id' => $asignarCurso[2],
+                'cap_is_deleted' => $asignarCurso[3],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

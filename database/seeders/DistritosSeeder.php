@@ -1863,9 +1863,12 @@ class DistritosSeeder extends Seeder
 
         foreach ($distritos as $distrito) {
             DB::table('distritos')->insert([
-                'id' => $distrito[0],
-                'nombre' => $distrito[1],
-                'provincia_id' => $distrito[2]
+                'idDist' => $distrito[0],
+                'distrito' => $distrito[1],
+                'idProv' => $distrito[2],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

@@ -63,14 +63,17 @@ class AulasSeeder extends Seeder
 
         foreach ($aulas as $aula) {
             DB::table('aulas')->insert([
-                'id' => $aula[0],
-                'nombre' => $aula[1],
-                'tipo' => $aula[2],
-                'capacidad' => $aula[3],
-                'ubicacion' => $aula[4],
-                'estado' => $aula[5],
-                'sede_id' => $aula[6],
-                'nivel_id' => $aula[7]
+                'ala_id' => $aula[0],
+                'ala_descripcion' => $aula[1],
+                'ala_tipo' => $aula[2],
+                'ala_aforo' => $aula[3],
+                'ala_ubicacion' => $aula[4],
+                'ala_estado' => $aula[5],
+                'ala_is_delete' => $aula[6],
+                'ala_en_uso' => $aula[7],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

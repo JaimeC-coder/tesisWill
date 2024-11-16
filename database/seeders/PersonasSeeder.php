@@ -215,22 +215,25 @@ class PersonasSeeder extends Seeder
 
         foreach ($personas as $persona) {
             DB::table('personas')->insert([
-                'id' => $persona[0],
-                'dni' => $persona[1],
-                'nombres' => $persona[2],
-                'apellidos' => $persona[3],
-                'email' => $persona[4],
-                'telefono' => $persona[5],
-                'sexo' => $persona[6],
-                'fecha_nacimiento' => $persona[7],
-                'estado_civil' => $persona[8],
-                'direccion' => $persona[9],
-                'pais_id' => $persona[10],
-                'departamento_id' => $persona[11],
-                'provincia_id' => $persona[12],
-                'distrito_id' => $persona[13],
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'per_id' => $persona[0],
+                'per_dni' => $persona[1],
+                'per_nombres' => $persona[2],
+                'per_apellidos' => $persona[3],
+                'per_nombre_completo' => $persona[4],
+                'per_email' => $persona[5],
+                'per_sexo' => $persona[6],
+                'per_fecha_nacimiento' => $persona[7],
+                'per_estado_civil' => $persona[8],
+                'per_celular' => $persona[9],
+                'per_pais' => $persona[10],
+                'per_departamento' => $persona[11],
+                'per_provincia' => $persona[12],
+                'per_distrito' => $persona[13],
+                'per_direccion' => $persona[14],
+                'is_deleted' => $persona[15],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

@@ -24,11 +24,14 @@ class GradosSeeder extends Seeder
 
         foreach ($grados as $grado) {
             DB::table('grados')->insert([
-                'id' => $grado[0],
-                'nombre' => $grado[1],
-                'nivel_id' => $grado[2],
+                'gra_id' => $grado[0],
+                'gra_descripcion' => $grado[1],
+                'niv_id' => $grado[2],
+                'gra_estado' => $grado[3],
+                'gra_is_delete' => $grado[4],
                 'created_at' => now(),
                 'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

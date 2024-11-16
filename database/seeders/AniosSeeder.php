@@ -20,16 +20,19 @@ class AniosSeeder extends Seeder
 
         foreach ($anios as $anio) {
             DB::table('anios')->insert([
-                'id' => $anio[0],
-                'anio' => $anio[1],
-                'fecha_inicio' => $anio[2],
-                'fecha_fin' => $anio[3],
-                'hora_clase' => $anio[4],
-                'hora_recreo' => $anio[5],
-                'tiempo_receso' => $anio[6],
-                'estado' => $anio[7],
-                'activo' => $anio[8],
-                'eliminado' => $anio[9]
+                'anio_id' => $anio[0],
+                'anio_descripcion' => $anio[1],
+                'anio_fechaInicio' => $anio[2],
+                'anio_fechaFin' => $anio[3],
+                'anio_duracionHoraAcademica' => $anio[4],
+                'anio_duracionHoraLibre' => $anio[5],
+                'anio_cantidadPersonal' => $anio[6],
+                'anio_tallerSeleccionable' => $anio[7],
+                'anio_estado' => $anio[8],
+                'is_deleted' => $anio[9],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
 

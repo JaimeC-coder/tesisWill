@@ -25,11 +25,13 @@ class RolsSeeder extends Seeder
 
         foreach ($rols as $rol) {
             DB::table('rols')->insert([
-                'id' => $rol[0],
-                'nombre' => $rol[1],
-                'estado' => $rol[2],
-                'created_at' => $rol[3],
-                'updated_at' => $rol[4]
+                'rol_id' => $rol[0],
+                'rol_descripcion' => $rol[1],
+                'rol_estado' => $rol[2],
+                'is_deleted' => $rol[3],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

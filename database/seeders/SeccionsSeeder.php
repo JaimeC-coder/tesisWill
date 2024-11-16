@@ -25,14 +25,17 @@ class SeccionsSeeder extends Seeder
 
         foreach ($seccions as $seccion) {
             DB::table('seccions')->insert([
-                'id' => $seccion[0],
-                'nombre' => $seccion[1],
-                'grado_id' => $seccion[2],
-                'aula_id' => $seccion[3],
-                'personal_academico_id' => $seccion[4],
-                'institucion_id' => $seccion[5],
-                'nivel_id' => $seccion[6],
-                'estado' => $seccion[7]
+                'sec_id' => $seccion[0],
+                'sec_descripcion' => $seccion[1],
+                'sec_tutor' => $seccion[2],
+                'sec_aula' => $seccion[3],
+                'gra_id' => $seccion[4],
+                'sec_periodo' => $seccion[5],
+                'sec_vacantes' => $seccion[6],
+                'sec_is_delete' => $seccion[7],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

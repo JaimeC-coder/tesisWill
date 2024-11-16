@@ -15,15 +15,17 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('per_id')->nullable();
             $table->unsignedBigInteger('rol_id')->nullable();
-            $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
-            $table->foreign('per_id')->references('per_id')->on('personas');
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->char('estado', 1)->default('0')->comment('1: Habilitado; 0:Deshabilitado');
+            $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
+            $table->foreign('per_id')->references('per_id')->on('personas');
+            $table->foreign('rol_id')->references('rol_id')->on('rols');
             $table->rememberToken();
-
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

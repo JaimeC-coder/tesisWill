@@ -119,6 +119,7 @@ class AlumnosSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
                 'deleted_at' => NULL
+                
             ]);
         }
     }

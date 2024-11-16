@@ -43,8 +43,11 @@ class DepartamentosSeeder extends Seeder
 
         foreach ($departamentos as $departamento) {
             DB::table('departamentos')->insert([
-                'id' => $departamento[0],
-                'nombre' => $departamento[1]
+                'idDepa' => $departamento[0],
+                'departamento' => $departamento[1],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

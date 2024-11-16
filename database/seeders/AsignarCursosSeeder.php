@@ -102,11 +102,14 @@ class AsignarCursosSeeder extends Seeder
 
         foreach ($asignarCursos as $asignarCurso) {
             DB::table('asignar_cursos')->insert([
-                'id' => $asignarCurso[0],
-                'curso_id' => $asignarCurso[1],
-                'seccion_id' => $asignarCurso[2],
-                'asignatura' => $asignarCurso[3],
-                'estado' => $asignarCurso[4],
+                'asig_id' => $asignarCurso[0],
+                'pa_id' => $asignarCurso[1],
+                'niv_id' => $asignarCurso[2],
+                'curso' => $asignarCurso[3],
+                'asig_is_deleted' => $asignarCurso[4],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

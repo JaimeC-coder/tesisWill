@@ -111,11 +111,14 @@ class ApoderadosSeeder extends Seeder
 
         foreach ($apoderados as $apoderado) {
             DB::table('apoderados')->insert([
-                'id' => $apoderado[0],
-                'persona_id' => $apoderado[1],
-                'parentesco' => $apoderado[2],
-                'estado' => $apoderado[3],
-                'deleted_at' => $apoderado[4],
+                'apo_id' => $apoderado[0],
+                'per_id' => $apoderado[1],
+                'apo_parentesco' => $apoderado[2],
+                'apo_vive_con_estudiante' => $apoderado[3],
+                'is_deleted' => $apoderado[4],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

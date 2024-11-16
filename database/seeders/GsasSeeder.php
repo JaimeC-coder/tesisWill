@@ -110,14 +110,15 @@ class GsasSeeder extends Seeder
 
         foreach ($gsas as $gsa) {
             DB::table('gsas')->insert([
-                'id' => $gsa[0],
-                'grado_id' => $gsa[1],
-                'seccion_id' => $gsa[2],
-                'curso_id' => $gsa[3],
-                'docente_id' => $gsa[4],
-                'estado' => $gsa[5],
+                'ags_id' => $gsa[0],
+                'ala_id' => $gsa[1],
+                'niv_id' => $gsa[2],
+                'gra_id' => $gsa[3],
+                'sec_id' => $gsa[4],
+                'is_deleted' => $gsa[5],
                 'created_at' => now(),
                 'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
     }

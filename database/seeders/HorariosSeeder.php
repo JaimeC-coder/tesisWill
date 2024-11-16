@@ -54,16 +54,19 @@ class HorariosSeeder extends Seeder
 
         foreach ($horarios as $horario) {
             DB::table('horarios')->insert([
-                'id' => $horario[0],
-                'aula_id' => $horario[1],
-                'grado_id' => $horario[2],
-                'curso_id' => $horario[3],
+                'hor_id' => $horario[0],
+                'per_id' => $horario[1],
+                'ags_id' => $horario[2],
+                'cur_id' => $horario[3],
                 'fecha' => $horario[4],
                 'hora_inicio' => $horario[5],
                 'hora_fin' => $horario[6],
                 'color' => $horario[7],
-                'observacion' => $horario[8],
-                'estado' => $horario[9]
+                'editable' => $horario[8],
+                'is_deleted' => $horario[9],
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
             ]);
         }
 

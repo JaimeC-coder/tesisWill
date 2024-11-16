@@ -1,0 +1,38 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class AsignarGradosSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $asignarGrados = [
+            [295, 52, 1, 13, 'A', '1'],
+            [296, 52, 1, 18, 'A', '0'],
+            [297, 54, 1, 17, 'A', '0'],
+            [298, 53, 1, 15, 'A', '0'],
+            [299, 49, 1, 14, 'A', '0'],
+            [300, 55, 1, 17, 'B', '0'],
+            [301, 51, 1, 13, 'A', '0'],
+            [302, 50, 1, 16, 'A', '0']
+        ];
+
+        foreach ($asignarGrados as $asignarGrado) {
+            DB::table('asignar_grados')->insert([
+                'id' => $asignarGrado[0],
+                'aula_id' => $asignarGrado[1],
+                'grado_id' => $asignarGrado[2],
+                'periodo_id' => $asignarGrado[3],
+                'seccion' => $asignarGrado[4],
+                'estado' => $asignarGrado[5]
+            ]);
+        }
+    }
+}

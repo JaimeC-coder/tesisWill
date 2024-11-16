@@ -2,6 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\AsignarCurso;
+use App\Models\AsignarGrado;
+use App\Models\Curso;
+use App\Models\NotaCapacidad;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,9 +19,35 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+       $this->call([
+        PersonasSeeder::class,
+        UsersSeeder::class,
+        AniosSeeder::class,
+        AulasSeeder::class,
+        PeriodosSeeder::class,
+        DepartamentosSeeder::class,
+        NivelsSeeder::class,
+        RolsSeeder::class,
+        PersonalAcademicosSeeder::class,
+        GradosSeeder::class,
+        ProvinciasSeeder::class,
+        SeccionsSeeder::class,
+        ApoderadosSeeder::class,
+        AlumnosSeeder::class,
+        AsignarCursosSeeder::class,
+        AsignarGradosSeeder::class,
+        AsistenciasSeeder::class,
+        CursosSeeder::class,
+        DistritosSeeder::class,
+        GsasSeeder::class,
+        HorariosSeeder::class,
+        InstitucionsSeeder::class,
+        MatriculasSeeder::class,
+NotasSeeder::class,
+        NotaCapacidadsSeeder::class,
+        SeguimientosSeeder::class,
+        TiposSeeder::class,
+           CapacidadsSeeder::class,
+       ]);
     }
 }

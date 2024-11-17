@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('capacidads', function (Blueprint $table) {
-
             $table->bigIncrements('cap_id');
             $table->string('cap_descripcion', 255)->default('');
             $table->unsignedBigInteger('cur_id')->nullable();

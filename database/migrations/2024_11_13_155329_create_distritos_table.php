@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('distritos', function (Blueprint $table) {
-
             $table->bigIncrements('idDist');
             $table->string('distrito', 50)->nullable();
             $table->unsignedBigInteger('idProv')->nullable();

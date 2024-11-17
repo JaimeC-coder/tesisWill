@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('apoderados', function (Blueprint $table) {
-
             $table->bigIncrements('apo_id');
             $table->unsignedBigInteger('per_id')->nullable();
             $table->string('apo_parentesco', 50)->nullable();

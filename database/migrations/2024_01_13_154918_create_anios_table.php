@@ -12,8 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('anios', function (Blueprint $table) {
-
-
             $table->bigIncrements('anio_id');
             $table->string('anio_descripcion', 50)->default('0');
             $table->date('anio_fechaInicio')->nullable();
@@ -26,7 +24,6 @@ return new class extends Migration
             $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
             $table->timestamps();
             $table->softDeletes();
-
         });
     }
 

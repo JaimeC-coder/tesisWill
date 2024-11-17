@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('nota_capacidads', function (Blueprint $table) {
-
             $table->bigIncrements('nc_id');
             $table->string('nc_descripcion', 18)->nullable();
             $table->decimal('nc_nota', 10, 2);

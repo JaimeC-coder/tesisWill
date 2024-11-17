@@ -12,17 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notas', function (Blueprint $table) {
-            /**
-             *  `nt_id` int(11) NOT NULL,
-  `per_id` int(11) DEFAULT NULL,
-  `alu_id` int(11) DEFAULT NULL,
-  `pa_id` int(11) DEFAULT NULL,
-  `ags_id` int(11) DEFAULT NULL,
-  `nt_bimestre` int(11) DEFAULT NULL,
-  `nt_nota` char(18) NOT NULL,
-  `nt_is_deleted` char(1) DEFAULT '0' COMMENT '1: Eliminado; 0:No Eliminado',
-  `curso_id` int(11) DEFAULT NULL
-             */
             $table->bigIncrements('nt_id');
             $table->unsignedBigInteger('per_id')->nullable();
             $table->unsignedBigInteger('alu_id')->nullable();
@@ -32,13 +21,13 @@ return new class extends Migration
             $table->integer('nt_bimestre')->nullable();
             $table->string('nt_nota', 18)->default('');
             $table->char('nt_is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
-            $table->foreign('per_id')->references('per_id')->on('personas');
+            $table->foreign('per_id')->references('per_id')->on('periodos');
             $table->foreign('alu_id')->references('alu_id')->on('alumnos');
-            $table->foreign('pa_id')->references('per_id')->on('periodos');
+            $table->foreign('pa_id')->references('pa_id')->on('personal_academicos');
             $table->foreign('ags_id')->references('ags_id')->on('gsas');
             $table->foreign('curso_id')->references('cur_id')->on('cursos');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

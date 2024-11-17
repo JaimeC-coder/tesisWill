@@ -24,9 +24,9 @@ return new class extends Migration
             $table->char('anio_tallerSeleccionable', 1)->nullable()->comment('1: SI; 2: NO');
             $table->char('anio_estado', 1)->nullable()->comment('1: Activo; 2: Inactivo');
             $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
+            $table->timestamps();
             $table->softDeletes();
 
-            $table->timestamps();
         });
     }
 

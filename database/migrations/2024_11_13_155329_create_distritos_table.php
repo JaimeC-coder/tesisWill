@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('idProv')->nullable();
             $table->foreign('idProv')->references('idProv')->on('provincias');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->foreign('gra_id')->references('gra_id')->on('grados');
             $table->foreign('sec_id')->references('sec_id')->on('seccions');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

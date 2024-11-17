@@ -24,8 +24,8 @@ return new class extends Migration
             $table->foreign('gra_id')->references('gra_id')->on('grados');
             $table->foreign('niv_id')->references('niv_id')->on('nivels');
             $table->foreign('per_id')->references('per_id')->on('periodos');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

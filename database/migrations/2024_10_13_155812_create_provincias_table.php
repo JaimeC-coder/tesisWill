@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('provincia', 50)->nullable();
             $table->unsignedBigInteger('idDepa')->nullable();
             $table->foreign('idDepa')->references('idDepa')->on('departamentos');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('gra_id');
             $table->string('seccion', 255)->nullable();
             $table->char('asig_is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
-            $table->foreign('pa_id')->references('per_id')->on('periodos');
+            $table->foreign('pa_id')->references('pa_id')->on('personal_academicos');
             $table->foreign('niv_id')->references('niv_id')->on('nivels');
             $table->foreign('gra_id')->references('gra_id')->on('grados');
             $table->softDeletes();

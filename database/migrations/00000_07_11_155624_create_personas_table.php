@@ -29,7 +29,6 @@ return new class extends Migration
             $table->string('per_direccion', 255)->nullable();
             $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
             $table->softDeletes();
-
             $table->timestamps();
         });
     }

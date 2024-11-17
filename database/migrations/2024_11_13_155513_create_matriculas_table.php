@@ -27,8 +27,8 @@ return new class extends Migration
             $table->foreign('per_id')->references('per_id')->on('personas');
             $table->foreign('alu_id')->references('alu_id')->on('alumnos');
             $table->foreign('ags_id')->references('ags_id')->on('gsas');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('tipos', function (Blueprint $table) {
             $table->bigIncrements('tp_id');
             $table->string('tp_tipo', 255)->nullable();
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

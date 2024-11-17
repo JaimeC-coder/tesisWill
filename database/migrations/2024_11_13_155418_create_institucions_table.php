@@ -32,8 +32,8 @@ return new class extends Migration
             $table->string('ie_email', 255)->nullable();
             $table->string('ie_web', 255)->nullable();
             $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

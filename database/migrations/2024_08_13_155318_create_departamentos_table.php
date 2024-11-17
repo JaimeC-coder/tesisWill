@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('idDepa');
             $table->string('departamento', 50)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

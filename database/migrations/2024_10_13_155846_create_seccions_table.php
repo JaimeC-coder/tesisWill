@@ -24,8 +24,8 @@ return new class extends Migration
             $table->foreign('sec_tutor')->references('pa_id')->on('personal_academicos');
             $table->foreign('sec_aula')->references('ala_id')->on('aulas');
             $table->foreign('gra_id')->references('gra_id')->on('grados');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

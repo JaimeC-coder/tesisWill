@@ -17,7 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('pa_id')->nullable();
             $table->unsignedBigInteger('niv_id')->nullable();
             $table->string('curso', 255)->nullable();
-            $table->foreign('pa_id')->references('per_id')->on('periodos');
+            $table->char('asig_is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
+            $table->foreign('pa_id')->references('pa_id')->on('personal_academicos');
             $table->foreign('niv_id')->references('niv_id')->on('nivels');
             $table->softDeletes();
             $table->timestamps();

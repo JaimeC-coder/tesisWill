@@ -22,8 +22,8 @@ return new class extends Migration
             $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
             $table->foreign('per_id')->references('per_id')->on('personas');
             $table->foreign('apo_id')->references('apo_id')->on('apoderados');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

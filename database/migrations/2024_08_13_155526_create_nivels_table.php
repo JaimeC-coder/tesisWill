@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('nivels', function (Blueprint $table) {
             $table->bigIncrements('niv_id');
             $table->string('niv_descripcion', 255)->default('');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('rol_descripcion', 255)->default('');
             $table->char('rol_estado', 1)->default('0')->comment('1: Habilitado; 0:Deshabilitado');
             $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

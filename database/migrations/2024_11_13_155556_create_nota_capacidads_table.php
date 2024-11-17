@@ -19,8 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('nt_id')->nullable();
             $table->char('nc_is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
             $table->foreign('nt_id')->references('nt_id')->on('notas');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

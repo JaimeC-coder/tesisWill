@@ -18,9 +18,10 @@ return new class extends Migration
             $table->integer('ala_aforo')->nullable();
             $table->string('ala_ubicacion', 255)->nullable();
             $table->char('ala_estado', 1)->default('1')->comment('1: Bueno; 2: Regular; 3: Malo');
+            $table->char('ala_is_delete', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
             $table->char('ala_en_uso', 1)->default('2')->comment('1: Ocupada; 2: Vacia');
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

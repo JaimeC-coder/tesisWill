@@ -21,9 +21,8 @@ return new class extends Migration
             $table->char('per_estado', 1)->default('0')->comment('1: Aperturado; 2:Finalizado');
             $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
             $table->foreign('anio_id')->references('anio_id')->on('anios');
-            $table->softDeletes();
-
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -62,4 +62,12 @@ class AlumnoController extends Controller
     {
         //
     }
+
+    public function inicio()
+    {
+        $alumnos = Alumno::where('is_deleted', '!=', 1)->get();
+       // return $alumnos;
+        return view('view.alumno.inicio', compact('alumnos'));
+
+    }
 }

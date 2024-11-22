@@ -62,4 +62,10 @@ class AnioController extends Controller
     {
         //
     }
+
+    public function inicio()
+    {
+        $anio = Anio::where('is_deleted','!=',1)->orderBy('anio_id', 'desc')->get();
+        return view('view.anioEscolar.inicio', compact('anio'));
+    }
 }

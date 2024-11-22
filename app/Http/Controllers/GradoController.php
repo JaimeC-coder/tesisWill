@@ -62,4 +62,11 @@ class GradoController extends Controller
     {
         //
     }
+
+    public function inicio()
+    {
+        $grados = Grado::where('gra_is_delete','!=',1)->orderBy('niv_id', 'desc')->get();
+       //return  $grados;
+        return view('view.gradoSeccion.inicio', compact('grados'));
+    }
 }

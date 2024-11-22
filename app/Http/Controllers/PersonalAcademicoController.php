@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Nivel;
+use App\Models\Persona;
 use App\Models\PersonalAcademico;
+use App\Models\Rol;
 use Illuminate\Http\Request;
 
 class PersonalAcademicoController extends Controller
@@ -61,5 +64,11 @@ class PersonalAcademicoController extends Controller
     public function destroy(PersonalAcademico $personalAcademico)
     {
         //
+    }
+    public function inicio()
+    {
+        $personal = PersonalAcademico::where('is_deleted','!=',1)->orderBy('pa_id', 'desc')->get();
+
+        return view('view.personalAcademico.inicio', compact('personal'));
     }
 }

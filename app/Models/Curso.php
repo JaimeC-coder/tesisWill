@@ -56,4 +56,9 @@ class Curso extends Model
     {
         return $this->belongsTo(Periodo::class, 'per_id', 'per_id');
     }
+
+    public function capacidad()
+    {
+        return $this->hasMany(Capacidad::class, 'cur_id', 'cur_id');
+    }
 }

@@ -47,6 +47,11 @@ class Periodo extends Model
         return $this->hasMany(Matricula::class, 'per_id', 'per_id');
     }
 
+    public function Tipo()
+    {
+        return $this->belongsTo(Tipo::class, 'per_tp_notas', 'tp_id');
+    }
+
     public function cursos()
     {
         return $this->hasMany(Curso::class, 'per_id', 'per_id');

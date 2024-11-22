@@ -303,14 +303,14 @@ return [
         ['header' => 'Académico'],
         [
             'text' => 'Inicio',
-            'url' => 'admin/settings',
+            'url' => '/',
             'icon' => 'fas fa-tachometer-alt',
             'icon_color' => 'yellow',
 
         ],
         [
             'text' => 'Matriculas',
-            'url' => 'admin/settings',
+            'route' => 'matricula.inicio',
             'icon' => 'fas fa-book',
             'icon_color' => 'red',
         ],
@@ -349,34 +349,34 @@ return [
         [
             'text' => 'Ambientes',
             'icon'=>'fas fa-table',
-            'url' => '#',
+            'route' => 'ambiente.inicio',
         ],
         [
             'text' => 'Perosnal Académico',
             'icon'=>'fas fa-chalkboard-teacher',
-            'url' => '#',
+            'route' => 'personal.inicio',
         ],
         [
             'text' => 'Año Escolar',
             'icon'=>'fas fa-calendar-alt',
-            'url' => '#',
+            'route' => 'anio.inicio',
         ],
         [
             'text' => 'Periodo Académico',
             'icon_color' => 'green',
-            'url' => '#',
+            'route' => 'periodo.inicio',
             'icon'=>'fas fa-calendar-check',
         ],
         [
             'text' => 'Cursos',
             'icon_color' => 'red',
             'icon'=>'fas fa-book',
-            'url' => '#',
+            'route' => 'curso.inicio',
         ],
         [
             'text' => 'Grados y Secciones',
             'icon'=>'fas fa-stream',
-            'url' => '#',
+            'route' => 'gradoSeccion.inicio',
         ],
         [
             'text' => 'Asignar de Cursos',
@@ -393,12 +393,12 @@ return [
             'text' => 'Alumnos',
             'icon'=>'fas fa-users',
             'icon_color' => 'green',
-            'url' => '#',
+            'route' => 'alumno.inicio',
         ],
         ['header' => 'SEGURIDAD'],
         [
             'text' => 'Roles',
-            'url' => '#',
+            'route' => 'roles.inicio',
             'icon'=>'fas fa-briefcase'
         ],
         [
@@ -451,7 +451,7 @@ return [
 
     'plugins' => [
         'Datatables' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
@@ -467,6 +467,26 @@ return [
                     'type' => 'css',
                     'asset' => false,
                     'location' => '//cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/v/dt/jszip-3.10.1/dt-1.13.8/af-2.6.0/b-2.4.2/b-colvis-2.4.2/b-html5-2.4.2/b-print-2.4.2/cr-1.7.0/date-1.5.1/fc-4.3.0/fh-3.4.0/kt-2.11.0/r-2.5.0/rg-1.4.1/rr-1.4.1/sc-2.3.0/sb-1.6.0/sp-2.2.0/sl-1.7.0/sr-1.3.0/datatables.min.css',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/v/dt/jszip-3.10.1/dt-1.13.8/af-2.6.0/b-2.4.2/b-colvis-2.4.2/b-html5-2.4.2/b-print-2.4.2/cr-1.7.0/date-1.5.1/fc-4.3.0/fh-3.4.0/kt-2.11.0/r-2.5.0/rg-1.4.1/rr-1.4.1/sc-2.3.0/sb-1.6.0/sp-2.2.0/sl-1.7.0/sr-1.3.0/datatables.min.js',
                 ],
             ],
         ],

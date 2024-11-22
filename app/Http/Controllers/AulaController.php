@@ -62,4 +62,20 @@ class AulaController extends Controller
     {
         //
     }
+
+    public function inicio()
+    {
+        $aulas = Aula::orderBy('ala_id','asc')->where('ala_is_delete','!=',1)->get();
+        return view('view.ambiente.inicio',compact('aulas'));
+    }
+    public function aulas()
+    {
+        $aulas = Aula::where('ala_en_uso', '!=', 1)
+        ->whereNotIn('ala_tipo', ['Oficina', 'Extra'])
+        ->where('ala_is_delete', '!=', 1)
+        ->orderBy('ala_id', 'asc')
+        ->get();
+        return $aulas;
+        // return view('ambiente.inicio');
+    }
 }

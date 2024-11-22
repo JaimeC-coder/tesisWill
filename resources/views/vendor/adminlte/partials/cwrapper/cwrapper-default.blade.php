@@ -20,6 +20,7 @@
         <div class="content-header border-bottom">
             <div class="{{ config('adminlte.classes_content_header') ?: $def_container_class }}">
                 @hasSection('content_header_title')
+                <div class="d-flex justify-content-between">
                     <h1 class="text-muted">
                         @yield('content_header_title')
 
@@ -28,8 +29,14 @@
                                 <i class="fas fa-xs fa-angle-right text-muted"></i>
                                 @yield('content_header_subtitle')
                             </small>
+
                         @endif
                     </h1>
+
+                    @hasSection('content_buttom')
+                        @yield('content_buttom')
+                    @endif
+                </div>
                     <br>
                 @endif
             </div>

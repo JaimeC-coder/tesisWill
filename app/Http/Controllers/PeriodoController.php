@@ -62,4 +62,11 @@ class PeriodoController extends Controller
     {
         //
     }
+
+    public function inicio()
+    {
+        $periodos = Periodo::where('is_deleted','!=',1)->get();
+        //return $periodos;
+        return view('view.periodoAcademico.inicio', compact('periodos'));
+    }
 }

@@ -34,4 +34,9 @@ class Grado extends Model
         return $this->hasMany(Gsa::class, 'gra_id', 'gra_id');
     }
 
+    public function curso()
+    {
+        return $this->hasMany(Curso::class, 'gra_id', 'gra_id');
+    }
+
 }

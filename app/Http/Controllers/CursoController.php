@@ -62,4 +62,12 @@ class CursoController extends Controller
     {
         //
     }
+
+    public function inicio()
+    {
+        $cursos = Curso::where('is_deleted','!=',1)->orderBy('cur_id', 'desc')->get();
+        return $cursos;
+
+        return view('view.curso.inicio', compact('cursos'));
+    }
 }

@@ -62,4 +62,12 @@ class RolController extends Controller
     {
         //
     }
+
+    public function inicio()
+    { $roles = Rol::where('rol_estado', 1)->where('is_deleted','!=',1)->get();
+        //return $roles;
+        return view('view.roles.inicio', compact('roles'));
+
+    }
 }
+

@@ -5,7 +5,7 @@
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Año Escolar')
 @section('content_buttom')
-    <a href="{{ route('anio.create') }}" class="btn btn-primary">Nueva Año escolar (falta)</a>
+    <a href="{{ route('anio.create') }}" class="btn btn-primary">Nueva Año escolar</a>
 
 @endsection
 
@@ -44,10 +44,10 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('ambiente.edit', $value) }}" class="text-warning">
+                                        <a href="{{ route('anio.edit', $info) }}" class="text-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('ambiente.destroy', $value) }}" method="POST"
+                                        <form action="{{ route('anio.destroy', $info) }}" method="POST"
                                             style="display: inline-block">
                                             @csrf
                                             @method('DELETE')

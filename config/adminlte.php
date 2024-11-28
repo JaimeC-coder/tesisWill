@@ -303,7 +303,7 @@ return [
         ['header' => 'Académico'],
         [
             'text' => 'Inicio',
-            'url' => '/',
+            'route' => 'home',
             'icon' => 'fas fa-tachometer-alt',
             'icon_color' => 'yellow',
 

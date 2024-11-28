@@ -25,8 +25,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/ambiente', App\Http\Controllers\AulaController::class);
      Route::get('/personal/inicio', [App\Http\Controllers\PersonalAcademicoController::class, 'inicio'])->name('personal.inicio');
      Route::get('/escolar/anio/inico', [App\Http\Controllers\AnioController::class, 'inicio'])->name('anio.inicio');
-     Route::resource('/escolar/anio', App\Http\Controllers\AnioController::class);
+     Route::resource('/escolar/anio',App\Http\Controllers\AnioController::class);
      Route::get('/periodo/inicio', [App\Http\Controllers\PeriodoController::class, 'inicio'])->name('periodo.inicio');
+     Route::resource('/periodo', App\Http\Controllers\PeriodoController::class);
      Route::get('/curso/inicio', [App\Http\Controllers\CursoController::class, 'inicio'])->name('curso.inicio');
     Route::get('/gradoSeccion/inicio', [App\Http\Controllers\GradoController::class, 'inicio'])->name('gradoSeccion.inicio');
      Route::get('/alumno/inicio', [App\Http\Controllers\AlumnoController::class, 'inicio'])->name('alumno.inicio');

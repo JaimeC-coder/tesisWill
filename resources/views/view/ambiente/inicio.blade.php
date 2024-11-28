@@ -5,7 +5,7 @@
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Ambientes')
 @section('content_buttom')
-    <a href="{{ route('matricula.create') }}" class="btn btn-primary">Nueva ambiente(falta)</a>
+    <a href="{{ route('ambiente.create') }}" class="btn btn-primary">Nueva ambiente</a>
 
 @endsection
 

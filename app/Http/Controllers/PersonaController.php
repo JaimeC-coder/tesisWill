@@ -62,4 +62,14 @@ class PersonaController extends Controller
     {
         //
     }
+
+    public function searchDni(Request $request)
+    {
+        try {
+            $persona = Persona::where('per_dni', $request->per_dni)->first();
+            return response()->json($persona);
+        } catch (\Throwable $th) {
+            return response()->json($th->getMessage());
+        }
+    }
 }

@@ -24,4 +24,9 @@ class Capacidad extends Model
     {
         return $this->belongsTo(Curso::class, 'cur_id', 'cur_id');
     }
+
+    public function getResultadoAttribute()
+    {
+        return $this->cap_descripcion;
+    }
 }

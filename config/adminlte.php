@@ -380,9 +380,8 @@ return [
         ],
         [
             'text' => 'Asignar de Cursos',
-
             'icon'=>'fas fa-copy',
-            'url' => '#',
+            'route' => 'asignarCurso.inicio',
         ],
         [
             'text' => 'Asignar Grados',

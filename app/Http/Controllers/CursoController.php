@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Curso;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CursoController extends Controller
 {
@@ -60,13 +61,26 @@ class CursoController extends Controller
      */
     public function destroy(Curso $curso)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $curso->update([
+                'is_deleted' => 1
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('curso.inicio')->with('success', 'Año escolar eliminado correctamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('curso.inicio')->with('error', 'Error al eliminar el año escolar');
+        }
     }
 
     public function inicio()
     {
         $cursos = Curso::where('is_deleted','!=',1)->orderBy('cur_id', 'desc')->get();
-        return $cursos;
+        //return $cursos[0]->capacidad;
 
         return view('view.curso.inicio', compact('cursos'));
     }

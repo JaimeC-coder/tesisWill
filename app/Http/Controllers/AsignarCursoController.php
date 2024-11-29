@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\AsignarCurso;
+use App\Models\Curso;
+use App\Models\Nivel;
+use App\Models\Persona;
+use App\Models\PersonalAcademico;
 use Illuminate\Http\Request;
 
+use function Illuminate\Log\log;
 class AsignarCursoController extends Controller
 {
     /**
@@ -61,5 +66,33 @@ class AsignarCursoController extends Controller
     public function destroy(AsignarCurso $asignarCurso)
     {
         //
+    }
+
+    public function inicio(Request $request ,$nivel = null)
+    {
+        $curso = null;
+        $docente = null;
+        $nivel = Nivel::all();
+        if($request){
+
+            $cursos = Curso::selectRaw('cur_nombre, cur_abreviatura')->where('cur_horas', '>', 0)->where('niv_id', $request->niv_id)->where('is_deleted', '!=', 1)->groupBy('cur_nombre', 'cur_abreviatura')->get();
+            $docentes = PersonalAcademico::whereIn('rol_id', [4])->where('niv_id', $request->niv_id)->where('is_deleted', '!=', 1)->get();
+            foreach ($docentes as $d) {
+                $asignaciones = AsignarCurso::where('pa_id', $d->pa_id)
+                    ->where('asig_is_deleted', '!=', 1)
+                    ->pluck('curso')
+                    ->toArray();
+                if ($asignaciones) {
+                    $d->checked = $asignaciones;
+                } else {
+                    $d->checked = [];
+                }
+
+                $d->dni = $d->persona->per_dni;
+                $d->nombres = $d->persona->per_nombres;
+                $d->apellidos = $d->persona->per_apellidos;
+            }
+        }
+        return view('view.asignarCurso.inicio' , compact('nivel','cursos','docentes'));
     }
 }

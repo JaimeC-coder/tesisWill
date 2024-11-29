@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Alumno;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AlumnoController extends Controller
 {
@@ -60,7 +61,20 @@ class AlumnoController extends Controller
      */
     public function destroy(Alumno $alumno)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $alumno->update([
+                'is_deleted' => 1
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('alumno.inicio')->with('success', 'Año escolar eliminado correctamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('alumno.inicio')->with('error', 'Error al eliminar el año escolar');
+        }
     }
 
     public function inicio()

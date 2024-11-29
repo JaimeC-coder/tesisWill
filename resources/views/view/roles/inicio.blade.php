@@ -23,9 +23,14 @@
                         <div class="card-header d-flex justify-content-between" >
                             <h5 class="card-title">{{ $info->rol_descripcion }}</h5>
 
-                                <a href="{{ route('roles.show', $info) }}" class="btn btn-danger rounded-circle">
+                                <form action="{{ route('roles.destroy', $info) }}" method="POST"
+                                style="display: inline-block"  class=" btn-danger rounded-circle">
+                                @csrf
+                                @method('DELETE')
+                                <button class="text-light  btn btn-none" type="submit">
                                     <i class="fas fa-trash-alt"></i>
-                                </a>
+                                </button>
+                            </form>
 
                         </div>
                         <div class="card-body  d-flex justify-content-between">

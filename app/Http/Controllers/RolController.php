@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Rol;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RolController extends Controller
 {
@@ -60,7 +61,20 @@ class RolController extends Controller
      */
     public function destroy(Rol $rol)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $rol->update([
+                'is_deleted' => 1
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('rol.inicio')->with('success', 'Año escolar eliminado correctamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('rol.inicio')->with('error', 'Error al eliminar el año escolar');
+        }
     }
 
     public function inicio()

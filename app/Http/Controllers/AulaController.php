@@ -37,20 +37,20 @@ class AulaController extends Controller
      */
     public function store(Request $request)
     {
-
+       
         DB::beginTransaction();
         try {
 
                 Aula::create([
-                    'ala_descripcion' => $request->descripcion,
-                    'ala_tipo' => $request->tipo,
-                    'ala_aforo' => $request->aforo,
-                    'ala_ubicacion' => $request->ubicacion,
+                    'ala_descripcion' => $request->ala_descripcion,
+                    'ala_tipo' => $request->ala_tipo,
+                    'ala_aforo' => $request->ala_aforo,
+                    'ala_ubicacion' => $request->ala_ubicacion,
                 ]);
 
             DB::commit();
 
-            return view('view.ambiente.inicio')->with('success', 'Aula creada correctamente');
+            return redirect()->route('ambiente.inicio')->with('success', 'Aula creada correctamente');
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -5,7 +5,7 @@
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Personal')
 @section('content_buttom')
-    <a href="{{ route('matricula.create') }}" class="btn btn-primary">Nueva personal(falta)</a>
+    <a href="{{ route('personal.create') }}" class="btn btn-primary">Nueva personal</a>
 
 @endsection
 
@@ -48,10 +48,10 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('ambiente.edit', $info) }}" class="text-warning">
+                                        <a href="{{ route('personal.edit', $info) }}" class="text-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('ambiente.destroy', $info) }}" method="POST"
+                                        <form action="{{ route('personal.destroy', $info) }}" method="POST"
                                             style="display: inline-block">
                                             @csrf
                                             @method('DELETE')

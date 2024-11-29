@@ -34,22 +34,22 @@
                             @foreach ($aulas as $value => $info)
                                 <tr>
                                     <th scope="row">{{ $value+1 }}</th>
-                                    <td>{{ $info['ala_descripcion'] }}</td>
-                                    <td>{{ $info['ala_tipo'] }}</td>
-                                    <td>{{ $info['ala_ubicacion'] }}</td>
-                                    <td>{{ $info['ala_aforo'] }}</td>
+                                    <td>{{ $info->ala_descripcion }}</td>
+                                    <td>{{ $info->ala_tipo }}</td>
+                                    <td>{{ $info->ala_ubicacion }}</td>
+                                    <td>{{ $info->ala_aforo }}</td>
                                     <td>
-                                        @if ($info['ala_estado'] == 1)
+                                        @if ($info->ala_estado == 1)
                                             <span class="badge badge-success">Activo</span>
                                         @else
                                             <span class="badge badge-danger">Inactivo</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('ambiente.edit', $info['ala_id']) }}" class="text-warning">
+                                        <a href="{{ route('ambiente.edit', $info) }}" class="text-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('ambiente.destroy', $info['ala_id']) }}" method="POST"
+                                        <form action="{{ route('ambiente.destroy', $info) }}" method="POST"
                                             style="display: inline-block">
                                             @csrf
                                             @method('DELETE')

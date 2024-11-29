@@ -5,8 +5,7 @@
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Curso')
 @section('content_buttom')
-    <a href="{{ route('anio.create') }}" class="btn btn-primary">Nueva Curso (falta)</a>
-
+    <a href="{{ route('curso.create') }}" class="btn btn-primary">Nueva Curso</a>
 @endsection
 
 
@@ -33,7 +32,7 @@
                         <tbody>
                             @foreach ($cursos as $value => $info)
                                 <tr>
-                                    <th scope="row">{{ $value+1 }}</th>
+                                    <th scope="row">{{ $value + 1 }}</th>
                                     <td>{{ $info->cur_nombre }}</td>
                                     <td>
                                         {{ $info->capacidad->where('cap_is_deleted', '!=', 1)->count() }}
@@ -44,19 +43,21 @@
 
                                     <td>
                                         @if ($info->cur_estado == 1)
-                                        <span class="badge badge-success">Activo</span>
+                                            <span class="badge badge-success">Activo</span>
                                         @else
                                             <span class="badge badge-danger">Inactivo</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('ambiente.edit', $value) }}" class="text-secondary btn btn-none">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('ambiente.edit', $value) }}" class="text-warning btn btn-none">
+                                        <button type="button" class="text-secondary btn btn-none" data-toggle="modal"
+                                            data-target="#exampleModal" data-whatever="{{ $info->capacidad }}" data-title="{{ $info->cur_nombre}}">
+                                            <i class="fa fa-eye"></i></button>
+
+                                        <a href="{{ route('curso.edit', $value) }}" class="text-warning btn btn-none">
                                             <i class="fas fa-edit"></i>
+
                                         </a>
-                                        <form action="{{ route('ambiente.destroy', $value) }}" method="POST"
+                                        <form action="{{ route('curso.destroy', $value) }}" method="POST"
                                             style="display: inline-block">
                                             @csrf
                                             @method('DELETE')
@@ -71,11 +72,36 @@
                     </table>
                 </div>
 
-
             </div>
         </div>
     </div>
 
+
+
+    <!-- Modal -->
+    <div class="modal fade bd-example-modal-lg" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row clearfix mt-2" id="modalDataUse">
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
@@ -102,5 +128,39 @@
                 }
             });
         });
+    </script>
+
+    {{-- MODAL --}}
+    <script>
+        $('#exampleModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var recipient = button.data('whatever') // Extract info from data-* attributes
+            var title = button.data('title') // Extract info from data-* attributes
+            var modalDataUse = document.getElementById('modalDataUse');
+
+            modalDataUse.innerHTML = '';
+            recipient.forEach((element,index) => {
+                modalDataUse.innerHTML += `
+                <div class="col-lg-4 col-md-6">
+                    <div class="card"
+                        style="color: black; background: linear-gradient(rgba(125, 183, 213, 0.5) 0%, rgba(175, 192, 223, 0.5) 100%);">
+
+                        <div class="card-body text-center">
+                            <h5>C${index+1}</h5>
+                            <br>
+                            <p class="m-2">${element.cap_descripcion}</p>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+
+
+
+
+            var modal = $(this)
+            modal.find('.modal-title').text('Capacidades de ' + title)
+            modal.find('.modal-body input').val(recipient)
+        })
     </script>
 @endsection

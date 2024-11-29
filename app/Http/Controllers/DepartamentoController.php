@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Departamento;
+use App\Models\Provincia;
 use Illuminate\Http\Request;
+
+use function Illuminate\Log\log;
 
 class DepartamentoController extends Controller
 {
@@ -61,5 +64,30 @@ class DepartamentoController extends Controller
     public function destroy(Departamento $departamento)
     {
         //
+    }
+
+    public function searchProvincia(Request $request)
+    {
+
+        try {
+
+        $provincias = Departamento::find($request->dep_id)->provincia;
+
+        return response()->json($provincias);
+
+        } catch (\Throwable $th) {
+            return response()->json($th);
+        }
+
+    }
+
+    public function searchDistrito(Request $request)
+    {
+       try {
+        $distritos = Provincia::find($request->prov_id)->distrito;
+        return response()->json($distritos);
+       } catch (\Throwable $th) {
+              return response()->json($th);
+       }
     }
 }

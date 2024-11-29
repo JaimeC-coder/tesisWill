@@ -113,7 +113,21 @@ class AnioController extends Controller
      */
     public function destroy(Anio $anio)
     {
-        //
+        
+        DB::beginTransaction();
+        try {
+            $anio->update([
+                'is_deleted' => 1
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('anio.inicio')->with('success', 'Año escolar eliminado correctamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('anio.inicio')->with('error', 'Error al eliminar el año escolar');
+        }
     }
 
     public function inicio()

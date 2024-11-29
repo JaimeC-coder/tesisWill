@@ -2,11 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Anio;
 use App\Models\Periodo;
+use App\Models\Tipo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PeriodoController extends Controller
 {
+    public $estado = [
+        '1' => 'Aperturado',
+        '0' => 'Finalizado'
+    ];
+    public $anio;
+    public $tipo;
+
+    public function __construct()
+    {
+        $this->anio = Anio::where('is_deleted', '!=', 1)->get();
+        $this->tipo = Tipo::where('is_deleted', '!=', 1)->get();
+    }
     /**
      * Display a listing of the resource.
      */
@@ -20,7 +35,11 @@ class PeriodoController extends Controller
      */
     public function create()
     {
-        //
+        $periodo = new Periodo();
+        $anio = $this->anio;
+        $tipos = $this->tipo;
+        $estado = $this->estado;
+        return view('view.periodoAcademico.create', compact('periodo', 'anio', 'tipos', 'estado'));
     }
 
     /**
@@ -28,7 +47,25 @@ class PeriodoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        DB::beginTransaction();
+        try {
+            Periodo::create([
+                'anio_id' => $request->anio_id,
+                'per_inicio_matriculas' => $request->per_inicio_matriculas,
+                'per_final_matricula' => $request->per_final_matricula,
+                'per_limite_cierre' => $request->per_limite_cierre,
+                'per_tp_notas' => $request->per_tp_notas,
+                'per_estado' => $request->per_estado,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('periodo.inicio')->with('success', 'Año escolar creado correctamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('periodo.create')->with('error', 'Error al crear el aula');
+        }
     }
 
     /**
@@ -44,7 +81,12 @@ class PeriodoController extends Controller
      */
     public function edit(Periodo $periodo)
     {
-        //
+
+        $anio = $this->anio;
+        $tipos = $this->tipo;
+        $estado = $this->estado;
+        return view('view.periodoAcademico.edit', compact('periodo', 'anio', 'tipos', 'estado'));
+
     }
 
     /**
@@ -52,7 +94,25 @@ class PeriodoController extends Controller
      */
     public function update(Request $request, Periodo $periodo)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $periodo->update([
+                'anio_id' => $request->anio_id,
+                'per_inicio_matriculas' => $request->per_inicio_matriculas,
+                'per_final_matricula' => $request->per_final_matricula,
+                'per_limite_cierre' => $request->per_limite_cierre,
+                'per_tp_notas' => $request->per_tp_notas,
+                'per_estado' => $request->per_estado,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('periodo.inicio')->with('success', 'Año escolar creado correctamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('periodo.create')->with('error', 'Error al crear el aula');
+        }
     }
 
     /**
@@ -66,7 +126,6 @@ class PeriodoController extends Controller
     public function inicio()
     {
         $periodos = Periodo::where('is_deleted','!=',1)->get();
-        //return $periodos;
         return view('view.periodoAcademico.inicio', compact('periodos'));
     }
 }

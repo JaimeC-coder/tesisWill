@@ -1,11 +1,12 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Periodo Academico')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
-@section('content_header_subtitle', 'Año Escolar')
+@section('content_header_subtitle', 'Periodo Academico')
 @section('content_buttom')
-    <a href="{{ route('anio.create') }}" class="btn btn-primary">Nueva Año escolar (falta)</a>
+    <a href="{{ route('periodo.create') }}" class="btn btn-primary">Nueva Periodo
+    </a>
 
 @endsection
 
@@ -46,10 +47,10 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('ambiente.edit', $value) }}" class="text-warning">
+                                        <a href="{{ route('periodo.edit', $info) }}" class="text-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('ambiente.destroy', $value) }}" method="POST"
+                                        <form action="{{ route('periodo.destroy', $info) }}" method="POST"
                                             style="display: inline-block">
                                             @csrf
                                             @method('DELETE')

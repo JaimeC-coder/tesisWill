@@ -14,13 +14,13 @@ class Departamento extends Model
     protected $primaryKey = 'idDepa';
     protected $fillable = [
         'departamento'
-    ];
 
+    ];
     public function provincia()
     {
         return $this->hasMany(Provincia::class, 'idDepa', 'idDepa');
     }
-    
+
 
 
 }

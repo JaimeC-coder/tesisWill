@@ -59,10 +59,10 @@
                                     </td>
                                     <td>
 
-                                        <a href="{{ route('ambiente.edit', $info) }}" class="text-primary btn btn-none">
+                                        <a href="{{ route('gradoSeccion.edit', $info) }}" class="text-primary btn btn-none">
                                             <i class="fas fa-plus"></i>
                                         </a>
-                                        <a href="{{ route('ambiente.edit', $info) }}" class="text-warning btn btn-none">
+                                        <a href="{{ route('gradoSeccion.edit', $info) }}" class="text-warning btn btn-none">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                 </tr>

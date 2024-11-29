@@ -61,10 +61,10 @@
                                     </td>
                                     <td>
 
-                                        <a href="{{ route('ambiente.edit', $value) }}" class="text-secundary btn btn-none">
+                                        <a href="{{ route('alumno.destroy', $value) }}" class="text-secundary btn btn-none">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('ambiente.destroy', $value) }}" method="POST"
+                                        <form action="{{ route('alumno.destroy', $value) }}" method="POST"
                                             style="display: inline-block">
                                             @csrf
                                             @method('DELETE')

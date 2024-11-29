@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('tipos', function (Blueprint $table) {
             $table->bigIncrements('tp_id');
             $table->string('tp_tipo', 255)->nullable();
+            $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
             $table->timestamps();
             $table->softDeletes();
         });

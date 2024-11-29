@@ -1,6 +1,6 @@
 <div class="card border-primary">
     <div class=" p-2">
-        <h5 class="card-title">Card title</h5>
+        <h5 class="card-title">INFORMACIÓN BÁSICA</h5>
     </div>
     <div class="card-body">
         <div class="form-row">

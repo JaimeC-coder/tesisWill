@@ -48,8 +48,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/roles/inicio', [App\Http\Controllers\RolController::class, 'inicio'])->name('roles.inicio');
     Route::resource('/roles', App\Http\Controllers\RolController::class);
 
-    Route::get('/institucion/inicio', [App\Http\Controllers\MatriculaController::class, 'inicio'])->name('institucion.inicio');
-    Route::resource('/institucion', App\Http\Controllers\MatriculaController::class);
+    Route::get('/institucion/inicio', [App\Http\Controllers\InstitucionController::class, 'inicio'])->name('institucion.inicio');
+    Route::resource('/institucion', App\Http\Controllers\InstitucionController::class);
 
     Route::get('/asignarCurso/inicio', [App\Http\Controllers\AsignarCursoController::class, 'inicio'])->name('asignarCurso.inicio');
 

@@ -5,7 +5,7 @@
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Alumno')
 @section('content_buttom')
-    <a href="{{ route('anio.create') }}" class="btn btn-primary">Nueva Alumno (falta)</a>
+    <a href="{{ route('alumno.create') }}" class="btn btn-primary">Nueva Alumno (falta)</a>
 
 @endsection
 
@@ -61,10 +61,10 @@
                                     </td>
                                     <td>
 
-                                        <a href="{{ route('alumno.destroy', $value) }}" class="text-secundary btn btn-none">
+                                        <a href="{{ route('alumno.edit', $info) }}" class="text-secundary btn btn-none">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('alumno.destroy', $value) }}" method="POST"
+                                        <form action="{{ route('alumno.destroy', $info) }}" method="POST"
                                             style="display: inline-block">
                                             @csrf
                                             @method('DELETE')

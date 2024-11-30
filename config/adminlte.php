@@ -410,7 +410,7 @@ return [
             'text' => 'Institucion Educativa',
             'icon'=>'fas fa-cogs',
             'icon_color' => 'cyan',
-            'url' => '#',
+            'route' => 'institucion.inicio',
         ],
     ],
 

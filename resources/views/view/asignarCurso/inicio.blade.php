@@ -54,8 +54,8 @@
                             </thead>
                             <tbody>
                                 @foreach ($docentes as $item)
-                                    <tr>
-                                        <td class="d-none">{{ $item['pa_id'] }}</td>
+                                    <tr data-docente-id="{{ $item['pa_id'] }}" data-docente-id-aux="{{ $item['pa_id'] }}">
+                                        <td class="d-none">{{ $item['pa_id'] }} </td>
                                         <td>
                                             <button type="button" class="btn btn-icon btn-sm" title="Registrar"
                                                 onclick="grabarAsignacion({{ $item['pa_id'] }})">
@@ -69,10 +69,17 @@
                                         <td class="d-none">{{ $item['dni'] }}</td>
                                         <td>{{ $item['nombres'] }} {{ $item['apellidos'] }}</td>
 
+
                                         @foreach ($cursos as $curso)
                                             <td>
-                                                <input type="checkbox" @if (in_array($curso['cur_nombre'], $item['checked'])) checked @endif
-                                                    onclick="guardandoCursos({{ $item['pa_id'] }}, {{ $curso['id'] }})">
+                                                <input type="checkbox"
+                                                  value="{{ $curso['cur_nombre'] }}"
+                                                onchange="handleCheckboxChange({{ $item['pa_id'] }})"
+                                                @if (in_array($curso['cur_nombre'], $item['checked'])) checked
+                                                onclick="eliminarCurso({{ $item['pa_id'] }},'{{ $curso['cur_nombre'] }}')"
+                                                @else
+                                                    onclick="guardandoCursos({{ $item['pa_id'] }},'{{ $curso['cur_nombre'] }}')"
+                                                 @endif >
                                             </td>
                                         @endforeach
                                     </tr>
@@ -85,7 +92,7 @@
                 </div>
             </div>
         </div>
-{{$docentes}}
+
     </div>
 
 
@@ -120,38 +127,5 @@
             });
         });
     </script>
-
-    {{-- MODAL --}}
-    <script>
-        $('#exampleModal').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget) // Button that triggered the modal
-            var recipient = button.data('whatever') // Extract info from data-* attributes
-            var title = button.data('title') // Extract info from data-* attributes
-            var modalDataUse = document.getElementById('modalDataUse');
-
-            modalDataUse.innerHTML = '';
-            recipient.forEach((element, index) => {
-                modalDataUse.innerHTML += `
-                <div class="col-lg-4 col-md-6">
-                    <div class="card"
-                        style="color: black; background: linear-gradient(rgba(125, 183, 213, 0.5) 0%, rgba(175, 192, 223, 0.5) 100%);">
-
-                        <div class="card-body text-center">
-                            <h5>C${index+1}</h5>
-                            <br>
-                            <p class="m-2">${element.cap_descripcion}</p>
-                        </div>
-                    </div>
-                </div>
-                `;
-            });
-
-
-
-
-            var modal = $(this)
-            modal.find('.modal-title').text('Capacidades de ' + title)
-            modal.find('.modal-body input').val(recipient)
-        })
-    </script>
+  <script src="{{ asset('js/asignarCursos/form.js') }}"></script>
 @endsection

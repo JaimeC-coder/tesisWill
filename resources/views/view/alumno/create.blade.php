@@ -2,8 +2,8 @@
 @section('title', 'Ambiente')
 
 @section('content_header', 'Inicio')
-@section('content_header_title', 'Rol')
-@section('content_header_subtitle', 'Informacion de Rol Educativa')
+@section('content_header_title', 'Alumno')
+@section('content_header_subtitle', 'Crear Alumno')
 
 
 
@@ -12,11 +12,10 @@
     <div class="container">
         <div class="container">
 
-            <form method="POST" action="{{ route('roles.store') }}"  role="form" enctype="multipart/form-data">
-
+            <form method="POST" action="{{ route('alumno.store') }}"  role="form" enctype="multipart/form-data">
                 @csrf
 
-                @include('view.roles.form')
+                @include('view.alumno.form')
 
             </form>
 
@@ -25,4 +24,5 @@
     </div>
 
 @endsection
+
 

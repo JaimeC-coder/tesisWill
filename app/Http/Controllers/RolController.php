@@ -11,6 +11,10 @@ class RolController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public $estado = [
+        1 => 'Habilitado',
+        0 => 'Deshabilitado'
+    ];
     public function index()
     {
         //
@@ -21,7 +25,11 @@ class RolController extends Controller
      */
     public function create()
     {
-        //
+        $rol = new Rol();
+        $estado = $this->estado;
+
+        return view('view.roles.create', compact('rol', 'estado'));
+
     }
 
     /**
@@ -29,7 +37,21 @@ class RolController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        DB::beginTransaction();
+        try {
+            Rol::create([
+                'rol_descripcion' => $request->rol_descripcion,
+                'rol_estado' => $request->rol_estado,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('roles.inicio')->with('success', 'Año escolar eliminado correctamente');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('roles.inicio')->with('error', 'Error al eliminar el año escolar');
+        }
     }
 
     /**
@@ -59,29 +81,27 @@ class RolController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Rol $rol)
+    public function destroy(Rol $role)
     {
         DB::beginTransaction();
         try {
-            $rol->update([
+            $role->update([
                 'is_deleted' => 1
             ]);
 
             DB::commit();
 
-            return redirect()->route('rol.inicio')->with('success', 'Año escolar eliminado correctamente');
-
+            return redirect()->route('roles.inicio')->with('success', 'Año escolar eliminado correctamente');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('rol.inicio')->with('error', 'Error al eliminar el año escolar');
+            return redirect()->route('roles.inicio')->with('error', 'Error al eliminar el año escolar');
         }
     }
 
     public function inicio()
-    { $roles = Rol::where('rol_estado', 1)->where('is_deleted','!=',1)->get();
+    {
+        $roles = Rol::where('rol_estado', 1)->where('is_deleted', '!=', 1)->get();
         //return $roles;
         return view('view.roles.inicio', compact('roles'));
-
     }
 }
-

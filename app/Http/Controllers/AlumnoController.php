@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alumno;
+use App\Models\Departamento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -10,7 +11,13 @@ class AlumnoController extends Controller
 {
     /**
      * Display a listing of the resource.
+     *
      */
+    public $sexo = ['M' => 'Masculino', 'F' => 'Femenino'];
+    public $estadoCivil = ['S' => 'Soltero', 'C' => 'Casado', 'D' => 'Divorciado', 'V' => 'Viudo'];
+    public $vive = [1 => 'Si', 2 => 'No'];
+    public $parentesco = ['Madre' => 'Madre', 'Padre' => 'Padre', 'TUTOR' => 'Tutor'];
+
     public function index()
     {
         //
@@ -21,7 +28,15 @@ class AlumnoController extends Controller
      */
     public function create()
     {
-        //
+        $alumno = new Alumno();
+        $sexo = $this->sexo;
+        $estadoCivil = $this->estadoCivil;
+        $vive = $this->vive;
+        $parentesco = $this->parentesco;
+        $departamentos = Departamento::all();
+
+        return view('view.alumno.create', compact('alumno', 'sexo', 'estadoCivil', 'vive', 'parentesco', 'departamentos'));
+
     }
 
     /**
@@ -29,7 +44,7 @@ class AlumnoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return $request;
     }
 
     /**
@@ -45,7 +60,16 @@ class AlumnoController extends Controller
      */
     public function edit(Alumno $alumno)
     {
-        //
+        $sexo = $this->sexo;
+        $estadoCivil = $this->estadoCivil;
+        $vive = $this->vive;
+        $parentesco = $this->parentesco;
+        $departamentos = Departamento::all();
+
+        return view('view.alumno.edit',compact('sexo','estadoCivil','vive','parentesco','departamentos','alumno'));
+
+
+
     }
 
     /**
@@ -54,6 +78,8 @@ class AlumnoController extends Controller
     public function update(Request $request, Alumno $alumno)
     {
         //
+
+        return $request;
     }
 
     /**

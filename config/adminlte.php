@@ -316,7 +316,7 @@ return [
         ],
         [
             'text' => 'Horario',
-            'url' => 'admin/settings',
+            'route' => 'horario.inicio',
             'icon' => 'fas fa-bullhorn',
             'icon_color' => 'orange',
         ],
@@ -539,6 +539,42 @@ return [
                 ],
             ],
         ],
+        'fullCalendar' => [
+            'active' => true,
+            'files' => [
+
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js',
+                ],
+            ],
+        ],
+        'timepicker' =>[
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => '//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css',
+                ],
+            ],
+        ],
+        'moment'=>[
+            'active'=>true,
+            'files'=>[
+                [
+                    'type'=>'js',
+                    'asset'=> true,
+                    'location'=>'//cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js'
+                ]
+            ]
+        ]
     ],
 
     /*

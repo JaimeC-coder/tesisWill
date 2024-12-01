@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anio;
+use App\Models\Grado;
+use App\Models\Nivel;
+use App\Models\Seccion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +30,7 @@ class AnioController extends Controller
         $estado = $this->estado;
         $taller = $this->taller;
 
-        return view('view.anioEscolar.create',compact('anio','estado','taller'));
+        return view('view.anioEscolar.create', compact('anio', 'estado', 'taller'));
     }
 
     /**
@@ -52,8 +55,7 @@ class AnioController extends Controller
 
             DB::commit();
 
-           return redirect()->route('anio.inicio')->with('success', 'Año escolar creado correctamente');
-
+            return redirect()->route('anio.inicio')->with('success', 'Año escolar creado correctamente');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('anio.create')->with('error', 'Error al crear el aula');
@@ -76,7 +78,7 @@ class AnioController extends Controller
         //
         $estado = $this->estado;
         $taller = $this->taller;
-        return view('view.anioEscolar.edit', compact('anio','estado','taller'));
+        return view('view.anioEscolar.edit', compact('anio', 'estado', 'taller'));
     }
 
     /**
@@ -101,7 +103,6 @@ class AnioController extends Controller
             DB::commit();
 
             return redirect()->route('anio.inicio')->with('success', 'Año escolar actualizado correctamente');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('anio.edit')->with('error', 'Error al actualizar el año escolar');
@@ -113,7 +114,7 @@ class AnioController extends Controller
      */
     public function destroy(Anio $anio)
     {
-        
+
         DB::beginTransaction();
         try {
             $anio->update([
@@ -123,7 +124,6 @@ class AnioController extends Controller
             DB::commit();
 
             return redirect()->route('anio.inicio')->with('success', 'Año escolar eliminado correctamente');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('anio.inicio')->with('error', 'Error al eliminar el año escolar');
@@ -132,7 +132,39 @@ class AnioController extends Controller
 
     public function inicio()
     {
-        $anio = Anio::where('is_deleted','!=',1)->orderBy('anio_id', 'desc')->get();
+        $anio = Anio::where('is_deleted', '!=', 1)->orderBy('anio_id', 'desc')->get();
         return view('view.anioEscolar.inicio', compact('anio'));
+    }
+
+    public function nivel()
+    {
+        try {
+            $nivel = Nivel::all();
+            return response()->json($nivel);
+        } catch (\Throwable $th) {
+            return response()->json($th);
+        }
+    }
+
+    public function grado(Request $request)
+    {
+
+        try {
+            $grado = Grado::where('niv_id', $request->nivel_id)->get();
+            return response()->json($grado);
+        } catch (\Throwable $th) {
+            return response()->json($th);
+        }
+    }
+
+    public function seccion(Request $request)
+    {
+        try {
+            $seccion = Seccion::where('gra_id', $request->grado_id)->get();
+            return response()->json($seccion);
+        } catch (\Throwable $th) {
+            return response()->json($th);
+        }
+
     }
 }

@@ -8,8 +8,10 @@ use App\Models\Nivel;
 use App\Models\Persona;
 use App\Models\PersonalAcademico;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use function Illuminate\Log\log;
+
 class AsignarCursoController extends Controller
 {
     /**
@@ -68,12 +70,12 @@ class AsignarCursoController extends Controller
         //
     }
 
-    public function inicio(Request $request ,$nivel = null)
+    public function inicio(Request $request, $nivel = null)
     {
         $curso = null;
         $docente = null;
         $nivel = Nivel::all();
-        if($request){
+        if ($request) {
 
             $cursos = Curso::selectRaw('cur_nombre, cur_abreviatura')->where('cur_horas', '>', 0)->where('niv_id', $request->niv_id)->where('is_deleted', '!=', 1)->groupBy('cur_nombre', 'cur_abreviatura')->get();
             $docentes = PersonalAcademico::whereIn('rol_id', [4])->where('niv_id', $request->niv_id)->where('is_deleted', '!=', 1)->get();
@@ -93,88 +95,77 @@ class AsignarCursoController extends Controller
                 $d->apellidos = $d->persona->per_apellidos;
             }
         }
-        return view('view.asignarCurso.inicio' , compact('nivel','cursos','docentes'));
+        return view('view.asignarCurso.inicio', compact('nivel', 'cursos', 'docentes'));
     }
 
-    public function asignarCurso(Request $request)
-    {
-        try {
-            log($request);
-        } catch (\Throwable $th) {
-            //throw $th;
-            log($th);
-        }
 
 
-        // $asignarCurso = new AsignarCurso();
-        // $asignarCurso->pa_id = $request->pa_id;
-        // $asignarCurso->curso = $request->curso;
-        // $asignarCurso->asig_is_deleted = 0;
-        // $asignarCurso->save();
-        // return response()->json(['success' => 'Curso asignado correctamente']);
-    }
-
-    public function eliminarCurso(Request $request)
-    {
-        try {
-            log($request);
-        } catch (\Throwable $th) {
-            //throw $th;
-            log($th);
-        }
-        // $asignarCurso = AsignarCurso::where('pa_id', $request->pa_id)->where('curso', $request->curso)->first();
-        // $asignarCurso->asig_is_deleted = 1;
-        // $asignarCurso->save();
-        // return response()->json(['success' => 'Curso eliminado correctamente']);
-    }
 
     public function asignacionMasivaCurso(Request $request)
     {
         try {
-            log($request);
+
+            DB::beginTransaction();
+            $datos_asignar = $request['cursos'];
+            $docente=$request['docente'];
+            $niv_id=$request['niv_id'];
+            $cursos_asignados = AsignarCurso::where('pa_id', $docente)->where('asig_is_deleted', '!=', 1)
+            ->where('niv_id', $niv_id)->get();
+            foreach ($cursos_asignados as $curso) {
+                $curso->asig_is_deleted = 1;
+                $curso->save();
+            }
+            foreach ($datos_asignar as $value) {
+                $data = AsignarCurso::where('curso', $value)
+                ->where('pa_id', $docente)
+                ->first();
+                if (!$data) {
+                    AsignarCurso::create([
+                        'pa_id' => $docente,
+                        'niv_id' => $niv_id,
+                        'curso' => $value
+                    ]);
+                } else {
+                    $data->asig_is_deleted = 0;
+                    $data->save();
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'status' => 1
+            ]);
         } catch (\Throwable $th) {
-            //throw $th;
+            return response()->json([
+                'status' => 0
+            ]);
             log($th);
         }
 
-
-
-        // $docente = PersonalAcademico::find($request->pa_id);
-        // $asignaciones = AsignarCurso::where('pa_id', $request->pa_id)->where('asig_is_deleted', '!=', 1)->pluck('curso')->toArray();
-        // $cursos = Curso::where('niv_id', $docente->niv_id)->where('is_deleted', '!=', 1)->get();
-        // foreach ($cursos as $curso) {
-        //     if (!in_array($curso->cur_abreviatura, $asignaciones)) {
-        //         $asignarCurso = new AsignarCurso();
-        //         $asignarCurso->pa_id = $request->pa_id;
-        //         $asignarCurso->curso = $curso->cur_abreviatura;
-        //         $asignarCurso->asig_is_deleted = 0;
-        //         $asignarCurso->save();
-        //     }
-        // }
-        // return response()->json(['success' => 'Cursos asignados correctamente']);
     }
 
     public function eliminacionMasivaCurso(Request $request)
     {
         try {
-            log($request);
+            DB::beginTransaction();
+            $docente=$request['docente'];
+            $niv_id=$request['niv_id'];
+            $cursos_asignados = AsignarCurso::where('pa_id', $docente)->where('asig_is_deleted', '!=', 1)
+            ->where('niv_id', $niv_id)->get();
+            foreach ($cursos_asignados as $curso) {
+                $curso->asig_is_deleted = 1;
+                $curso->save();
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => 1
+            ]);
         } catch (\Throwable $th) {
-            //throw $th;
+            return response()->json([
+                'status' => 0
+            ]);
             log($th);
         }
 
-
-
-        // $docente = PersonalAcademico::find($request->pa_id);
-        // $asignaciones = AsignarCurso::where('pa_id', $request->pa_id)->where('asig_is_deleted', '!=', 1)->pluck('curso')->toArray();
-        // $cursos = Curso::where('niv_id', $docente->niv_id)->where('is_deleted', '!=', 1)->get();
-        // foreach ($cursos as $curso) {
-        //     if (in_array($curso->cur_abreviatura, $asignaciones)) {
-        //         $asignarCurso = AsignarCurso::where('pa_id', $request->pa_id)->where('curso', $curso->cur_abreviatura)->first();
-        //         $asignarCurso->asig_is_deleted = 1;
-        //         $asignarCurso->save();
-        //     }
-        // }
-        // return response()->json(['success' => 'Cursos eliminados correctamente']);
     }
 }

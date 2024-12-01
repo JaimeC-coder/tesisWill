@@ -58,11 +58,11 @@
                                         <td class="d-none">{{ $item['pa_id'] }} </td>
                                         <td>
                                             <button type="button" class="btn btn-icon btn-sm" title="Registrar"
-                                                onclick="grabarAsignacion({{ $item['pa_id'] }})">
+                                                onclick="asignacionMasivaCurso({{ $item['pa_id'] }})">
                                                 <i class="fa fa-save text-info"></i>
                                             </button>
                                             <button type="button" class="btn btn-icon btn-sm" title="Limpiar"
-                                                onclick="eliminarAsignacion({{ $item['pa_id'] }})">
+                                                onclick="eliminacionMasivaCurso({{ $item['pa_id'] }})">
                                                 <i class="fa fa-trash text-danger"></i>
                                             </button>
                                         </td>
@@ -76,9 +76,6 @@
                                                   value="{{ $curso['cur_nombre'] }}"
                                                 onchange="handleCheckboxChange({{ $item['pa_id'] }})"
                                                 @if (in_array($curso['cur_nombre'], $item['checked'])) checked
-                                                onclick="eliminarCurso({{ $item['pa_id'] }},'{{ $curso['cur_nombre'] }}')"
-                                                @else
-                                                    onclick="guardandoCursos({{ $item['pa_id'] }},'{{ $curso['cur_nombre'] }}')"
                                                  @endif >
                                             </td>
                                         @endforeach

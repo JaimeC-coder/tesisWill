@@ -54,5 +54,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/asignarCurso/inicio', [App\Http\Controllers\AsignarCursoController::class, 'inicio'])->name('asignarCurso.inicio');
 
     Route::resource('/asignarCurso', App\Http\Controllers\AsignarCursoController::class);
+    Route::get('/horario/inicio', [App\Http\Controllers\HorarioController::class, 'inicio'])->name('horario.inicio');
 
 });

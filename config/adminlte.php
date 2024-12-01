@@ -329,7 +329,7 @@ return [
         ['header' => 'Reportes'],
         [
             'text' => 'Generales',
-            'url' => 'admin/settings',
+            'route' => 'reporte.general',
             'icon_color' => 'pink',
             'icon' => 'fas fa-folder-open',
         ],
@@ -505,17 +505,17 @@ return [
             ],
         ],
         'Chartjs' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js',
+                    'location' => '//cdn.jsdelivr.net/npm/chart.js',
                 ],
             ],
         ],
         'Sweetalert2' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',

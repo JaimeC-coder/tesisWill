@@ -5,6 +5,7 @@ use App\Http\Controllers\AsignarCursoController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\HorarioController;
 use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\ReportController;
 use App\Models\AsignarCurso;
 use Illuminate\Support\Facades\Route;
 
@@ -26,11 +27,15 @@ Route::group(['prefix' => 'anio'], function () {
 
 });
 Route::group(['prefix' => 'horario'], function () {
-
     Route::post('search', [HorarioController::class, 'search']);
     Route::post('register', [HorarioController::class, 'store']);
-
-
+});
+Route::group(['prefix' => 'reporte'], function () {
+    Route::post('matricula', [ReportController::class, 'matricula']);
+    Route::post('personal', [ReportController::class, 'personal']);
+    Route::post('sexo', [ReportController::class, 'sexo']);
+    Route::post('countPersonal', [ReportController::class, 'countPersonal']);
+    Route::post('vacante', [ReportController::class, 'vacante']);
 });
 
 

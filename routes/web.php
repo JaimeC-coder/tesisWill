@@ -19,7 +19,7 @@ Auth::routes();
 //auth routes
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/home', [App\Http\Controllers\homeController::class, 'index'])->name('home');
 
     Route::get('/matricula/inicio', [App\Http\Controllers\MatriculaController::class, 'inicio'])->name('matricula.inicio');
     Route::resource('/matricula', App\Http\Controllers\MatriculaController::class);

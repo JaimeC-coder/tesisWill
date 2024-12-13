@@ -52,10 +52,16 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/institucion', App\Http\Controllers\InstitucionController::class);
 
     Route::get('/asignarCurso/inicio', [App\Http\Controllers\AsignarCursoController::class, 'inicio'])->name('asignarCurso.inicio');
-
     Route::resource('/asignarCurso', App\Http\Controllers\AsignarCursoController::class);
+
+    Route::get('/asignarGrado/inicio', [App\Http\Controllers\AsignarGradoController::class, 'inicio'])->name('asignarGrado.inicio');
+    Route::resource('/asignarCurso', App\Http\Controllers\AsignarGradoController::class);
+
     Route::get('/horario/inicio', [App\Http\Controllers\HorarioController::class, 'inicio'])->name('horario.inicio');
     Route::get('/reporte/general/inicio', [App\Http\Controllers\ReportController::class, 'inicio'])->name('reporte.general');
+
+    Route::get('/nota/inicio', [App\Http\Controllers\NotaController::class, 'inicio'])->name('nota.inicio');
+   // Route::get('/reporte/general/inicio', [App\Http\Controllers\ReportController::class, 'inicio'])->name('reporte.general');
 
 
 

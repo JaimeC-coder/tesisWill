@@ -94,6 +94,8 @@ class PeriodoController extends Controller
      */
     public function update(Request $request, Periodo $periodo)
     {
+    
+
         DB::beginTransaction();
         try {
             $periodo->update([

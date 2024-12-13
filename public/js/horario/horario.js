@@ -54,6 +54,7 @@ function handleGradoChange() {
 
 
 function updateSelectOptions(selectElement, options, textKey, valueKey) {
+    console.log(options);
     selectElement.innerHTML = '<option value="">Seleccione una opción</option>';
     options.forEach(option => {
         let opc = document.createElement("option");

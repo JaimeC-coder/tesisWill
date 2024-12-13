@@ -2,7 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alumno;
+use App\Models\Anio;
+use App\Models\AsignarCurso;
+use App\Models\AsignarGrado;
+use App\Models\Capacidad;
+use App\Models\Curso;
+use App\Models\Grado;
+use App\Models\Gsa;
+use App\Models\Matricula;
 use App\Models\Nivel;
+use App\Models\Nota;
+use App\Models\NotaCapacidad;
+use App\Models\Periodo;
+use App\Models\Persona;
+use App\Models\PersonalAcademico;
+use App\Models\Seccion;
+use App\Models\Tipo;
 use Illuminate\Http\Request;
 
 class NivelController extends Controller

@@ -322,7 +322,7 @@ return [
         ],
         [
             'text' => 'Notas',
-            'url' => 'admin/settings',
+            'route' => 'nota.inicio',
             'icon_color' => 'black',
             'icon' => 'fas fa-clipboard',
         ],
@@ -386,7 +386,7 @@ return [
         [
             'text' => 'Asignar Grados',
             'icon'=>'fas fa-shapes',
-            'url' => '#',
+            'route' => 'asignarGrado.inicio',
         ],
         [
             'text' => 'Alumnos',

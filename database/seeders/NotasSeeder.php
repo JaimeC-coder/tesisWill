@@ -557,7 +557,12 @@ class NotasSeeder extends Seeder
                 'pa_id' => $nota[3],
                 'ags_id' => $nota[4],
                 'nt_bimestre' => $nota[5],
-                'nt_nota' => $nota[6],
+                'nt_nota' => match (true) {
+                    $nota[6] <= 10.4 => 'C',
+                    $nota[6] <= 13.4 => 'B',
+                    $nota[6] <= 16.4 => 'A',
+                    default => 'AD',
+                },
                 'nt_is_deleted' => $nota[7],
                 'curso_id' => $nota[8],
                 'created_at' => now(),

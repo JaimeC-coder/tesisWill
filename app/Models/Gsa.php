@@ -39,4 +39,9 @@ class Gsa extends Model
         return $this->belongsTo(Seccion::class, 'sec_id', 'sec_id');
     }
 
+    public function matricula()
+    {
+        return $this->hasMany(Matricula::class, 'ags_id', 'ags_id');
+    }
+
 }

@@ -15,9 +15,9 @@ class TiposSeeder extends Seeder
     {
         $tipos = [
             [1, 'Registro de Notas Anuales'],
-            [2, 'Registro de Notas Bimestrales'],
+            [2, 'Registro de Notas Semestrales'],
             [3, 'Registro de Notas Trimestrales'],
-            [4, 'Registro de Notas Semestrales'],
+            [4, 'Registro de Notas Bimestrales'],
 
         ];
 

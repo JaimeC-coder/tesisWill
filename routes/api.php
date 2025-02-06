@@ -19,7 +19,7 @@ Route::POST('asignarCurso', [AsignarCursoController::class,'asignarCurso']);
 Route::POST('EliminarCurso', [AsignarCursoController::class,'eliminarCurso']);
 Route::POST('asignacionMasivaCurso', [AsignarCursoController::class,'asignacionMasivaCurso']);
 Route::POST('EliminacionMasivaCurso', [AsignarCursoController::class,'eliminacionMasivaCurso']);
-
+Route::GET('notas1', [NotaController::class, 'inicioaPI']);
 
 Route::group(['prefix' => 'anio'], function () {
     Route::post('nivel', [AnioController::class, 'nivel']);
@@ -53,5 +53,7 @@ Route::group(['prefix' => 'asignacion'], function () {
     Route::post('/masiva/grado', [AsignarGradoController::class, 'masiva']);
     Route::post('eliminacion/masiva/grado', [AsignarGradoController::class, 'eliminacionMasiva']);
 });
+
+
 
 

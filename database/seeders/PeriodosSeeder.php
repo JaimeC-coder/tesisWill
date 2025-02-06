@@ -14,7 +14,7 @@ class PeriodosSeeder extends Seeder
     public function run(): void
     {
         $periodos = [
-            [1, 2, '2023-01-01', '2023-12-31', '2023-12-31', 3, '1', '0']
+            [1, 2, '2023-01-01', '2023-12-31', '2023-12-31', 4, '1', '0']
         ];
 
         foreach ($periodos as $periodo) {

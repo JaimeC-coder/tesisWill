@@ -1700,7 +1700,13 @@ class NotaCapacidadsSeeder extends Seeder
             DB::table('nota_capacidads')->insert([
                 'nc_id' => $nota_capacidad[0],
                 'nc_descripcion' => $nota_capacidad[1],
-                'nc_nota' => $nota_capacidad[2],
+                'descripcion' => NULL,
+                'nc_nota' => match (true) {
+                    $nota_capacidad[2] <= 10.4 => 'C',
+                    $nota_capacidad[2] <= 13.4 => 'B',
+                    $nota_capacidad[2] <= 16.4 => 'A',
+                    default => 'AD',
+                },
                 'nt_id' => $nota_capacidad[3],
                 'nc_is_deleted' => $nota_capacidad[4],
                 'created_at' => now(),

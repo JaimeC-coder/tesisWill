@@ -70,54 +70,68 @@
             </div>
         </div>
     </div>
+    <pre>
+        {{-- {{ print_r($Gsas) }} --}}
+        {{-- {{ print_r($capacidad) }} --}}
+    </pre>
     <div class="col-lg-12 col-md-12 col-sm-12">
         <div class="card">
             <div class="card-body">
                 <div class="row p-2">
                     <div class="table-responsive">
-                        <table id="myTable" class="display" style="width:100%; text-align: center;">
-                            @if ($tipoPeriodo !=null)
+                        <table id="myTable" class="display table  table-bordered" style="width:100%; text-align: center;">
+                            @if ($tipoPeriodo != null)
 
-                            <thead>
-                                <tr>
-                                    <th class="d-none">#</th>
-                                    <th>DNI</th>
-                                    <th>Alumno</th>
-                                    @foreach (range(1, $tipoPeriodo['cantidad']) as $index => $item)
-                                        <th>{{ $tipoPeriodo['name'] }} {{ $item }}</th>
-                                    @endforeach
-                                    <th>Promedio</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($Gsas as $index => $item)
+                                <thead class="thead-dark">
                                     <tr>
-                                        <td class="d-none">{{ $item['ags_id'] }}</td>
-                                        <td>{{ $item['dni'] }}</td>
-                                        <td>{{ $item['alumno'] }}</td>
-                                        @foreach (range(1, $tipoPeriodo['cantidad']) as $index2 => $g)
-                                            <td>
-                                                @if (!empty($item['notas'][$g - 1]))
-                                                    {{ $item['notas'][$g - 1]['notaValor'] }}
-                                                @else
-                                                    0
-                                                    <button type="button" class="btn btn-icon btn-sm" title="Registrar"
-                                                        onclick="mostrar_crear({{ json_encode($item) }}, {{ $g }})">
-                                                        <i class="fa fa-edit text-secondary"></i>
-                                                    </button>
-                                                @endif
-                                            </td>
+
+                                        <th>DNI</th>
+                                        <th>Alumno</th>
+                                        <th>Capacidades</th>
+                                        @foreach (range(1, $tipoPeriodo['cantidad']) as $index => $item)
+                                            <th>{{ $tipoPeriodo['name'] }} {{ $item }}</th>
                                         @endforeach
-                                        <td>
-                                            <span
-                                                class="{{ $item['promedio'] >= 10.5 ? 'badge badge-success' : 'badge badge-danger' }}">
-                                                {{ $item['promedioValor'] }}
-                                            </span>
-                                        </td>
+                                        <th>Promedio</th>
                                     </tr>
-                                @endforeach
+                                </thead>
+                                <tbody>
+                                    @foreach ($Gsas as $index => $item)
+                                        <tr>
+
+                                            <td rowspan="4">{{ $item['dni'] }}</td>
+                                            <td rowspan="4">{{ $item['alumno'] }}</td>
+                                            @foreach ($capacidad as $key => $value)
+                                        <tr>
+                                            @foreach ($item['notas'] as $key2 => $value2)
+                                                @if ($key == $key2)
+                                                    <td>{{ $value }}</td>
+                                                    @foreach ($value2 as $key3 => $value3)
+                                                        @if ($value3['nota'] != null)
+                                                            <td>{{ $value3['nota'] }}</td>
+                                                        @else
+                                                            <td>
+                                                                <button type="button" class="btn btn-icon btn-sm"
+                                                                    title="Registrar">
+                                                                    <i class="fa fa-edit text-secondary"></i>
+                                                                </button>
+
+                                                            </td>
+                                                        @endif
+                                                    @endforeach
+                                                @endif
+                                            @endforeach
+
+
+
+                                        </tr>
+                                    @endforeach
+
+                                    </tr>
+                            @endforeach
                             </tbody>
-                            @else
+
+
+                            {{-- @else
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -127,8 +141,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                               
-                            </tbody>
+
+                            </tbody> --}}
 
 
                             @endif

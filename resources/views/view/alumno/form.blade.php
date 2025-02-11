@@ -44,14 +44,14 @@
                         <div class="col-lg-4 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label>Nombres <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" required value="{{$alumno->persona->per_nombres?? ''}}" name="per_nombres_Alumno" id="per_nombres_Alumno" disabled>
+                                <input type="text" class="form-control" required value="{{$alumno->persona->per_nombres?? ''}}" name="per_nombres_Alumno" id="per_nombres_Alumno" readOnly >
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label>Apellidos <span class="text-danger">*</span></label>
                                 <input type="text" v-model="persona.apellidos" class="form-control"
-                                    required value="{{$alumno->persona->per_apellidos?? ''}}" id="per_apellidos_Alumno" name="per_apellidos_Alumno" disabled>
+                                    required value="{{$alumno->persona->per_apellidos?? ''}}" id="per_apellidos_Alumno" name="per_apellidos_Alumno" readOnly >
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 col-sm-12">
@@ -82,7 +82,7 @@
                             <div class="form-group">
                                 <label>País <span class="text-danger">*</span></label>
                                 <input type="text"   class="form-control"
-                                    required value="{{$alumno->persona->per_pais?? ''}}" id="per_pais_Alumno" name="per_pais_Alumno"disabled>
+                                    required value="{{$alumno->persona->per_pais?? ''}}" id="per_pais_Alumno" name="per_pais_Alumno"readOnly >
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
@@ -96,14 +96,14 @@
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Provincia </label>
-                            <select  class="form-control show-tick" required id="per_provincia_Alumno" name="per_provincia_Alumno" disabled>
-                                <option value="0" selected disabled>-- Selecciona --</option>
+                            <select  class="form-control show-tick" required id="per_provincia_Alumno" name="per_provincia_Alumno" readOnly >
+                                <option value="0" selected readOnly >-- Selecciona --</option>
                             </select>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Distrito </label>
-                            <select  class="form-control show-tick" required id="per_distrito_Alumno" name="per_distrito_Alumno" disabled>
-                                <option value="0" selected disabled>-- Selecciona --</option>
+                            <select  class="form-control show-tick" required id="per_distrito_Alumno" name="per_distrito_Alumno" readOnly >
+                                <option value="0" selected readOnly >-- Selecciona --</option>
 
                             </select>
                         </div>
@@ -171,19 +171,19 @@
                         <div class="col-lg-4 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label>Nombres <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" required value="{{$alumno->apoderado->persona->per_nombres?? ''}}" id="per_nombres_Apoderado" name="per_nombres_Apoderado"disabled>
+                                <input type="text" class="form-control" required value="{{$alumno->apoderado->persona->per_nombres?? ''}}" id="per_nombres_Apoderado" name="per_nombres_Apoderado"readOnly >
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label>Apellidos <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" required value="{{$alumno->apoderado->persona->per_apellidos?? ''}}" id="per_apellidos_Apoderado" name="per_apellidos_Apoderado" disabled>
+                                <input type="text" class="form-control" required value="{{$alumno->apoderado->persona->per_apellidos?? ''}}" id="per_apellidos_Apoderado" name="per_apellidos_Apoderado" readOnly >
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 col-sm-12">
                             <label>Sexo <span class="text-danger">*</span></label>
                             <select  class="form-control show-tick" required id="per_sexo_Apoderado" name="per_sexo_Apoderado">
-                                <option value="0" disabled>-- Selecciona --</option>
+                                <option value="0" readOnly >-- Selecciona --</option>
                                 @foreach ($sexo as $key => $tipo)
                                 <option value="{{ $key }}" @if (isset($alumno->apoderado->persona) && $alumno->apoderado->persona->per_sexo == $key) selected @endif>{{ $tipo }}</option>
                                 @endforeach
@@ -199,7 +199,7 @@
                         <div class="col-lg-4 col-md-6 col-sm-12">
                             <label>Estado Civil </label>
                             <select class="form-control show-tick" required id="per_estado_civil_Apoderado" name="per_estado_civil_Apoderado">
-                                <option value="0" disabled>-- Selecciona --</option>
+                                <option value="0" readOnly >-- Selecciona --</option>
                                 @foreach ($estadoCivil as $key => $tipo)
                                 <option value="{{ $key }}" @if (isset($alumno->apoderado->persona) && $alumno->apoderado->persona->per_sexo == $key) selected @endif>{{ $tipo }}</option>
                                 @endforeach
@@ -208,13 +208,13 @@
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label>País <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" required value="{{$alumno->apoderado->persona->per_pais ?? ''}}" id="per_pais_Apoderado" name="per_pais_Apoderado"  disabled>
+                                <input type="text" class="form-control" required value="{{$alumno->apoderado->persona->per_pais ?? ''}}" id="per_pais_Apoderado" name="per_pais_Apoderado"  readOnly >
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Departamento </label>
                             <select  class="form-control show-tick" required id="per_departamento_Apoderado" name="per_departamento_Apoderado">
-                                <option value="0" selected disabled>-- Selecciona --</option>
+                                <option value="0" selected readOnly >-- Selecciona --</option>
                                 @foreach ($departamentos as $departamento)
                                 <option value="{{ $departamento->idDepa }}" @if (isset($alumno->apoderado->persona) && $alumno->apoderado->persona->per_departamento == $departamento->idDepa) selected @endif>{{ $departamento->departamento }}</option>
                             @endforeach
@@ -222,14 +222,14 @@
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Provincia </label>
-                            <select class="form-control show-tick" required id="per_provincia_Apoderado" name="per_provincia_Apoderado"disabled>
-                                <option value="0" selected disabled>-- Selecciona --</option>
+                            <select class="form-control show-tick" required id="per_provincia_Apoderado" name="per_provincia_Apoderado"readOnly >
+                                <option value="0" selected readOnly >-- Selecciona --</option>
                             </select>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Distrito </label>
-                            <select  class="form-control show-tick" required id="per_distrito_Apoderado" name="per_distrito_Apoderado" disabled>
-                                <option value="0" selected disabled>-- Selecciona --</option>
+                            <select  class="form-control show-tick" required id="per_distrito_Apoderado" name="per_distrito_Apoderado" readOnly >
+                                <option value="0" selected readOnly >-- Selecciona --</option>
                             </select>
                         </div>
                         <div class="col-lg-4 col-md-6 col-sm-12">
@@ -253,7 +253,7 @@
                         <div class="col-lg-6 col-md-6 col-sm-12">
                             <label>Parentesco <span class="text-danger">*</span></label>
                             <select class="form-control show-tick" required id="per_parentesco_Apoderado" name="per_parentesco_Apoderado">
-                                <option value="0" disabled>-- Selecciona --</option>
+                                <option value="0" readOnly >-- Selecciona --</option>
                                 @foreach ($parentesco as $key => $tipo)
                                 <option value="{{ $key }}" @if (isset($alumno->apoderado) && $alumno->apoderado->apo_parentesco == $key) selected @endif>{{ $tipo }}</option>
                                 @endforeach
@@ -264,7 +264,7 @@
                                 <label>Vive con el estudiante</label>
                                 <select class="form-control show-tick" required id="per_vive_con_estudiante_Apoderado" name="per_vive_con_estudiante_Apoderado">
 
-                                    <option value="0" disabled>-- Selecciona --</option>
+                                    <option value="0" readOnly >-- Selecciona --</option>
                                     @foreach ($vive as $key => $tipo)
                                     <option value="{{ $key }}" @if (isset($alumno->apoderado) && $alumno->apoderado->apo_vive_con_estudiante == $key) selected @endif>{{ $tipo }}</option>
                                     @endforeach

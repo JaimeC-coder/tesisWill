@@ -90,14 +90,13 @@ document.addEventListener('DOMContentLoaded', function () {
         let departamento1 = document.getElementById(`per_departamento_Alumno`);
         let provincia1 = document.getElementById(`per_provincia_Alumno_hidden`);
         let distrito1 = document.getElementById(`per_distrito_Alumno_hidden`);
-        console.log(distrito1);
-        console.log(provincia1);
+
         let departamento2 = document.getElementById(`per_departamento_Apoderado`);
         let provincia2 = document.getElementById(`per_provincia_Apoderado_hidden`);
         let distrito2 = document.getElementById(`per_distrito_Apoderado_hidden`);
 
-        aux(departamento1,provincia1,distrito1,"Alumno");
-        aux(departamento2,provincia2,distrito2,"Apoderado");
+        aux(departamento1, provincia1, distrito1, "Alumno");
+        aux(departamento2, provincia2, distrito2, "Apoderado");
     }
 
     buscarDniApoderda.addEventListener("click", function () {
@@ -126,20 +125,20 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-function aux (departamento1,provincia1,distrito1,group){
+function aux(departamento1, provincia1, distrito1, group) {
     const provincia = document.getElementById(`per_provincia_${group}`);
     const distrito = document.getElementById(`per_distrito_${group}`);
 
 
-      loadProvincias(departamento1.value, provincia).then(() => {
+    loadProvincias(departamento1.value, provincia).then(() => {
         provincia.value = provincia1.value;
-        provincia.disabled = true;
+        provincia.readonly = true;
 
-console.log (provincia);
+        console.log(provincia);
         loadDistritos(provincia1.value, distrito).then(() => {
             console.log(distrito)
             distrito.value = distrito1.value;
-            distrito.disabled = true;
+            distrito.readonly = true;
         });
     });
 
@@ -167,55 +166,60 @@ function checked(flexCheckDefault, grupo) {
 function clearInputs(group) {
     const inputs = document.querySelectorAll(`[id^="per_"][id$="_${group}"]`);
     inputs.forEach(input => {
-        input.value = "";
+        if (input.tagName.toLowerCase() !== "select") {
+            input.value = "";
+        }
 
     });
 }
 
 
 function blockInput(status, group) {
+    console.log(status);
     const inputs = document.querySelectorAll(`[id^="per_"][id$="_${group}"]`);
     inputs.forEach(input => {
         if (!arregloData.includes(input)) {
-            input.disabled = status;
+            //input.addClassName = "disabled";
+            input.readOnly  = status;
         }
 
     });
     // Los elementos en arregloData se aseguran de no ser afectados
     arregloData.forEach(input => {
-        input.disabled = false;
+        input.readonly = false;
     });
-    per_dni_Apoderado.disabled = false;
-    per_dni_Alumno.disabled = false;
+    per_dni_Apoderado.readonly = false;
+    per_dni_Alumno.readonly = false;
 
 }
 
 function inputAlumno(data) {
 
     if (data != null) {
-       if(data.per_id != null){
-        per_id_Alumno.value = data.per_id || "";
-        per_dni_Alumno.value = data.per_dni || "";
-        per_nombres_Alumno.value = data.per_nombres || "";
-        per_apellidos_Alumno.value = data.per_apellidos || "";
-        per_sexo_Alumno.value = data.per_sexo || "";
-        per_fecha_nacimiento_Alumno.value = data.per_fecha_nacimiento || "";
-        per_estado_civil_Alumno.value = data.per_estado_civil || "";
-        per_pais_Alumno.value = data.per_pais || "";
-        per_direccion_Alumno.value = data.per_direccion || "";
-        per_celular_Alumno.value = data.per_celular || "";
-        per_email_Alumno.value = data.per_email || "";
-        per_departamento_Alumno.value = data.per_departamento || "";
-        preselectLocation(data, "Alumno");
-       }else{
-        let apellidos = data.apellidoPaterno + " " + data.apellidoMaterno;
+        if (data.per_id != null) {
+            per_id_Alumno.value = data.per_id || "";
+            per_dni_Alumno.value = data.per_dni || "";
+            per_nombres_Alumno.value = data.per_nombres || "";
+            per_apellidos_Alumno.value = data.per_apellidos || "";
+            per_sexo_Alumno.value = data.per_sexo || "";
+            per_fecha_nacimiento_Alumno.value = data.per_fecha_nacimiento || "";
+            per_estado_civil_Alumno.value = data.per_estado_civil || "";
+            per_pais_Alumno.value = data.per_pais || "";
+            per_direccion_Alumno.value = data.per_direccion || "";
+            per_celular_Alumno.value = data.per_celular || "";
+            per_email_Alumno.value = data.per_email || "";
+            per_departamento_Alumno.value = data.per_departamento || "";
+            preselectLocation(data, "Alumno");
+        } else {
+            let apellidos = data.apellidoPaterno + " " + data.apellidoMaterno;
 
-        per_dni_Alumno.value = data.dni || "";
-        per_nombres_Alumno.value = data.nombres || "";
-        per_apellidos_Alumno.value = apellidos || "";
-        per_pais_Alumno.value="Perú";
-        return alert("El Alumno es nuevo por favor complete los datos");
-       }
+            per_dni_Alumno.value = data.dni || "";
+            per_nombres_Alumno.value = data.nombres || "";
+            per_apellidos_Alumno.value = apellidos || "";
+            per_pais_Alumno.value = "Perú";
+            per_fecha_nacimiento_Alumno.readonly = false;
+            return alert("El Alumno es nuevo por favor complete los datos");
+        }
         return;
     }
     return alert("No se encontro el DNI");
@@ -226,30 +230,30 @@ function inputAlumno(data) {
 function inputApoderado(data) {
     console.log(data);
     if (data != null) {
-        if(data.per_id != null){
-        per_id_Apoderado.value = data.per_id || "";
-        per_dni_Apoderado.value = data.per_dni || "";
-        per_nombres_Apoderado.value = data.per_nombres || "";
-        per_apellidos_Apoderado.value = data.per_apellidos || "";
-        per_sexo_Apoderado.value = data.per_sexo || "";
-        per_fecha_nacimiento_Apoderado.value = data.per_fecha_nacimiento || "";
-        per_estado_civil_Apoderado.value = data.per_estado_civil || "";
-        per_pais_Apoderado.value = data.per_pais || "";
-        per_direccion_Apoderado.value = data.per_direccion || "";
-        per_celular_Apoderado.value = data.per_celular || "";
-        per_email_Apoderado.value = data.per_email || "";
-        per_parentesco_Apoderado.value = data.per_parentesco || "";
-        per_vive_con_estudiante_Apoderado.value = data.per_vive_con_estudiante || "";
-        per_departamento_Apoderado.value = data.per_departamento || "";
-        preselectLocation(data, "Apoderado");
-        return;
-        }else{
+        if (data.per_id != null) {
+            per_id_Apoderado.value = data.per_id || "";
+            per_dni_Apoderado.value = data.per_dni || "";
+            per_nombres_Apoderado.value = data.per_nombres || "";
+            per_apellidos_Apoderado.value = data.per_apellidos || "";
+            per_sexo_Apoderado.value = data.per_sexo || "";
+            per_fecha_nacimiento_Apoderado.value = data.per_fecha_nacimiento || "";
+            per_estado_civil_Apoderado.value = data.per_estado_civil || "";
+            per_pais_Apoderado.value = data.per_pais || "";
+            per_direccion_Apoderado.value = data.per_direccion || "";
+            per_celular_Apoderado.value = data.per_celular || "";
+            per_email_Apoderado.value = data.per_email || "";
+            per_parentesco_Apoderado.value = data.per_parentesco || "";
+            per_vive_con_estudiante_Apoderado.value = data.per_vive_con_estudiante || "";
+            per_departamento_Apoderado.value = data.per_departamento || "";
+            preselectLocation(data, "Apoderado");
+            return;
+        } else {
             let apellidos = data.apellidoPaterno + " " + data.apellidoMaterno;
 
             per_dni_Apoderado.value = data.dni || "";
             per_nombres_Apoderado.value = data.nombres || "";
             per_apellidos_Apoderado.value = apellidos || "";
-            per_pais_Apoderado.value="Perú";
+            per_pais_Apoderado.value = "Perú";
 
             return alert("El Apoderado es nuevo por favor complete los datos");
         }
@@ -265,12 +269,12 @@ function preselectLocation(data, group) {
     // Cargar provincias y seleccionar la correspondiente
     loadProvincias(data.per_departamento, provincia).then(() => {
         provincia.value = data.per_provincia;
-        provincia.disabled = true;
+        provincia.readonly = true;
 
         // Cargar distritos y seleccionar el correspondiente
         loadDistritos(data.per_provincia, distrito).then(() => {
             distrito.value = data.per_distrito;
-            distrito.disabled = true;
+            distrito.readonly = true;
         });
     });
 }

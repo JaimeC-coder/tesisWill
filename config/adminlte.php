@@ -352,7 +352,7 @@ return [
             'route' => 'ambiente.inicio',
         ],
         [
-            'text' => 'Perosnal Académico',
+            'text' => 'Personal Académico',
             'icon'=>'fas fa-chalkboard-teacher',
             'route' => 'personal.inicio',
         ],

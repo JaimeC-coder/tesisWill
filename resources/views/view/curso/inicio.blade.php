@@ -53,11 +53,11 @@
                                             data-target="#exampleModal" data-whatever="{{ $info->capacidad }}" data-title="{{ $info->cur_nombre}}">
                                             <i class="fa fa-eye"></i></button>
 
-                                        <a href="{{ route('curso.edit', $value) }}" class="text-warning btn btn-none">
+                                        <a href="{{ route('curso.edit', $info) }}" class="text-warning btn btn-none">
                                             <i class="fas fa-edit"></i>
 
                                         </a>
-                                        <form action="{{ route('curso.destroy', $value) }}" method="POST"
+                                        <form action="{{ route('curso.destroy', $info) }}" method="POST"
                                             style="display: inline-block">
                                             @csrf
                                             @method('DELETE')

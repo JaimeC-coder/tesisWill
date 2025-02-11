@@ -72,8 +72,9 @@ async function searchInformation(dniValue) {
 
         const data = await response.json();
 
+
         // Validación de la respuesta
-        return data && data.per_dni ? data : null;
+        return data;
     } catch (error) {
         console.error(error);
         return null;
@@ -190,8 +191,9 @@ function blockInput(status, group) {
 }
 
 function inputAlumno(data) {
+
     if (data != null) {
-        console.log(data);
+       if(data.per_id != null){
         per_id_Alumno.value = data.per_id || "";
         per_dni_Alumno.value = data.per_dni || "";
         per_nombres_Alumno.value = data.per_nombres || "";
@@ -205,6 +207,15 @@ function inputAlumno(data) {
         per_email_Alumno.value = data.per_email || "";
         per_departamento_Alumno.value = data.per_departamento || "";
         preselectLocation(data, "Alumno");
+       }else{
+        let apellidos = data.apellidoPaterno + " " + data.apellidoMaterno;
+
+        per_dni_Alumno.value = data.dni || "";
+        per_nombres_Alumno.value = data.nombres || "";
+        per_apellidos_Alumno.value = apellidos || "";
+        per_pais_Alumno.value="Perú";
+        return alert("El Alumno es nuevo por favor complete los datos");
+       }
         return;
     }
     return alert("No se encontro el DNI");
@@ -213,7 +224,9 @@ function inputAlumno(data) {
 }
 
 function inputApoderado(data) {
+    console.log(data);
     if (data != null) {
+        if(data.per_id != null){
         per_id_Apoderado.value = data.per_id || "";
         per_dni_Apoderado.value = data.per_dni || "";
         per_nombres_Apoderado.value = data.per_nombres || "";
@@ -230,6 +243,16 @@ function inputApoderado(data) {
         per_departamento_Apoderado.value = data.per_departamento || "";
         preselectLocation(data, "Apoderado");
         return;
+        }else{
+            let apellidos = data.apellidoPaterno + " " + data.apellidoMaterno;
+
+            per_dni_Apoderado.value = data.dni || "";
+            per_nombres_Apoderado.value = data.nombres || "";
+            per_apellidos_Apoderado.value = apellidos || "";
+            per_pais_Apoderado.value="Perú";
+
+            return alert("El Apoderado es nuevo por favor complete los datos");
+        }
     }
     return alert("No se encontro el DNI");
 }

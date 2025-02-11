@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 
 Route::get('/', function () {
-    return redirect()->to('landing');
+     
     return view('welcome');
 });
 Route::get('/landing', function () {

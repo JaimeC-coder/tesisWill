@@ -40,7 +40,15 @@ function searchInformation(){
     .then(response => response.json())
     .then(data => {
         console.log(data);
-        if(data && data.per_dni){
+        if(data && data.success){
+            let apellidocompleto =data.apellidoMaterno+" "+data.apellidoPaterno;
+            nombre.value =data.nombres || "";
+            apellido.value=apellidocompleto || "";
+            dni.value =data.dni || "";
+            pais.value="Perú";
+            alert("Datos encontrados");
+            return;
+        }else if(data && data.per_dni){
             blockInput(true);
             per_id.value=data.per_id;
             nombre.value =data.per_nombres || "";
@@ -64,8 +72,11 @@ function searchInformation(){
                     distrito.disabled = true;
                 });
             });
+            return;
         }else{
-            alert("No se encontraron datos");
+            alert("No se encontraron datos con el DNI ingresado");
+            blockInput(false);
+            return;
         }
     })
     .catch((error) => {

@@ -74,6 +74,7 @@ async function searchInformation(dniValue) {
 
 
         // Validación de la respuesta
+        console.log(data);
         return data;
     } catch (error) {
         console.error(error);
@@ -132,13 +133,13 @@ function aux(departamento1, provincia1, distrito1, group) {
 
     loadProvincias(departamento1.value, provincia).then(() => {
         provincia.value = provincia1.value;
-        provincia.readonly = true;
+        provincia.disabled = true;
 
         console.log(provincia);
         loadDistritos(provincia1.value, distrito).then(() => {
             console.log(distrito)
             distrito.value = distrito1.value;
-            distrito.readonly = true;
+            distrito.disabled = true;
         });
     });
 

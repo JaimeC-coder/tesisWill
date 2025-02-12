@@ -96,14 +96,14 @@
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Provincia </label>
-                            <select  class="form-control show-tick" required id="per_provincia_Alumno" name="per_provincia_Alumno" readOnly >
+                            <select  class="form-control show-tick" required id="per_provincia_Alumno" name="per_provincia_Alumno" disabled >
                                 <option value="0" selected readOnly >-- Selecciona --</option>
                             </select>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Distrito </label>
-                            <select  class="form-control show-tick" required id="per_distrito_Alumno" name="per_distrito_Alumno" readOnly >
-                                <option value="0" selected readOnly >-- Selecciona --</option>
+                            <select  class="form-control show-tick" required id="per_distrito_Alumno" name="per_distrito_Alumno" disabled >
+                                <option value="0" selected disabled >-- Selecciona --</option>
 
                             </select>
                         </div>

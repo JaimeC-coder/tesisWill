@@ -10,7 +10,7 @@ class Curso extends Model
 
     use SoftDeletes;
 
- 
+
 
     protected $table = 'cursos';
     protected $primaryKey = 'cur_id';

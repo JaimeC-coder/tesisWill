@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 
 Route::get('/', function () {
-     
+
     return view('welcome');
 });
 Route::get('/landing', function () {
@@ -40,6 +40,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/curso', App\Http\Controllers\CursoController::class);
 
     Route::get('/gradoSeccion/inicio', [App\Http\Controllers\GradoController::class, 'inicio'])->name('gradoSeccion.inicio');
+    Route::get('/gradoSeccion/seccionAdd2/{seccionAdd2}', [App\Http\Controllers\GradoController::class, 'secciongrado'])->name('gradoSeccion.secciongrado');
+    Route::post('/gradoSeccion/seccionAdd2/{seccionAdd2}', [App\Http\Controllers\GradoController::class, 'secciongradoRegister'])->name('gradoSeccion.secciongradoregister');
     Route::resource('/gradoSeccion', App\Http\Controllers\GradoController::class);
 
     Route::get('/alumno/inicio', [App\Http\Controllers\AlumnoController::class, 'inicio'])->name('alumno.inicio');

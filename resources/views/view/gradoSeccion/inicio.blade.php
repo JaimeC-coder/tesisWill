@@ -5,7 +5,7 @@
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Grado y Sección')
 @section('content_buttom')
-    <a href="{{ route('anio.create') }}" class="btn btn-primary">Nueva Curso (falta)</a>
+    <a href="{{ route('gradoSeccion.create') }}" class="btn btn-primary">Nueva Grado </a>
 
 @endsection
 
@@ -59,7 +59,7 @@
                                     </td>
                                     <td>
 
-                                        <a href="{{ route('gradoSeccion.edit', $info) }}" class="text-primary btn btn-none">
+                                        <a href="{{ route('gradoSeccion.secciongrado', $info) }}" class="text-primary btn btn-none">
                                             <i class="fas fa-plus"></i>
                                         </a>
                                         <a href="{{ route('gradoSeccion.edit', $info) }}" class="text-warning btn btn-none">

@@ -71,15 +71,14 @@
         </div>
     </div>
     <pre>
-        {{-- {{ print_r($Gsas) }} --}}
-        {{-- {{ print_r($capacidad) }} --}}
+
     </pre>
     <div class="col-lg-12 col-md-12 col-sm-12">
         <div class="card">
             <div class="card-body">
                 <div class="row p-2">
                     <div class="table-responsive">
-                        <table id="myTable" class="display table  table-bordered" style="width:100%; text-align: center;">
+                        <table  class="display table  table-bordered" style="width:100%; text-align: center;">
                             @if ($tipoPeriodo != null)
 
                                 <thead class="thead-dark">
@@ -165,28 +164,6 @@
 
 
 @section('js')
-    <script>
-        $(document).ready(function() {
-            $('#myTable').DataTable({
-                dom: 'Bfrtip',
-                buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
-                ],
-                language: {
-                    "lengthMenu": "Mostrar _MENU_ registros por página",
-                    "zeroRecords": "Nada encontrado - lo siento",
-                    "info": "Mostrando la página _PAGE_ de _PAGES_",
-                    "infoEmpty": "No hay registros disponibles",
-                    "search": "Buscar:",
-                    "paginate": {
-                        "first": "Primero",
-                        "last": "Último",
-                        "next": "Siguiente",
-                        "previous": "Anterior"
-                    }
-                }
-            });
-        });
-    </script>
+   
     <script src="{{ asset('js/notas/form.js') }}"></script>
 @endsection

@@ -33,33 +33,37 @@
                         <tbody>
                             @foreach ($grados as $value => $info)
                                 <tr>
-                                    <th scope="row">{{ $value+1 }}</th>
+                                    <th scope="row">{{ $value + 1 }}</th>
                                     <td>{{ $info->nivel->niv_descripcion }}</td>
                                     <td>{{ $info->gra_descripcion }}</td>
                                     <td>
-
-                                        <a href="{{ route('ambiente.edit', $info) }}" class="text-secondary btn btn-none">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
+                                        <button type="button" class="text-secondary btn btn-none" data-toggle="modal"
+                                            data-target="#dynamicModal" data-whatever='@json($info->seccion)'
+                                            data-title="Secciones de {{ $info->gra_descripcion }}"
+                                            data-key="sec_descripcion">
+                                            <i class="fa fa-eye"></i></button>
                                         {{ $info->seccion->where('is_deleted', '!=', 1)->count() }}
                                     </td>
                                     <td>
-                                        <a href="{{ route('ambiente.edit', $info) }}" class="text-secondary btn btn-none">
-                                            <i class="fas fa-list"></i>
-                                        </a>
+                                        <button type="button" class="text-secondary btn btn-none" data-toggle="modal"
+                                            data-target="#dynamicModal" data-whatever='@json($info->curso)'
+                                            data-title="Cursos asignados a {{ $info->gra_descripcion }}"
+                                            data-key="cur_nombre">
+                                            <i class="fa fa-eye"></i></button>
                                         {{ $info->curso->where('is_deleted', '!=', 1)->count() }}
                                     </td>
 
                                     <td>
                                         @if ($info->gra_estado == 1)
-                                        <span class="badge badge-success">Activo</span>
+                                            <span class="badge badge-success">Activo</span>
                                         @else
                                             <span class="badge badge-danger">Inactivo</span>
                                         @endif
                                     </td>
                                     <td>
 
-                                        <a href="{{ route('gradoSeccion.secciongrado', $info) }}" class="text-primary btn btn-none">
+                                        <a href="{{ route('gradoSeccion.secciongrado', $info) }}"
+                                            class="text-primary btn btn-none">
                                             <i class="fas fa-plus"></i>
                                         </a>
                                         <a href="{{ route('gradoSeccion.edit', $info) }}" class="text-warning btn btn-none">
@@ -76,6 +80,35 @@
             </div>
         </div>
     </div>
+
+
+
+
+    <!-- Modal Reutilizable -->
+    <div class="modal fade bd-example-modal-lg" id="dynamicModal" tabindex="-1" role="dialog"
+        aria-labelledby="dynamicModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dynamicModalLabel">Título dinámico</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row clearfix mt-2" id="modalDataUse">
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 
 @endsection
 
@@ -101,6 +134,47 @@
                         "previous": "Anterior"
                     }
                 }
+            });
+        });
+    </script>
+
+
+    {{-- MODAL --}}
+    <script>
+        $(document).ready(function() {
+            $('#dynamicModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget);
+                var recipient = button.data('whatever');
+                var title = button.data('title');
+                var dataKey = button.data('key'); // Nuevo atributo para definir la clave de los datos
+
+                var modalDataUse = document.getElementById('modalDataUse');
+                console.log(recipient);
+                modalDataUse.innerHTML = '';
+
+                recipient.forEach((element, index) => {
+                    let label = dataKey === 'sec_descripcion' ? 'Seccion' : 'Curso de ';
+                    let label2 = dataKey === 'sec_descripcion' ? 'S' : 'C';
+                    modalDataUse.innerHTML += `
+
+                        <div class="  col-md-4 ">
+                            <ul class="list-group" >
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                   <i class="fas fa-book"></i>
+                                    ${label}  ${element[dataKey]}
+                                </li>
+                            </ul>
+                        </div>
+
+
+
+
+
+            `;
+                });
+
+                var modal = $(this);
+                modal.find('.modal-title').text(title);
             });
         });
     </script>

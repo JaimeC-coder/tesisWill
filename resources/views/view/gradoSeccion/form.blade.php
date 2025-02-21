@@ -36,7 +36,8 @@
                         <button type="submit" class="btn btn-primary">
                             {{  $grado->gra_descripcion == ' ' ? 'Actualizar' : 'Guardar' }}
                         </button>
-                        <button type="button" class="btn btn-outline-secondary">Cancelar</button>
+                        <a href="{{ route('gradoSeccion.inicio')}}" class="btn btn-outline-secondary">Cancelar</a>
+
                     </div>
                 </div>
             </div>

@@ -94,14 +94,15 @@
                         <button type="submit" class="btn btn-primary">
                             {{ $curso->capacidad == [] ? 'Actualizar' : 'Guardar' }}
                         </button>
-                        <button type="button" class="btn btn-outline-secondary">Cancelar</button>
+                        <a href="{{ route('curso.inicio')}}" class="btn btn-outline-secondary">Cancelar</a>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
- 
+
 
 @section('js')
     <script src="{{ asset('js/curso/curso.js') }}"></script>

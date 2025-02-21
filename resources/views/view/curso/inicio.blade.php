@@ -50,7 +50,8 @@
                                     </td>
                                     <td>
                                         <button type="button" class="text-secondary btn btn-none" data-toggle="modal"
-                                            data-target="#exampleModal" data-whatever="{{ $info->capacidad }}" data-title="{{ $info->cur_nombre}}">
+                                            data-target="#exampleModal" data-whatever="{{ $info->capacidad }}"
+                                            data-title="{{ $info->cur_nombre }}">
                                             <i class="fa fa-eye"></i></button>
 
                                         <a href="{{ route('curso.edit', $info) }}" class="text-warning btn btn-none">
@@ -79,8 +80,8 @@
 
 
     <!-- Modal -->
-    <div class="modal fade bd-example-modal-lg" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
+    <div class="modal fade bd-example-modal-lg" id="exampleModal" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -139,7 +140,7 @@
             var modalDataUse = document.getElementById('modalDataUse');
 
             modalDataUse.innerHTML = '';
-            recipient.forEach((element,index) => {
+            recipient.forEach((element, index) => {
                 modalDataUse.innerHTML += `
                 <div class="col-lg-4 col-md-6">
                     <div class="card"

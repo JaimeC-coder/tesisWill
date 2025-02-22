@@ -87,7 +87,7 @@
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Departamento </label>
-                            <select  class="form-control show-tick" required id="per_departamento_Alumno" name="per_departamento_Alumno">
+                            <select  class="form-control show-tick" required id="per_departamento_Alumno" name="per_departamento_Alumno" >
                                 <option value="0" selected disabled>-- Selecciona --</option>
                                 @foreach ($departamentos as $departamento)
                                 <option value="{{ $departamento->idDepa }}"  @if (isset($alumno->persona) && $alumno->persona->per_departamento == $departamento->idDepa) selected @endif>{{ $departamento->departamento }}</option>
@@ -96,13 +96,13 @@
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Provincia </label>
-                            <select  class="form-control show-tick" required id="per_provincia_Alumno" name="per_provincia_Alumno" disabled >
+                            <select  class="form-control show-tick" required id="per_provincia_Alumno" name="per_provincia_Alumno" readOnly >
                                 <option value="0" selected readOnly >-- Selecciona --</option>
                             </select>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-12">
                             <label>Distrito </label>
-                            <select  class="form-control show-tick" required id="per_distrito_Alumno" name="per_distrito_Alumno" disabled >
+                            <select  class="form-control show-tick" required id="per_distrito_Alumno" name="per_distrito_Alumno" readOnly >
                                 <option value="0" selected disabled >-- Selecciona --</option>
 
                             </select>
@@ -283,7 +283,6 @@
         </div>
 
 </div>
-
 
 @section('js')
     <script src="{{ asset('js/alumno/infromacionAlumnoApoderado.js') }}"></script>

@@ -133,13 +133,13 @@ function aux(departamento1, provincia1, distrito1, group) {
 
     loadProvincias(departamento1.value, provincia).then(() => {
         provincia.value = provincia1.value;
-        provincia.disabled = true;
+        provincia.readOnly = true;
 
         console.log(provincia);
         loadDistritos(provincia1.value, distrito).then(() => {
             console.log(distrito)
             distrito.value = distrito1.value;
-            distrito.disabled = true;
+            distrito.readOnly = true;
         });
     });
 
@@ -176,23 +176,32 @@ function clearInputs(group) {
 
 
 function blockInput(status, group) {
-    console.log(status);
     const inputs = document.querySelectorAll(`[id^="per_"][id$="_${group}"]`);
     inputs.forEach(input => {
         if (!arregloData.includes(input)) {
-            //input.addClassName = "disabled";
-            input.readOnly  = status;
+            if (input.tagName.toLowerCase() === "select") {
+                // Para los selects
+                if(status) {
+                    input.setAttribute('readonly', '');  // Agregamos readonly
+                    input.classList.add('form-select-readonly'); // Clase custom
+                } else {
+                    input.removeAttribute('readonly');
+                    input.classList.remove('form-select-readonly');
+                }
+            } else {
+                input.readOnly = status;
+            }
         }
-
     });
-    // Los elementos en arregloData se aseguran de no ser afectados
+
+    // Asegurarse que los campos específicos permanezcan habilitados
     arregloData.forEach(input => {
-        input.readonly = false;
+        input.readOnly = false;
     });
-    per_dni_Apoderado.readonly = false;
-    per_dni_Alumno.readonly = false;
-
+    per_dni_Apoderado.readOnly = false;
+    per_dni_Alumno.readOnly = false;
 }
+
 
 function inputAlumno(data) {
 
@@ -267,15 +276,17 @@ function preselectLocation(data, group) {
     const provincia = document.getElementById(`per_provincia_${group}`);
     const distrito = document.getElementById(`per_distrito_${group}`);
 
-    // Cargar provincias y seleccionar la correspondiente
     loadProvincias(data.per_departamento, provincia).then(() => {
         provincia.value = data.per_provincia;
-        provincia.readonly = true;
+        provincia.setAttribute('readonly', '');
+        provincia.classList.add('form-select-readonly');
 
-        // Cargar distritos y seleccionar el correspondiente
         loadDistritos(data.per_provincia, distrito).then(() => {
             distrito.value = data.per_distrito;
-            distrito.readonly = true;
+            distrito.setAttribute('readonly', '');
+            distrito.classList.add('form-select-readonly');
         });
     });
 }
+
+

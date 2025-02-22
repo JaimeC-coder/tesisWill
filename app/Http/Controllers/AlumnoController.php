@@ -196,9 +196,50 @@ class AlumnoController extends Controller
      */
     public function update(Request $request, Alumno $alumno)
     {
-        //
+        $newRequest = $request->all();
+      
+        DB::transaction(function () use ($newRequest, $alumno) {
+            $alumno->persona->update([
+                'per_dni' => $newRequest['per_dni_Alumno'],
+                'per_nombres' => $newRequest['per_nombres_Alumno'],
+                'per_apellidos' => $newRequest['per_apellidos_Alumno'],
+                'per_email' => $newRequest['per_email_Alumno'],
+                'per_sexo' => $newRequest['per_sexo_Alumno'],
+                'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Alumno'],
+                'per_estado_civil' => $newRequest['per_estado_civil_Alumno'],
+                'per_celular' => $newRequest['per_celular_Alumno'],
+                'per_pais' => $newRequest['per_pais_Alumno'],
+                'per_departamento' => $newRequest['per_departamento_Alumno'],
+                'per_provincia' => $newRequest['per_provincia_Alumno'],
+                'per_distrito' => $newRequest['per_distrito_Alumno'],
+                'per_direccion' => $newRequest['per_direccion_Alumno'],
+            ]);
 
-        return $request;
+            $alumno->apoderado->persona->update([
+                'per_dni' => $newRequest['per_dni_Apoderado'],
+                'per_nombres' => $newRequest['per_nombres_Apoderado'],
+                'per_apellidos' => $newRequest['per_apellidos_Apoderado'],
+                'per_email' => $newRequest['per_email_Apoderado'],
+                'per_sexo' => $newRequest['per_sexo_Apoderado'],
+                'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Apoderado'],
+                'per_estado_civil' => $newRequest['per_estado_civil_Apoderado'],
+                'per_celular' => $newRequest['per_celular_Apoderado'],
+                'per_pais' => $newRequest['per_pais_Apoderado'],
+                'per_departamento' => $newRequest['per_departamento_Apoderado'],
+                'per_provincia' => $newRequest['per_provincia_Apoderado'],
+                'per_distrito' => $newRequest['per_distrito_Apoderado'],
+                'per_direccion' => $newRequest['per_direccion_Apoderado'],
+            ]);
+
+            $alumno->apoderado->update([
+                'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
+                'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
+            ]);
+
+        });
+
+        return redirect()->route('alumno.inicio')->with('success', 'Alumno actualizado correctamente');
+
     }
 
     /**

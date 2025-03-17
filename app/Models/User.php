@@ -68,4 +68,19 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Rol::class, 'rol_id', 'rol_id');
     }
+
+    public function adminlte_image()
+    {
+        return 'https://picsum.photos/300/300';
+    }
+
+    public function adminlte_desc()
+    {
+        return $this->roles->pluck('name')->implode(', ');
+    }
+
+    public function adminlte_profile_url()
+    {
+        return 'profile/username';
+    }
 }

@@ -2,10 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Persona;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class PersonasSeeder extends Seeder
 {
@@ -214,12 +217,12 @@ class PersonasSeeder extends Seeder
         ];
 
         foreach ($personas as $persona) {
-            DB::table('personas')->insert([
+              $personafor = Persona::create([
                 'per_id' => $persona[0],
                 'per_dni' => $persona[1],
                 'per_nombres' => $persona[2],
                 'per_apellidos' => $persona[3],
-                'per_nombre_completo' => $persona[4],
+                'per_nombre_completo' => $persona[2] . ' ' . $persona[3],
                 'per_email' => $persona[5],
                 'per_sexo' => $persona[6],
                 'per_fecha_nacimiento' => $persona[7],
@@ -235,6 +238,37 @@ class PersonasSeeder extends Seeder
                 'updated_at' => now(),
                 'deleted_at' => NULL
             ]);
+
+            if ($persona[5] != NULL) {
+                $user = User::create([
+                    'name' => $persona[2] . ' ' . $persona[3],
+                    'per_id' => $persona[0],
+                    'email' => $persona[5],
+                    'estado' => $persona[15],
+                    'password' => Hash::make('12345678'),
+                    'rol_id' => 3,
+                    'is_deleted' => $persona[15],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'deleted_at' => NULL
+                ]);
+                $user->assignRole('Alumno');
+            }
+            else{
+                $user = User::create([
+                    'name' => $persona[2] . ' ' . $persona[3],
+                    'per_id' => $persona[0],
+                    'email' => $persona[1] .'_falta_'. '@gmail.com',
+                    'estado' => $persona[15],
+                    'password' => Hash::make('12345678'),
+                    'rol_id' => 3,
+                    'is_deleted' => $persona[15],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'deleted_at' => NULL
+                ]);
+                $user->assignRole('Alumno');
+            }
         }
     }
 }

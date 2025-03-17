@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/nota/inicio', [App\Http\Controllers\NotaController::class, 'inicio'])->name('nota.inicio');
    // Route::get('/reporte/general/inicio', [App\Http\Controllers\ReportController::class, 'inicio'])->name('reporte.general');
 
-
+   Route::get('/usuario/inicio', [App\Http\Controllers\UserController::class, 'inicio'])->name('usuarios.inicio');
+   Route::resource('/usuario', App\Http\Controllers\UserController::class);
 
 });

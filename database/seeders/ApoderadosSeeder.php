@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Apoderado;
+use Carbon\Factory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -110,7 +112,8 @@ class ApoderadosSeeder extends Seeder
         ];
 
         foreach ($apoderados as $apoderado) {
-            DB::table('apoderados')->insert([
+            $apoderadofor = Apoderado::create([
+
                 'apo_id' => $apoderado[0],
                 'per_id' => $apoderado[1],
                 'apo_parentesco' => $apoderado[2],
@@ -123,3 +126,4 @@ class ApoderadosSeeder extends Seeder
         }
     }
 }
+

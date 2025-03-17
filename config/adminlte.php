@@ -134,11 +134,11 @@ return [
     */
 
     'usermenu_enabled' => true,
-    'usermenu_header' => false,
-    'usermenu_header_class' => 'bg-primary',
+    'usermenu_header' => true,
+    'usermenu_header_class' => 'bg-dark',
     'usermenu_image' => false,
-    'usermenu_desc' => false,
-    'usermenu_profile_url' => false,
+    'usermenu_desc' => true,
+    'usermenu_profile_url' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -306,6 +306,7 @@ return [
             'route' => 'home',
             'icon' => 'fas fa-tachometer-alt',
             'icon_color' => 'yellow',
+            'can'  => 'panel.home',
 
         ],
         [
@@ -313,18 +314,21 @@ return [
             'route' => 'matricula.inicio',
             'icon' => 'fas fa-book',
             'icon_color' => 'red',
+            'can'  => 'panel.matriculas',
         ],
         [
             'text' => 'Horario',
             'route' => 'horario.inicio',
             'icon' => 'fas fa-bullhorn',
             'icon_color' => 'orange',
+            'can'  => 'panel.horario',
         ],
         [
             'text' => 'Notas',
             'route' => 'nota.inicio',
             'icon_color' => 'black',
             'icon' => 'fas fa-clipboard',
+            'can'  => 'panel.notas',
         ],
         ['header' => 'Reportes'],
         [
@@ -332,17 +336,21 @@ return [
             'route' => 'reporte.general',
             'icon_color' => 'pink',
             'icon' => 'fas fa-folder-open',
+            'can'  => 'reportes.generales',
         ],
         [
             'text' => 'Gestión',
             'url' => 'admin/settings',
             'icon_color' => 'blue',
             'icon' => 'fas fa-project-diagram',
+            'can'  => 'reportes.gestion',
         ],
         [
             'text' => 'Por Alumno',
             'url' => 'admin/settings',
             'icon' => 'fas fa-sitemap',
+            'icon_color' => 'green',
+            'can'  => 'reportes.alumno',
         ],
         ['header' => 'Admin'],
         ['header' => 'Actividades Adminitrativas'],
@@ -350,67 +358,79 @@ return [
             'text' => 'Ambientes',
             'icon'=>'fas fa-table',
             'route' => 'ambiente.inicio',
+            'can'  => 'actividades.ambientes',
         ],
         [
             'text' => 'Personal Académico',
             'icon'=>'fas fa-chalkboard-teacher',
             'route' => 'personal.inicio',
+            'can'  => 'actividades.personal',
         ],
         [
             'text' => 'Año Escolar',
             'icon'=>'fas fa-calendar-alt',
             'route' => 'anio.inicio',
+            'can'  => 'actividades.anio',
         ],
         [
             'text' => 'Periodo Académico',
             'icon_color' => 'green',
             'route' => 'periodo.inicio',
             'icon'=>'fas fa-calendar-check',
+            'can'  => 'actividades.periodo',
         ],
         [
             'text' => 'Cursos',
             'icon_color' => 'red',
             'icon'=>'fas fa-book',
             'route' => 'curso.inicio',
+            'can'  => 'actividades.cursos',
         ],
         [
             'text' => 'Grados y Secciones',
             'icon'=>'fas fa-stream',
             'route' => 'gradoSeccion.inicio',
+            'can'  => 'actividades.grados',
         ],
         [
             'text' => 'Asignar de Cursos',
             'icon'=>'fas fa-copy',
             'route' => 'asignarCurso.inicio',
+            'can'  => 'actividades.asignarCurso',
         ],
         [
             'text' => 'Asignar Grados',
             'icon'=>'fas fa-shapes',
             'route' => 'asignarGrado.inicio',
+            'can'  => 'actividades.asignarGrado',
         ],
         [
             'text' => 'Alumnos',
             'icon'=>'fas fa-users',
             'icon_color' => 'green',
             'route' => 'alumno.inicio',
+            'can'  => 'actividades.alumnos',
         ],
         ['header' => 'SEGURIDAD'],
         [
             'text' => 'Roles',
             'route' => 'roles.inicio',
-            'icon'=>'fas fa-briefcase'
+            'icon'=>'fas fa-briefcase',
+            'can'  => 'actividades.roles',
         ],
         [
             'text' => 'Usuarios',
             'icon'=>'fas fa-user-circle',
             'icon_color' => 'pink',
-            'url' => '#',
+            'route' => 'usuarios.inicio',
+            'can'  => 'actividades.usuarios',
         ],
         [
             'text' => 'Institucion Educativa',
             'icon'=>'fas fa-cogs',
             'icon_color' => 'cyan',
             'route' => 'institucion.inicio',
+            'can'  => 'actividades.institucion',
         ],
     ],
 

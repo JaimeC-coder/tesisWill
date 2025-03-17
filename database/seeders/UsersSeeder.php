@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Persona;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UsersSeeder extends Seeder
 {
@@ -13,29 +16,76 @@ class UsersSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = [
-           [1, 1, 1, 'Willian Samuel Miranda Huaman', 'willmirandahuaman20@gmail.com', NULL, '$2y$10$tBX8Bw470Z.6k.b8tah3VeVmXOAahgsUjtiQ9k0FVk8oa6ZT4/6zi', '1', '0', NULL, '2023-09-17 05:00:00', '2022-11-17 05:00:00'],
-           [2, 198, 1, 'STHEPHANIE CABRERA HONORIO', 'scabrerah@unitru.edu.pe', NULL, '$2y$10$Zf33.IktdVZEXB0PBiXcCezLZtHdAuyu7kvsMyC2n0/UR0Dlz3OIi', '1', '0', NULL, '2023-10-24 00:30:26', '2023-10-24 00:30:26'],
-           [3, 158, 7, 'Apoderado', 'william_15mir@hotmail.com', NULL, '$2y$10$svDClz1upUAq9ysfYnvjoeK9w7heWViN5vzkjWZlU12EhtD44xZi6', '1', '0', NULL, '2023-10-29 09:22:47', '2023-10-29 09:22:47'],
+        $personas = [
+            [206, '12345670', 'Usuario ', 'Pruebas 1', NULL, 'usuarioprueba@gmail.com', 'F', '1984-12-18', 'C', NULL, 'PERÚ', 6, 194, 1844, NULL, '0'],
+            [207, '12345600', 'Usuario2', 'MERINO CARPIO', NULL, 'usuariopruebaadmin@unitru.edu.pe', 'M', '1999-10-10', 'S', NULL, 'PERÚ', 13, 118, 1174, NULL, '0'],
+            [208, '12345000', 'Usuario3', 'CASTILLO SILVA', NULL, 'william_15mir@hotmail.com', 'F', '1980-10-10', 'S', NULL, 'PERÚ', 13, 118, 1174, NULL, '0'],
         ];
 
-        foreach ($users as $user) {
-            DB::table('users')->insert([
-                'id' => $user[0],
-                'per_id' => $user[1],
-                'rol_id' => $user[2],
-                'name' => $user[3],
-                'email' => $user[4],
-                'email_verified_at' =>NULL,
-                'password' => $user[6],
-                'estado' => $user[7],
-                'is_deleted' => $user[8],
-                'remember_token' => NULL,
-                'created_at' => $user[10],
-                'updated_at' => $user[11],
+
+
+        foreach ($personas as $persona) {
+            $personafor = Persona::create([
+                'per_id' => $persona[0],
+                'per_dni' => $persona[1],
+                'per_nombres' => $persona[2],
+                'per_apellidos' => $persona[3],
+                'per_nombre_completo' => $persona[2] . ' ' . $persona[3],
+                'per_email' => $persona[5],
+                'per_sexo' => $persona[6],
+                'per_fecha_nacimiento' => $persona[7],
+                'per_estado_civil' => $persona[8],
+                'per_celular' => $persona[9],
+                'per_pais' => $persona[10],
+                'per_departamento' => $persona[11],
+                'per_provincia' => $persona[12],
+                'per_distrito' => $persona[13],
+                'per_direccion' => $persona[14],
+                'is_deleted' => $persona[15],
+                'created_at' => now(),
+                'updated_at' => now(),
                 'deleted_at' => NULL
             ]);
-        }
 
+            if ($persona[5] != NULL) {
+                $user = User::create([
+                    'name' => $persona[2] . ' ' . $persona[3],
+                    'per_id' => $persona[0],
+                    'email' => $persona[5],
+                    'estado' => $persona[15],
+                    'password' => Hash::make('12345678'),
+                    'rol_id' => 3,
+                    'is_deleted' => $persona[15],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'deleted_at' => NULL
+                ]);
+                $user->assignRole('Administrador');
+            } else {
+                $user = User::create([
+                    'name' => $persona[2] . ' ' . $persona[3],
+                    'per_id' => $persona[0],
+                    'email' => $persona[1] . '_falta_' . '@gmail.com',
+                    'estado' => $persona[15],
+                    'password' => Hash::make('12345678'),
+                    'rol_id' => 3,
+                    'is_deleted' => $persona[15],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'deleted_at' => NULL
+                ]);
+                $user->assignRole('Alumno');
+            }
+        }
     }
 }
+
+/**
+ *     $user =User::create([
+                    'name' => 'Jaime Eduardo Centurion',
+                    'email'    => 'admin@example.com',
+                    'password' => Hash::make('12345678'), // password
+
+                ])->assignRole('admin');
+
+ */

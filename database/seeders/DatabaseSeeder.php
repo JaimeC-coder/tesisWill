@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $this->call([
+            RolesPermissonSeeder::class,
             RolsSeeder::class,
             PersonasSeeder::class,
             UsersSeeder::class,

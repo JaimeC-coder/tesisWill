@@ -63,7 +63,7 @@ class HorarioController extends Controller
      */
     public function store(Request $request)
     {
-log($request);
+        log($request);
 
 
         $niv_id = $request->nivel_id;
@@ -207,6 +207,5 @@ log($request);
             'cursos' => $cursos,
             'dias' => $dias
         ]);
-
     }
 }

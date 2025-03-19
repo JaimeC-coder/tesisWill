@@ -340,7 +340,7 @@ return [
         ],
         [
             'text' => 'Gestión',
-            'url' => 'admin/settings',
+            'route' => 'reporte.gestion',
             'icon_color' => 'blue',
             'icon' => 'fas fa-project-diagram',
             'can'  => 'reportes.gestion',

@@ -15,19 +15,22 @@ use App\Models\PersonalAcademico;
 use App\Models\Rol;
 use App\Models\Seccion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use function Illuminate\Log\log;
 
 class ReportController extends Controller
 {
-    public function inicio()  {
+    public function inicio()
+    {
 
         $anios = Anio::where('is_deleted', '!=', 1)->get();
         $niveles = Nivel::all();
-        return view('view.reporte.general',compact('anios','niveles'));
+        return view('view.reporte.general', compact('anios', 'niveles'));
     }
 
-    public function matricula(Request $request)  {
+    public function matricula(Request $request)
+    {
 
         $anio_id = $request->anio_id;
         $nivel_id = $request->nivel_id;
@@ -45,9 +48,9 @@ class ReportController extends Controller
             'grados' => $grados,
             'totales' => $totales
         ]);
-
     }
-    public function personal(Request $request)  {
+    public function personal(Request $request)
+    {
         $anio_id = $request->anio_id;
         $nivel_id = $request->nivel_id;
 
@@ -68,14 +71,11 @@ class ReportController extends Controller
             'totales' => $totales,
             'total' => $total,
         ]);
-
-
-
     }
-    public function sexo(Request $request)  {
-        {
+    public function sexo(Request $request)
+    { {
             $anio_id = $request->anio_id;
-        $nivel_id = $request->nivel_id;
+            $nivel_id = $request->nivel_id;
 
             $sexos = ['Masculino', 'Femenino'];
             $totales = [];
@@ -100,13 +100,10 @@ class ReportController extends Controller
                 'sexos' => $sexos,
                 'totales' => $cantidades
             ]);
-
-
-
         }
-
     }
-    public function countPersonal(Request $request)  {
+    public function countPersonal(Request $request)
+    {
         $anio_id = $request->anio_id;
         $nivel_id = $request->nivel_id;
 
@@ -127,9 +124,9 @@ class ReportController extends Controller
             'totales' => $totales,
             'total' => $total,
         ]);
-
     }
-    public function vacante(Request $request)  {
+    public function vacante(Request $request)
+    {
         $anio_id = $request->anio_id;
         $nivel_id = $request->nivel_id;
 
@@ -148,62 +145,38 @@ class ReportController extends Controller
             'totales' => $totales,
             'total' => $total,
         ]);
-
     }
 
-
-
-    /**
-     *   public function showAlumnosGrados(Request $request)
-
-     */
-
-
-     /**
-      *     public function showPersonalCargos(Request $request)
+    public function gestion(Request $request)
     {
+        // return $request;
+        $anios = Anio::where('is_deleted', '!=', 1)->get();
 
-    }
-      */
-
-      /**
-       *   public function showAlumnoSexo(Request $request)
-    {
-
-    }
-       */
-
-       /**
-        *   public function showDocenteCurso(Request $request)
-    {
+        $anio = $request->anio;
+        $nivel = $request->nivel;
+        $grado = $request->grado;
+        $seccion = $request->seccion;
 
 
-        /* if ($request->ajax()) {
-            return response()->json([
-                'cursos' => $cursos,
-                'totales' => $totales,
-                'total' => $total,
-            ]);
+
+        if ($anio == null || $nivel == null || $grado == null || $seccion == null) {
+            $result = [];
+        } else {
+            $result = $this->getCoursesWithAvgsAndNotes($anio, $nivel, $grado, $seccion);
         }
-        return view('Error404');
+
+       // return $result;
+        return view('view.reporte.gestion', compact('result', 'anios'));
     }
 
-        */
 
-        /**
-         *  public function showVacantesSeccion(Request $request)
+
+
+
+    public function getCoursesWithAvgsAndNotes($year, $level, $grade, $section)
     {
 
-
-        /* if ($request->ajax()) {
-            return response()->json([
-                'seccion' => $seccion,
-                'totales' => $totales,
-                'total' => $total,
-            ]);
-        }
-        return view('Error404');
+        $result = DB::select('CALL sp_coursesWithAvgsAndNotes(?, ?, ?, ?)', [$year, $level, $grade, $section]);
+        return $result;
     }
-    **/
 }
-

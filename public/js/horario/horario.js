@@ -31,6 +31,7 @@ function handleAnioChange() {
     if (anioId) {
         loadNiveles(anioId);
         resetSelect(nivel);
+        nivel.disabled = false;
     }
 }
 

@@ -60,7 +60,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/asignarCurso', App\Http\Controllers\AsignarGradoController::class);
 
     Route::get('/horario/inicio', [App\Http\Controllers\HorarioController::class, 'inicio'])->name('horario.inicio');
+
     Route::get('/reporte/general/inicio', [App\Http\Controllers\ReportController::class, 'inicio'])->name('reporte.general');
+    Route::get('/reporte/gestion/inicio', [App\Http\Controllers\ReportController::class, 'gestion'])->name('reporte.gestion');
 
     Route::get('/nota/inicio', [App\Http\Controllers\NotaController::class, 'inicio'])->name('nota.inicio');
    // Route::get('/reporte/general/inicio', [App\Http\Controllers\ReportController::class, 'inicio'])->name('reporte.general');

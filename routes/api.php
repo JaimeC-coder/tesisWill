@@ -31,6 +31,8 @@ Route::group(['prefix' => 'nota'], function () {
     Route::post('docente', [NotaController::class, 'buscarDocente']);
     Route::post('grado', [NotaController::class, 'buscarGrados']);
     Route::post('curso',[NotaController::class,'getCoursesByTeacher'] );
+    //nota/capacidad/actualizar
+    Route::post('capacidad/actualizar', [NotaController::class, 'updateCapacidad']);
     // Route::post('seccion', [AnioController::class, 'seccion']);
 });
 

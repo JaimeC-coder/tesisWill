@@ -131,10 +131,10 @@ class NotaController extends Controller
                     break;
             }
 
-            $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidad);
+            $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo);
 
 
-            return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo','capacidad'));
+            return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidad'));
         }
 
         $asignacionesCursos = null;
@@ -286,7 +286,7 @@ class NotaController extends Controller
                     break;
             }
 
-            $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidad);
+            $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo);
 
             //  Log::info($Gsas);
 
@@ -356,6 +356,7 @@ class NotaController extends Controller
 
             if (!$persona) continue;
 
+            $g->periodoID = $matricula->per_id;
             $g->alumno = $persona->per_apellidos . ' ' . $persona->per_nombres;
             $g->dni = $persona->per_dni;
             $g->idAlumno = $alumno->alu_id;
@@ -370,7 +371,7 @@ class NotaController extends Controller
             $notasOrganizadas = [];
 
             foreach ($notas as $v) {
-                $capacidades = NotaCapacidad::select(['nc_descripcion', 'nc_nota'])
+                $capacidades = NotaCapacidad::select(['nc_descripcion', 'nc_nota', 'nt_id'])
                     ->where('nt_id', $v->nt_id)
                     ->get();
 
@@ -384,28 +385,37 @@ class NotaController extends Controller
                     // Solo guardar notas para los períodos que correspondan según el tipo
                     if ($v->nt_bimestre <= $numeroPeriodos) {
                         $notasOrganizadas[$capKey]["B" . $v->nt_bimestre] = [
-                            "nota" => $cap->nc_nota ?? '--'
+                            "nota" => $cap->nc_nota ?? '--',
+                            "idNotaPadre" => $cap->nt_id ?? 0
+
+                        ];
+                    }else{
+                        // Si el bimestre no es válido, asignar un valor nulo
+                        $notasOrganizadas[$capKey]["B" . $v->nt_bimestre] = [
+                            "nota" => NULL,
+                            "idNotaPadre" => $cap->nt_id ?? 0
                         ];
                     }
                 }
             }
-
+            //TODO:TENGO QUE CORREGIR QUE SI EL BIMESTRE TIENE ALGUNA NOTA EN ESA CAPACIDAD SE DEBE DE MANDAR EL ID EN EL RESTO DE DATOS QUE NO TIENEN
             // Completar períodos faltantes con notas nulas
             foreach ($notasOrganizadas as $capKey => &$bimestres) {
-                for ($i = 1; $i <= $numeroPeriodos; $i++) {
-                    if (!isset($bimestres["B" . $i])) {
-                        $bimestres["B" . $i] = ["nota" => NULL];
-                    }
-                }
+                // for ($i = 1; $i <= $numeroPeriodos; $i++) {
+                //     if (!isset($bimestres["B" . $i])) {
+                //         $bimestres["B" . $i] = ["nota" => NULL];
+                //         $bimestres["B" . $i]["idNota"] = -1;
+                //     }
+                // }
 
                 // Calcular promedio solo con las notas existentes
                 $notasValores = array_column($bimestres, 'nota');
-                $notasFiltradas = array_filter($notasValores, function($nota) {
+                $notasFiltradas = array_filter($notasValores, function ($nota) {
                     return $nota !== '0' && $nota !== '--' && $nota !== NULL;
                 });
 
                 $promedio = !empty($notasFiltradas) ? $this->calcularPromedio($notasFiltradas) : '';
-                $bimestres["Promedio"] = ["nota" => $promedio];
+                $bimestres["Promedio"] = ["nota" => $promedio, "idNota" => -1];
             }
 
             $g->notas = $notasOrganizadas;
@@ -420,29 +430,120 @@ class NotaController extends Controller
     public function calcularPromedio($notas)
     {
 
-            if (empty($notas)) return ""; // Si el array está vacío, devolver vacío
+        if (empty($notas)) return ""; // Si el array está vacío, devolver vacío
 
-            // Jerarquía de notas
-            $jerarquia = ["AD" => 5, "A" => 4, "B" => 3, "C" => 2, "D" => 1];
+        // Jerarquía de notas
+        $jerarquia = ["AD" => 5, "A" => 4, "B" => 3, "C" => 2, "D" => 1];
 
-            // Contar frecuencia de cada nota
-            $conteo = array_count_values($notas);
+        // Contar frecuencia de cada nota
+        $conteo = array_count_values($notas);
 
-            // Encontrar la(s) nota(s) con mayor frecuencia
-            $maxFrecuencia = max($conteo);
-            $notasMasFrecuentes = array_keys($conteo, $maxFrecuencia);
+        // Encontrar la(s) nota(s) con mayor frecuencia
+        $maxFrecuencia = max($conteo);
+        $notasMasFrecuentes = array_keys($conteo, $maxFrecuencia);
 
-            if (count($notasMasFrecuentes) === 1) {
-                return $notasMasFrecuentes[0]; // Si hay una sola nota más frecuente, devolverla
+        if (count($notasMasFrecuentes) === 1) {
+            return $notasMasFrecuentes[0]; // Si hay una sola nota más frecuente, devolverla
+        }
+
+        // Si hay empate, elegir según la jerarquía
+        usort($notasMasFrecuentes, function ($a, $b) use ($jerarquia) {
+            return ($jerarquia[$b] ?? 0) <=> ($jerarquia[$a] ?? 0);
+        });
+
+        return $notasMasFrecuentes[0]; // Retornar la nota con mayor jerarquía
+
+
+    }
+
+    public function updateCapacidad(Request $request)
+    {
+        Log::info("----------------------------------------");
+        Log::info($request->all());
+        Log::info("----------------------------------------");
+        try {
+            $bimestre = $request->bimestre; //*
+            $idAlumno = $request->idAlumno; //*
+            $personalAcademico = $request->personalAcademico; //*
+            $cursoId = $request->cursoId; //*
+            $agsId = $request->agsId; //*
+            $idNota = $request->idNota;
+
+            $idCapacidad = $request->idCapacidad;
+            $idPeriodo = $request->idPeriodo;
+            $notaSeleccionada = $request->notaSeleccionada;
+            if ($idNota != -1) {
+                //$NotaPromoedio = Nota::where('nt_id', $idNota)->first();
+                $notaCapacidad  = NotaCapacidad::where('nt_id', $idNota)->where('cap_id', $idCapacidad)->first();
+
+                if ($notaCapacidad) {
+                    $notaCapacidad->nc_nota = $notaSeleccionada;
+                    $notaCapacidad->save();
+                    //ahora quiero que me busques todas las notas de la capacidad y me devuelvas el promedio
+                    $notasCapacidad = NotaCapacidad::where('nt_id', $idNota)->get();
+                    $notasValores = array_column($notasCapacidad->toArray(), 'nc_nota');
+                    $notasFiltradas = array_filter($notasValores, function ($nota) {
+                        return $nota !== '0' && $nota !== '--' && $nota !== NULL;
+                    });
+                    $promedio = !empty($notasFiltradas) ? $this->calcularPromedio($notasFiltradas) : '';
+                    $NotaPromoedio = Nota::where('nt_id', $idNota)->first();
+                    $NotaPromoedio->nt_nota = $promedio;
+                    $NotaPromoedio->save();
+                    //si se registro correctamente la nota, se actualiza el promedio
+                    $NotaPromoedio->nt_nota = $this->calcularPromedio($NotaPromoedio->nt_id);
+                    $NotaPromoedio->save();
+                } else {
+                    $NotaCapacidadRegistro = NotaCapacidad::Create([
+                        'nc_descripcion' => $idCapacidad,
+                        'nc_nota' => $notaSeleccionada,
+                        'nt_id' => $idNota,
+                        'nc_is_deleted' => 0
+                    ]);
+                }
+            } else {
+                Log::info('No se encontró la nota con ID: ' . $idNota);
+                Log::info('Se creará una nueva nota para el alumno con ID: ' . $idAlumno);
+                Log::info('Capacidad ID: ' . $idCapacidad);
+                Log::info('Nota seleccionada: ' . $notaSeleccionada);
+                Log::info('Curso ID: ' . $cursoId);
+                Log::info('Personal académico ID: ' . $personalAcademico);
+                Log::info('Periodo ID: ' . $idPeriodo);
+                Log::info('Bimestre: ' . $bimestre);
+                Log::info('AGS ID: ' . $agsId);
+                Log::info('Nota ID: ' . $idNota);
+                Log::info('Nota seleccionada: ' . $notaSeleccionada);
+                Log::info('Creando nueva nota para el alumno...');
+                // Crear una nueva nota para el alumno
+
+
+
+                $NotaPromoedio = Nota::Create([
+                    'per_id' => $idPeriodo,
+                    'nt_bimestre' => substr($bimestre,1),
+                    'nt_nota' => 0,
+                    'curso_id' => $cursoId,
+                    'alu_id' => $idAlumno,
+                    'pa_id' => $personalAcademico
+                ]);
+
+                $NotaCapacidadRegistro = NotaCapacidad::Create([
+                    'nc_descripcion' => $idCapacidad,
+                    'nc_nota' => $notaSeleccionada,
+                    'nt_id' => $NotaPromoedio->nt_id,
+                    'nc_is_deleted' => 0
+                ]);
+
+                Log::info('Nota creada con ID: ' . $NotaCapacidadRegistro);
+
+                // //si se registro correctamente la nota, se actualiza el promedio
+                // $NotaPromoedio->nt_nota = $notaSeleccionada;
+                // $NotaPromoedio->save();
             }
 
-            // Si hay empate, elegir según la jerarquía
-            usort($notasMasFrecuentes, function ($a, $b) use ($jerarquia) {
-                return ($jerarquia[$b] ?? 0) <=> ($jerarquia[$a] ?? 0);
-            });
-
-            return $notasMasFrecuentes[0]; // Retornar la nota con mayor jerarquía
-
-
+            return response()->json(['status' => 200, 'message' => 'Capacidad actualizada correctamente']);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['status' => 404, 'message' =>  'Error al actualizar la capacidad: ' . $th->getMessage()]);
+        }
     }
 }

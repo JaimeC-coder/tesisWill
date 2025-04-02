@@ -170,7 +170,22 @@ class ReportController extends Controller
     }
 
 
+    public function alumno(Request $request)
+    {
+        $anios = Anio::where('is_deleted', '!=', 1)->get();
+        $anio = $request->anio;
+        $nivel = $request->nivel;
+        $grado = $request->grado;
+        $seccion = $request->seccion;
 
+        if ($anio == null || $nivel == null || $grado == null || $seccion == null) {
+            $result = [];
+        } else {
+            $result = $this->getCoursesWithAvgsAndNotes($anio, $nivel, $grado, $seccion);
+        }
+
+        return view('view.reporte.alumno', compact('result', 'anios'));
+    }
 
 
     public function getCoursesWithAvgsAndNotes($year, $level, $grade, $section)

@@ -63,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/reporte/general/inicio', [App\Http\Controllers\ReportController::class, 'inicio'])->name('reporte.general');
     Route::get('/reporte/gestion/inicio', [App\Http\Controllers\ReportController::class, 'gestion'])->name('reporte.gestion');
+    Route::get('/reporte/alumno/inicio', [App\Http\Controllers\ReportController::class, 'alumno'])->name('reporte.alumno');
 
     Route::get('/nota/inicio', [App\Http\Controllers\NotaController::class, 'inicio'])->name('nota.inicio');
    // Route::get('/reporte/general/inicio', [App\Http\Controllers\ReportController::class, 'inicio'])->name('reporte.general');

@@ -347,7 +347,7 @@ return [
         ],
         [
             'text' => 'Por Alumno',
-            'url' => 'admin/settings',
+            'route' => 'reporte.alumno',
             'icon' => 'fas fa-sitemap',
             'icon_color' => 'green',
             'can'  => 'reportes.alumno',

@@ -71,9 +71,7 @@
         </div>
     </div>
 
-    <pre>
-        {{ $Gsas }}
-    </pre>
+   
 
     <div class="col-lg-12 col-md-12 col-sm-12">
         <div class="card">
@@ -95,46 +93,65 @@
                                         <th>Promedio</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @foreach ($Gsas as $index => $item)
+
+                                @php
+                                $bloques = ['B1', 'B2', 'B3', 'B4', 'Promedio'];
+                                $capacidades = ['C1', 'C2', 'C3'];
+                            @endphp
+
+                            <tbody>
+                                @foreach ($Gsas as $index => $item)
+                                    <tr>
+                                        <td rowspan="4">{{ $item['dni'] }}</td>
+                                        <td rowspan="4">{{ $item['alumno'] }}</td>
+                                    </tr>
+
+                                    @foreach ($capacidades as $capacidadKey)
                                         <tr>
+                                            <td>{{ $capacidad[$capacidadKey] ?? $capacidadKey }}</td>
 
-                                            <td rowspan="4">{{ $item['dni'] }}</td>
-                                            <td rowspan="4">{{ $item['alumno'] }}</td>
-                                            @foreach ($capacidad as $key => $value)
-                                            <tr>
-                                                @foreach ($item['notas'] as $key2 => $value2)
-                                                    @if ($key == $key2)
-                                                        <td>{{ $value }}</td>
-                                                        @foreach ($value2 as $key3 => $value3)
-                                                            @if ($value3['nota'] == null)
-                                                                <td>
-                                                                    <button type="button" class="btn btn-icon btn-sm"
-                                                                        title="Registrar" data-toggle="modal"
-                                                                        data-target="#myModal"
-                                                                        data-alumno="{{ $item['idAlumno'] }}"
-                                                                        data-capacidad="{{ $key2 }}"
-                                                                        data-sga ="{{ $item['ags_id'] }}"
-                                                                        data-periodo = "{{ $item['periodoID'] }}"
-                                                                        data-notaId="{{ $value3['idNota'] }}"
-                                                                        data-bimestre="{{ $key3 }}"
-                                                                       >
-                                                                        <i class="fa fa-edit text-secondary"></i>
-                                                                    </button>
+                                            @foreach ($bloques as $bloque)
+                                                @php
+                                                    $notaData = $item['notas'][$capacidadKey][$bloque] ?? null;
+                                                    $nota = $notaData['nota'] ?? null;
+                                                    $notaId = $notaData['idNotaPadre'] ?? $notaData['idNota'] ?? -1;
+                                                @endphp
 
-                                                                </td>
-                                                            @else
-                                                            <td>{{ $value3['nota'] }} </td>
-                                                            @endif
-
-                                                        @endforeach
+                                                @if ($bloque === 'Promedio')
+                                                    @if ($nota == "c" || $nota == "C")
+                                                        <td class="bg-danger">{{ $nota }}</td>
+                                                    @elseif (in_array(strtoupper($nota), ['A', 'AD']))
+                                                        <td class="bg-success">{{ $nota }}</td>
+                                                    @else
+                                                        <td class="bg-warning">{{ $nota }}</td>
                                                     @endif
-                                                @endforeach
-                                            </tr>
+                                                @else
+                                                    @if ($nota !== null)
+                                                        <td>{{ $nota }}</td>
+                                                    @else
+                                                        <td>
+                                                            <button type="button" class="btn btn-icon btn-sm"
+                                                                title="Registrar" data-toggle="modal"
+                                                                data-target="#myModal"
+                                                                data-alumno="{{ $item['idAlumno'] }}"
+                                                                data-capacidad="{{ $capacidadKey }}"
+                                                                data-sga="{{ $item['ags_id'] }}"
+                                                                data-periodo="{{ $item['periodoID'] }}"
+                                                                data-notaId="{{ $notaId }}"
+                                                                data-bimestre="{{ $bloque }}">
+                                                                <i class="fa fa-edit text-secondary"></i>
+                                                            </button>
+                                                        </td>
+                                                    @endif
+                                                @endif
                                             @endforeach
-                                         </tr>
+                                        </tr>
                                     @endforeach
+                                @endforeach
                             </tbody>
+
+
+
                             @endif
                         </table>
 

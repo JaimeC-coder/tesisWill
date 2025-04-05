@@ -223,20 +223,6 @@ class NotaController extends Controller
             'cursos' => $cursos
         ]);
     }
-    public function buscarInfoNotas($numero)
-    {
-        $valor = "";
-        if ($numero <= 11) {
-            $valor = "C";
-        }
-        if ($numero >= 12 && $numero <= 14) {
-            $valor = "B";
-        }
-        if ($numero >= 15 && $numero <= 20) {
-            $valor = "A";
-        }
-        return $valor;
-    }
 
 
     //PASAR A API :
@@ -310,6 +296,24 @@ class NotaController extends Controller
         ]);
     }
 
+    public function buscarInfoNotas($numero)
+    {
+        $valor = "";
+        if ($numero <= 11) {
+            $valor = "C";
+        }
+        if ($numero >= 12 && $numero <= 14) {
+            $valor = "B";
+        }
+        if ($numero >= 15 && $numero <= 20) {
+            $valor = "A";
+        }
+        return $valor;
+    }
+
+
+
+
 
     public function returnCapacitaciones($capacitacion)
     {
@@ -323,9 +327,104 @@ class NotaController extends Controller
         return $capacidades;
     }
 
+    // public function getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo)
+    // {
+
+    //     $Gsas = Gsa::select('ags_id')
+    //         ->where('niv_id', $nivel)
+    //         ->where('gra_id', $grado)
+    //         ->where('sec_id', $seccion)
+    //         ->where('is_deleted', '!=', 1)
+    //         ->get();
+
+
+    //     $numeroPeriodos =  $tipoPeriodo->tp_id;
+
+
+    //     foreach ($Gsas as $g) {
+    //         $matricula = Matricula::where('ags_id', $g->ags_id)
+    //             ->where('is_deleted', '!=', 1)
+    //             ->first();
+
+    //         if (!$matricula) continue;
+
+    //         $alumno = Alumno::where('alu_id', $matricula->alu_id)
+    //             ->where('is_deleted', '!=', 1)
+    //             ->first();
+
+    //         if (!$alumno) continue;
+
+    //         $persona = Persona::where('per_id', $alumno->per_id)
+    //             ->where('is_deleted', '!=', 1)
+    //             ->first();
+
+    //         if (!$persona) continue;
+
+    //         $g->periodoID = $matricula->per_id;
+    //         $g->alumno = $persona->per_apellidos . ' ' . $persona->per_nombres;
+    //         $g->dni = $persona->per_dni;
+    //         $g->idAlumno = $alumno->alu_id;
+
+    //         $notas = Nota::select(['nt_bimestre', 'nt_nota', 'nt_id'])
+    //             ->where('alu_id', $alumno->alu_id)
+    //             ->where('curso_id', $curso->cur_id)
+    //             ->where('pa_id', $docente)
+    //             ->where('nt_is_deleted', '!=', 1)
+    //             ->get();
+
+    //         $notasOrganizadas = [];
+
+    //         foreach ($notas as $v) {
+    //             $capacidades = NotaCapacidad::select(['nc_descripcion', 'nc_nota', 'nt_id'])
+    //                 ->where('nt_id', $v->nt_id)
+    //                 ->get();
+
+    //             foreach ($capacidades as $index => $cap) {
+    //                 $capKey = "C" . ($index + 1);
+
+    //                 if (!isset($notasOrganizadas[$capKey])) {
+    //                     $notasOrganizadas[$capKey] = [];
+    //                 }
+
+    //                 // Solo guardar notas para los períodos que correspondan según el tipo
+    //                 if ($v->nt_bimestre <= $numeroPeriodos) {
+    //                     $notasOrganizadas[$capKey]["B" . $v->nt_bimestre] = [
+    //                         "nota" => $cap->nc_nota ?? '--',
+    //                         "idNotaPadre" => $cap->nt_id ?? 0
+
+    //                     ];
+    //                 }
+    //             }
+    //         }
+
+    //         // Completar períodos faltantes con notas nulas
+    //         foreach ($notasOrganizadas as $capKey => &$bimestres) {
+    //             for ($i = 1; $i <= $numeroPeriodos; $i++) {
+    //                 if (!isset($bimestres["B" . $i])) {
+    //                     $bimestres["B" . $i] = ["nota" => NULL];
+    //                     $bimestres["B" . $i]["idNota"] = -1;
+    //                 }
+    //             }
+
+    //             // Calcular promedio solo con las notas existentes
+    //             $notasValores = array_column($bimestres, 'nota');
+    //             $notasFiltradas = array_filter($notasValores, function ($nota) {
+    //                 return $nota !== '0' && $nota !== '--' && $nota !== NULL;
+    //             });
+
+    //             $promedio = !empty($notasFiltradas) ? $this->calcularPromedio($notasFiltradas) : '';
+    //             $bimestres["Promedio"] = ["nota" => $promedio, "idNota" => -1];
+    //         }
+
+    //         $g->notas = $notasOrganizadas;
+    //         $g->promedioValor = $this->buscarInfoNotas($g->promedio);
+    //     }
+
+    //     return $Gsas;
+    // }
+
     public function getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo)
     {
-
         $Gsas = Gsa::select('ags_id')
             ->where('niv_id', $nivel)
             ->where('gra_id', $grado)
@@ -335,7 +434,6 @@ class NotaController extends Controller
 
 
         $numeroPeriodos =  $tipoPeriodo->tp_id;
-
 
         foreach ($Gsas as $g) {
             $matricula = Matricula::where('ags_id', $g->ags_id)
@@ -371,42 +469,34 @@ class NotaController extends Controller
             $notasOrganizadas = [];
 
             foreach ($notas as $v) {
-                $capacidades = NotaCapacidad::select(['nc_descripcion', 'nc_nota', 'nt_id'])
+                $capacidades = NotaCapacidad::select(['nc_descripcion', 'nc_nota', 'nt_id']) // Asegúrate de seleccionar la columna de orden
                     ->where('nt_id', $v->nt_id)
                     ->get();
 
-                foreach ($capacidades as $index => $cap) {
-                    $capKey = "C" . ($index + 1);
+                foreach ($capacidades as $cap) {
+                    $capKey = $cap->nc_descripcion; // Usar el orden explícito
 
                     if (!isset($notasOrganizadas[$capKey])) {
                         $notasOrganizadas[$capKey] = [];
                     }
 
-                    // Solo guardar notas para los períodos que correspondan según el tipo
                     if ($v->nt_bimestre <= $numeroPeriodos) {
                         $notasOrganizadas[$capKey]["B" . $v->nt_bimestre] = [
                             "nota" => $cap->nc_nota ?? '--',
-                            "idNotaPadre" => $cap->nt_id ?? 0
-
-                        ];
-                    }else{
-                        // Si el bimestre no es válido, asignar un valor nulo
-                        $notasOrganizadas[$capKey]["B" . $v->nt_bimestre] = [
-                            "nota" => NULL,
                             "idNotaPadre" => $cap->nt_id ?? 0
                         ];
                     }
                 }
             }
-            //TODO:TENGO QUE CORREGIR QUE SI EL BIMESTRE TIENE ALGUNA NOTA EN ESA CAPACIDAD SE DEBE DE MANDAR EL ID EN EL RESTO DE DATOS QUE NO TIENEN
+
             // Completar períodos faltantes con notas nulas
             foreach ($notasOrganizadas as $capKey => &$bimestres) {
-                // for ($i = 1; $i <= $numeroPeriodos; $i++) {
-                //     if (!isset($bimestres["B" . $i])) {
-                //         $bimestres["B" . $i] = ["nota" => NULL];
-                //         $bimestres["B" . $i]["idNota"] = -1;
-                //     }
-                // }
+                for ($i = 1; $i <= $numeroPeriodos; $i++) {
+                    if (!isset($bimestres["B" . $i])) {
+                        $bimestres["B" . $i] = ["nota" => NULL];
+                        $bimestres["B" . $i]["idNota"] = -1;
+                    }
+                }
 
                 // Calcular promedio solo con las notas existentes
                 $notasValores = array_column($bimestres, 'nota');
@@ -417,6 +507,7 @@ class NotaController extends Controller
                 $promedio = !empty($notasFiltradas) ? $this->calcularPromedio($notasFiltradas) : '';
                 $bimestres["Promedio"] = ["nota" => $promedio, "idNota" => -1];
             }
+
 
             $g->notas = $notasOrganizadas;
             $g->promedioValor = $this->buscarInfoNotas($g->promedio);
@@ -501,43 +592,39 @@ class NotaController extends Controller
                     ]);
                 }
             } else {
-                Log::info('No se encontró la nota con ID: ' . $idNota);
-                Log::info('Se creará una nueva nota para el alumno con ID: ' . $idAlumno);
-                Log::info('Capacidad ID: ' . $idCapacidad);
-                Log::info('Nota seleccionada: ' . $notaSeleccionada);
-                Log::info('Curso ID: ' . $cursoId);
-                Log::info('Personal académico ID: ' . $personalAcademico);
-                Log::info('Periodo ID: ' . $idPeriodo);
-                Log::info('Bimestre: ' . $bimestre);
-                Log::info('AGS ID: ' . $agsId);
-                Log::info('Nota ID: ' . $idNota);
-                Log::info('Nota seleccionada: ' . $notaSeleccionada);
-                Log::info('Creando nueva nota para el alumno...');
-                // Crear una nueva nota para el alumno
+
+                $NotaPromoedio = Nota::where('alu_id', $idAlumno)->where('curso_id', $cursoId)->where('pa_id', $personalAcademico)->where('per_id', $idPeriodo)->where('nt_bimestre', substr($bimestre, 1))->first();
+                if (!$NotaPromoedio) {
+
+                    $NotaPromoedio = Nota::Create([
+                        'per_id' => $idPeriodo,
+                        'nt_bimestre' => substr($bimestre, 1),
+                        'nt_nota' => 0,
+                        'ags_id' => $agsId,
+                        'curso_id' => $cursoId,
+                        'alu_id' => $idAlumno,
+                        'pa_id' => $personalAcademico
+                    ]);
+
+                    $NotaCapacidadRegistro = NotaCapacidad::Create([
+                        'nc_descripcion' => $idCapacidad,
+                        'nc_nota' => $notaSeleccionada,
+                        'nt_id' => $NotaPromoedio->nt_id,
+                        'nc_is_deleted' => 0
+                    ]);
+
+                    $NotaPromoedio->nt_nota = $notaSeleccionada;
+                    $NotaPromoedio->save();
+                } else {
 
 
-
-                $NotaPromoedio = Nota::Create([
-                    'per_id' => $idPeriodo,
-                    'nt_bimestre' => substr($bimestre,1),
-                    'nt_nota' => 0,
-                    'curso_id' => $cursoId,
-                    'alu_id' => $idAlumno,
-                    'pa_id' => $personalAcademico
-                ]);
-
-                $NotaCapacidadRegistro = NotaCapacidad::Create([
-                    'nc_descripcion' => $idCapacidad,
-                    'nc_nota' => $notaSeleccionada,
-                    'nt_id' => $NotaPromoedio->nt_id,
-                    'nc_is_deleted' => 0
-                ]);
-
-                Log::info('Nota creada con ID: ' . $NotaCapacidadRegistro);
-
-                // //si se registro correctamente la nota, se actualiza el promedio
-                // $NotaPromoedio->nt_nota = $notaSeleccionada;
-                // $NotaPromoedio->save();
+                    $NotaCapacidadRegistro = NotaCapacidad::Create([
+                        'nc_descripcion' => $idCapacidad,
+                        'nc_nota' => $notaSeleccionada,
+                        'nt_id' => $NotaPromoedio->nt_id,
+                        'nc_is_deleted' => 0
+                    ]);
+                }
             }
 
             return response()->json(['status' => 200, 'message' => 'Capacidad actualizada correctamente']);

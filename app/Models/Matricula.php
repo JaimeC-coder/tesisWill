@@ -25,9 +25,9 @@ class Matricula extends Model
         'is_deleted'
     ];
 
-    public function persona()
+    public function periodo()
     {
-        return $this->belongsTo(Persona::class, 'per_id', 'per_id');
+        return $this->belongsTo(Periodo::class, 'per_id', 'per_id');
     }
 
     public function alumno()
@@ -39,4 +39,6 @@ class Matricula extends Model
     {
         return $this->belongsTo(Gsa::class, 'ags_id', 'ags_id');
     }
+
+
 }

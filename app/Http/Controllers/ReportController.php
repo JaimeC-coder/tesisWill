@@ -201,7 +201,7 @@ class ReportController extends Controller
         })->with('persona')->first();
 
         $matricula = Matricula::where('alu_id', $alumno->alu_id)->first();
-       
+
         Log::info('Matricula: ' . $matricula);
 
         if ($matricula == null) {

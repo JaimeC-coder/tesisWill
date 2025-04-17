@@ -1,9 +1,9 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Notas')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
-@section('content_header_subtitle', 'Curso')
+@section('content_header_subtitle', 'Notas')
 
 
 @section('content')
@@ -71,7 +71,7 @@
         </div>
     </div>
 
-   
+
 
     <div class="col-lg-12 col-md-12 col-sm-12">
         <div class="card">
@@ -193,10 +193,10 @@
                             </label>
                             <select class="form-control" name="" id="selectNota" required>
                                 <option value="0">Selecteccione una opcion</option>
-                                <option value="C">C</option>
-                                <option value="B">B</option>
-                                <option value="A">A</option>
                                 <option value="AD">AD</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
                             </select>
 
 
@@ -204,9 +204,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="btnActualizar">Actualizar</button>
-
+                        <button type="button" class="btn btn-primary" id="btnActualizar">Registrar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
                     </div>
                 </form>
             </div>

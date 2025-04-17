@@ -1,11 +1,11 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Año Escolar')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Año Escolar')
 @section('content_buttom')
-    <a href="{{ route('anio.create') }}" class="btn btn-primary">Nueva Año escolar</a>
+    <a href="{{ route('anio.create') }}" class="btn btn-primary">Nuevo Año Escolar</a>
 
 @endsection
 

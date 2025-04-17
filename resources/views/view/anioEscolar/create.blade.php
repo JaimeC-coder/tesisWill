@@ -1,9 +1,9 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Año Escolar')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Año Escolar')
-@section('content_header_subtitle', 'Crear año')
+@section('content_header_subtitle', 'Crear Año Escolar')
 
 
 

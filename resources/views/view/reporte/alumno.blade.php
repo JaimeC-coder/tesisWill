@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-@section('title', 'Horario')
+@section('title', 'Reportes')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')

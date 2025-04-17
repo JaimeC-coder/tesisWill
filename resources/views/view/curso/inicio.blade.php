@@ -1,11 +1,11 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Curso')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Curso')
 @section('content_buttom')
-    <a href="{{ route('curso.create') }}" class="btn btn-primary">Nueva Curso</a>
+    <a href="{{ route('curso.create') }}" class="btn btn-primary">Nuevo Curso</a>
 @endsection
 
 

@@ -1,11 +1,11 @@
 @extends('adminlte::page')
-@section('title', 'Periodo Academico')
+@section('title', 'Periodo Académico')
 
 @section('content_header', 'Inicio')
-@section('content_header_title', 'Home')
-@section('content_header_subtitle', 'Periodo Academico')
+@section('content_header_title','Home')
+@section('content_header_subtitle','Periodo Académico')
 @section('content_buttom')
-    <a href="{{ route('periodo.create') }}" class="btn btn-primary">Nueva Periodo
+    <a href="{{ route('periodo.create') }}" class="btn btn-primary">Nuevo Periodo Académico
     </a>
 
 @endsection

@@ -1,9 +1,9 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Grado y Sección')
 
 @section('content_header', 'Inicio')
-@section('content_header_title', 'Alumno')
-@section('content_header_subtitle', 'Editar Grado')
+@section('content_header_title', 'Grado y Sección')
+@section('content_header_subtitle', 'Agregar Sección')
 
 
 
@@ -84,7 +84,7 @@
                             <div class="col-md-7 text-right mt-4">
                                 <button type="submit" class="btn btn-primary">Registrar</button>
                                 <a href="{{ route('gradoSeccion.inicio')}}" class="btn btn-outline-secondary">Cancelar</a>
-                                
+
                             </div>
                         </div>
                     </form>

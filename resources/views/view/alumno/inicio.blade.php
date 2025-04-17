@@ -5,7 +5,7 @@
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Alumno')
 @section('content_buttom')
-    <a href="{{ route('alumno.create') }}" class="btn btn-primary">Nueva Alumno</a>
+    <a href="{{ route('alumno.create') }}" class="btn btn-primary">Nuevo Alumno</a>
 
 @endsection
 

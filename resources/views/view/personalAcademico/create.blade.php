@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-@section('title', 'Periodo Academico')
+@section('title', 'Personal Académico')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Personal Académico')

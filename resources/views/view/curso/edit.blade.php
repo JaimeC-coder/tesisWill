@@ -1,8 +1,8 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Curso')
 
 @section('content_header', 'Inicio')
-@section('content_header_title', 'Alumno')
+@section('content_header_title', 'Curso')
 @section('content_header_subtitle', 'Editar Curso')
 
 

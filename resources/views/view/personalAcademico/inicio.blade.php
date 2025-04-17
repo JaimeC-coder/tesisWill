@@ -1,11 +1,11 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Personal Académico')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
-@section('content_header_subtitle', 'Personal')
+@section('content_header_subtitle', 'Personal Académico')
 @section('content_buttom')
-    <a href="{{ route('personal.create') }}" class="btn btn-primary">Nueva personal</a>
+    <a href="{{ route('personal.create') }}" class="btn btn-primary">Nuevo Personal Académico</a>
 
 @endsection
 

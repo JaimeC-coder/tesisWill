@@ -1,11 +1,11 @@
 @extends('adminlte::page')
-@section('title', 'Matricula')
+@section('title', 'Matriculas')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Matricula')
 @section('content_buttom')
-    <a href="{{ route('matricula.create') }}" class="btn btn-primary">Nueva matricula</a>
+    <a href="{{ route('matricula.create') }}" class="btn btn-primary">Nueva Matricula</a>
 
 @endsection
 

@@ -1,9 +1,9 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Asignar Grado')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
-@section('content_header_subtitle', 'Curso')
+@section('content_header_subtitle', 'Asignar Grado')
 
 
 @section('content')

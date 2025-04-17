@@ -5,7 +5,7 @@
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Grado y Sección')
 @section('content_buttom')
-    <a href="{{ route('gradoSeccion.create') }}" class="btn btn-primary">Nueva Grado </a>
+    <a href="{{ route('gradoSeccion.create') }}" class="btn btn-primary">Nuevo Grado </a>
 
 @endsection
 

@@ -1,9 +1,9 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Periodo Académico')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Periodo Académico')
-@section('content_header_subtitle', 'Editar periodo académico')
+@section('content_header_subtitle', 'Editar Periodo Académico')
 
 
 

@@ -1,9 +1,9 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Roles')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Rol')
-@section('content_header_subtitle', 'Informacion de Rol Educativa')
+@section('content_header_subtitle', 'Información de Rol Educativa')
 
 
 

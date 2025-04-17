@@ -1,11 +1,11 @@
 @extends('adminlte::page')
-@section('title', 'Alumnos')
+@section('title', 'Usuarios')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Usuario')
 @section('content_buttom')
-    <a href="{{ route('usuario.create') }}" class="btn btn-primary">Nueva Usuario</a>
+    <a href="{{ route('usuario.create') }}" class="btn btn-primary">Nuevo Usuario</a>
 
 @endsection
 

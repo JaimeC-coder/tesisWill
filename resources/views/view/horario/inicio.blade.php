@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-@section('title', 'Horario')
+@section('title', 'Horarios')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
@@ -53,8 +53,7 @@
                             </div>
                             <div class="col-md-1"></div>
                             <div class="col-lg-2 col-md-4 col-sm-6" style="display: flex;align-items: center;">
-                                <button id="btnHorario" class="btn btn-sm btn-primary btn-block" disabled>Cargar
-                                    Información</button>
+                                <button id="btnHorario" class="btn btn-sm btn-primary btn-block" disabled>Buscar</button>
 
                             </div>
                         </div>

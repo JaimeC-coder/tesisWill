@@ -34,7 +34,7 @@
 
                     <div class="col-sm-12 text-right mt-4">
                         <button type="submit" class="btn btn-primary">
-                            {{  $grado->gra_descripcion == ' ' ? 'Actualizar' : 'Guardar' }}
+                            {{  $grado->gra_descripcion == ' ' ? 'Actualizar' : 'Registrar' }}
                         </button>
                         <a href="{{ route('gradoSeccion.inicio')}}" class="btn btn-outline-secondary">Cancelar</a>
 

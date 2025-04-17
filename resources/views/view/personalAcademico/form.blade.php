@@ -188,7 +188,7 @@
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12">
-                    <label>Tutor (falta) <span class="text-danger">*</span></label>
+                    <label>Tutor <span class="text-danger">*</span></label>
                     <select name="pa_is_tutor" class="form-control show-tick" required>
                         <option value="0">-- Selecciona --</option>
                         @foreach ($tutor as $key => $tipo)

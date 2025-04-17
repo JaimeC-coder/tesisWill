@@ -1,9 +1,9 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Asignar Curso')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
-@section('content_header_subtitle', 'Curso')
+@section('content_header_subtitle', 'Asignar Curso')
 
 
 @section('content')
@@ -57,12 +57,10 @@
                                     <tr data-docente-id="{{ $item['pa_id'] }}" data-docente-id-aux="{{ $item['pa_id'] }}">
                                         <td class="d-none">{{ $item['pa_id'] }} </td>
                                         <td>
-                                            <button type="button" class="btn btn-icon btn-sm" title="Registrar"
-                                                onclick="asignacionMasivaCurso({{ $item['pa_id'] }})">
+                                            <button type="button" class="btn btn-icon btn-sm" title="Registrar" onclick="asignacionMasivaCurso({{ $item['pa_id'] }})">
                                                 <i class="fa fa-save text-info"></i>
                                             </button>
-                                            <button type="button" class="btn btn-icon btn-sm" title="Limpiar"
-                                                onclick="eliminacionMasivaCurso({{ $item['pa_id'] }})">
+                                            <button type="button" class="btn btn-icon btn-sm" title="Limpiar" onclick="eliminacionMasivaCurso({{ $item['pa_id'] }})">
                                                 <i class="fa fa-trash text-danger"></i>
                                             </button>
                                         </td>

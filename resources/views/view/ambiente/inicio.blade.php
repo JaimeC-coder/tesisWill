@@ -1,11 +1,11 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Ambientes')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
-@section('content_header_subtitle', 'Ambientes')
+@section('content_header_subtitle', 'Ambiente')
 @section('content_buttom')
-    <a href="{{ route('ambiente.create') }}" class="btn btn-primary">Nueva ambiente</a>
+    <a href="{{ route('ambiente.create') }}" class="btn btn-primary">Nuevo Ambiente</a>
 
 @endsection
 

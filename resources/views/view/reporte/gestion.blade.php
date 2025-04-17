@@ -1,9 +1,9 @@
 @extends('adminlte::page')
-@section('title', 'Gestion')
+@section('title', 'Reportes')
 
 @section('content_header', 'Inicio')
-@section('content_header_title', 'Generar Reporte')
-@section('content_header_subtitle', 'Reportes Generales')
+@section('content_header_title', 'Reporte')
+@section('content_header_subtitle', 'Reportes de Gestión')
 
 
 
@@ -14,7 +14,6 @@
             <div class="container-fluid">
                 <div class="d-flex justify-content-between align-items-center ">
                     <div class="header-action">
-                        <h1 class="page-title">Reportes de Gestión</h1>
                         <ol class="breadcrumb page-breadcrumb d-none">
                             <li class="breadcrumb-item"><a href="#">Ericsson</a></li>
                             <li class="breadcrumb-item active" aria-current="page">aula</li>

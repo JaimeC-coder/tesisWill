@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-@section('title', 'Ambiente')
+@section('title', 'Usuarios')
 
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Usuario')

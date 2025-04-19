@@ -62,7 +62,9 @@
 
         <div class="d-inline row p-2 float-right">
 
-            <button type="submit" class="btn btn-primary">Registrar</button>
+            <button type="submit" class="btn btn-primary">
+                {{$anio->anio_id ? 'Actualizar' : 'Registrar'}}
+            </button>
             <a href="{{ route('anio.inicio') }}" class="btn btn-outline-secondary">Cancelar</a>
         </div>
     </div>

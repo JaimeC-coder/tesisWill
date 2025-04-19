@@ -272,8 +272,12 @@
                             </div>
                         </div>
                         <div class="col-sm-12 text-right mt-4">
-                            <button v-if="!loading" type="submit"
-                                class="btn btn-primary">Registrar</button>
+                            <button type="submit" class="btn btn-primary">
+                                {{ $alumno->per_id ? 'Actualizar' : 'Registrar' }}
+                            </button>
+
+
+
                                 <a href="{{ route('alumno.inicio')}}" class="btn btn-outline-secondary">Cancelar</a>
                             </div>
                         </div>

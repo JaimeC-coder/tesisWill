@@ -82,7 +82,9 @@
                         <div class="form-group row">
                             <label class="col-md-3 col-form-label"></label>
                             <div class="col-md-7 text-right mt-4">
-                                <button type="submit" class="btn btn-primary">Registrar</button>
+                                <button type="submit" class="btn btn-primary">
+                                    {{ $seccionAdd2->sec_id ? 'Actualizar' : 'Registrar' }}
+                                </button>
                                 <a href="{{ route('gradoSeccion.inicio')}}" class="btn btn-outline-secondary">Cancelar</a>
 
                             </div>

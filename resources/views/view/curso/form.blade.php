@@ -92,7 +92,7 @@
 
                     <div class="col-sm-12 text-right mt-4">
                         <button type="submit" class="btn btn-primary">
-                            {{ $curso->capacidad == [] ? 'Actualizar' : 'Registrar' }}
+
                         </button>
                         <a href="{{ route('curso.inicio')}}" class="btn btn-outline-secondary">Cancelar</a>
 

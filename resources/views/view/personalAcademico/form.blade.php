@@ -198,7 +198,9 @@
                 </div>
 
                 <div class="col-sm-12 text-right mt-4">
-                    <button type="submit" class="btn btn-primary">Registrar</button>
+                    <button type="submit" class="btn btn-primary">
+                        {{ $personal->per_id ? 'Actualizar' : 'Registrar' }}
+                    </button>
                     <a href="{{ route('personal.inicio') }}" class="btn btn-outline-secondary">Cancelar</a>
 
                 </div>

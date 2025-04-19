@@ -190,7 +190,9 @@
                         <span class="text-danger">* Campos requeridos</span>
                     </div>
                     <div class="col-sm-12 text-right mt-4">
-                        <button v-if="!loading" type="submit" class="btn btn-primary">Registrar</button>
+                        <button   type="submit" class="btn btn-primary">
+                            {{ $usuario->id ? 'Actualizar' : 'Registrar' }}
+                        </button>
 
                         <button type="button" class="btn btn-outline-secondary"
                            >Cancelar</button>

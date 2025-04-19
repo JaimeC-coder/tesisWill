@@ -57,7 +57,9 @@
 
         <div class="d-inline row p-2 float-right">
 
-            <button type="submit" class="btn btn-primary">Registrar</button>
+            <button type="submit" class="btn btn-primary">
+                {{ isset($periodo) ? 'Actualizar' : 'Registrar' }}
+            </button>
             <a href="{{ route('periodo.inicio') }}" class="btn btn-outline-secondary">Cancelar</a>
         </div>
     </div>

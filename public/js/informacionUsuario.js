@@ -49,7 +49,7 @@ function searchInformation(){
             alert("Datos encontrados");
             return;
         }else if(data && data.per_dni){
-            blockInput(true);
+
             per_id.value=data.per_id;
             nombre.value =data.per_nombres || "";
             apellido.value=data.per_apellidos || "";

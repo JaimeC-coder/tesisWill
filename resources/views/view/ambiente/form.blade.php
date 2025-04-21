@@ -37,11 +37,14 @@
             </div>
         </div>
         <div class="d-inline row p-2 float-right">
-            @if ($ambiente->ala_id)
-                <button type="submit" class="btn btn-primary">Actualizar</button>
-            @else
-                <button type="submit" class="btn btn-primary">Registrar</button>
-            @endif
+
+
+            <button type="submit" class="btn btn-primary">
+                {{ $ambiente->ala_id ? 'Actualizar' : 'Registrar' }}
+            </button>
+
+
+
             <a href="{{ route('ambiente.inicio') }}" class="btn btn-outline-secondary">Cancelar</a>
         </div>
     </div>

@@ -35,7 +35,9 @@ class MatriculaController extends Controller
      */
     public function create()
     {
-        //
+        $matricula = New Matricula();
+
+        return view('view.matricula.create', compact('matricula'));
     }
 
     /**
@@ -43,7 +45,7 @@ class MatriculaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return $request;
     }
 
     /**
@@ -67,7 +69,7 @@ class MatriculaController extends Controller
      */
     public function update(Request $request, Matricula $matricula)
     {
-        //
+        return $request;
     }
 
     /**
@@ -77,38 +79,51 @@ class MatriculaController extends Controller
     {
         //
     }
-    public function inicio(){
+ 
 
-        $informacion = Matricula::where('is_deleted', '!=', 1)->get();
-        foreach ($informacion as $value => $m) {
-            $id =$value+1;
-            $alumno = Alumno::where('alu_id', $m->alu_id)->first();
-            $persona = Persona::where('per_id', $alumno->per_id)->first();
-            $apoderado = Apoderado::where('apo_id', $alumno->apo_id)->first();
-            $apo_persona = Persona::where('per_id', $apoderado->per_id)->first();
-            $periodo = Periodo::where('per_id', $m->per_id)->first();
-            $anio = Anio::where('anio_id', $periodo->anio_id)->first();
-            $gsa = Gsa::where('ags_id', $m->ags_id)->first();
-            $aula = Aula::where('ala_id', $gsa->ala_id)->first();
-            $nivel = Nivel::where('niv_id', $gsa->niv_id)->first();
-            $grado = Grado::where('gra_id', $gsa->gra_id)->first();
-            $seccion = Seccion::where('sec_id', $gsa->sec_id)->first();
-            $m->id_persona = $persona->per_id;
-            $m->dni = $persona->per_dni;
-            $m->alumno = $persona->per_apellidos . ' ' . $persona->per_nombres;
-            if ($apo_persona->per_nombres == "") {
-                $m->apoderado = $apo_persona->per_nombre_completo;
-            } else {
-                $m->apoderado = $apo_persona->per_apellidos . ' ' . $apo_persona->per_nombres;
-            }
-            $m->parentesco = $apoderado->apo_parentesco;
-            $m->periodo = $anio->anio_descripcion;
-            $m->estadoPeriodo = $periodo->per_estado;
-            $m->aula = $aula->ala_descripcion;
-            $m->nivel = $nivel->niv_descripcion;
-            $m->grado = $grado->gra_descripcion;
-            $m->seccion = $seccion->sec_descripcion;
+    public function showNiveles(Request $request)
+    {
+        $niveles = Nivel::get();
+        return response()->json($niveles);
+       /*  if ($request->ajax()) {
+            return response()->json($niveles);
+        } */
+        return view('Error404');
+    }
+
+    public function showGrados(Request $request)
+    {
+        $nivel = $request['params']['id'];
+        $grados = Grado::where('niv_id',$nivel)->get();
+        return response()->json($grados);
+       /*  if ($request->ajax()) {
+            return response()->json($grados);
         }
-        return view('view.matricula.inicio', compact('informacion'));
+        return view('Error404'); */
+    }
+
+    public function showSecciones(Request $request)
+    {
+        $grado = $request['params']['id'];
+        $secciones = Seccion::where('gra_id',$grado)->get();
+        return response()->json($secciones);
+        /* if ($request->ajax()) {
+            return response()->json($secciones);
+        }
+        return view('Error404'); */
+    }
+
+    public function infoSecciones(Request $request)
+    {
+        $data = $request['params']['data'];
+        $seccion = Seccion::where('sec_id',$data)->first();
+        $aula = Aula::where('ala_id',$seccion->sec_aula)->first();
+        $seccion->aula = $aula->ala_descripcion;
+        $seccion->ala_id = $aula->ala_id;
+        return response()->json($seccion);
+        /* if ($request->ajax()) {
+            return response()->json($seccion);
+        }
+        return view('Error404'); */
     }
 }

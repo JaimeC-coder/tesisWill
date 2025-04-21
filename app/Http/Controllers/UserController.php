@@ -9,6 +9,7 @@ use App\Models\Persona;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 use function Illuminate\Log\log;
 
@@ -21,6 +22,7 @@ class UserController extends Controller
     public $sexo = ['M' => 'Masculino', 'F' => 'Femenino'];
     public $estadoCivil = ['S' => 'Soltero', 'C' => 'Casado', 'D' => 'Divorciado', 'V' => 'Viudo'];
     public $vive = [1 => 'Si', 2 => 'No'];
+    public $estados = ['0' => 'Activo', '1' => 'Inactivo'];
     public $parentesco = ['Madre' => 'Madre', 'Padre' => 'Padre', 'TUTOR' => 'Tutor'];
 
     public function index()
@@ -33,14 +35,16 @@ class UserController extends Controller
      */
     public function create()
     {
-        $user = new User();
+        $usuario = new User();
         $sexo = $this->sexo;
+        $estados = $this->estados;
         $estadoCivil = $this->estadoCivil;
         $vive = $this->vive;
         $parentesco = $this->parentesco;
+        $roles = Role::all();
         $departamentos = Departamento::all();
 
-        return view('view.usuario.create', compact('user', 'sexo', 'estadoCivil', 'vive', 'parentesco', 'departamentos'));
+        return view('view.usuario.create', compact('usuario', 'estados','sexo', 'estadoCivil', 'vive', 'parentesco', 'departamentos','roles'));
 
     }
 
@@ -179,15 +183,17 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit(User $usuario)
     {
+        $roles = Role::all();
+        $estados = $this->estados;
         $sexo = $this->sexo;
         $estadoCivil = $this->estadoCivil;
         $vive = $this->vive;
         $parentesco = $this->parentesco;
         $departamentos = Departamento::all();
 
-        return view('view.alumno.edit',compact('sexo','estadoCivil','vive','parentesco','departamentos','user'));
+        return view('view.usuario.edit',compact('sexo','estados','estadoCivil','vive','parentesco','departamentos','usuario','roles'));
 
 
 

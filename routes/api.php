@@ -5,16 +5,21 @@ use App\Http\Controllers\AsignarCursoController;
 use App\Http\Controllers\AsignarGradoController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\HorarioController;
+use App\Http\Controllers\MatriculaController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ReportController;
-use App\Models\AsignarCurso;
+
 use Illuminate\Support\Facades\Route;
 
 
 Route::POST('provincia', [DepartamentoController::class, 'searchProvincia']);
 Route::POST('distrito', [DepartamentoController::class, 'searchDistrito']);
 Route::POST('personas', [PersonaController::class,'searchDni']);
+Route::POST('alumnoMatricula', [MatriculaController::class,'searchAlumno']);
+Route::POST('showGrados', [MatriculaController::class,'showGrados']);
+Route::POST('showSecciones', [MatriculaController::class,'showSecciones']);
+Route::POST('infoSecciones', [MatriculaController::class,'infoSecciones']);
 Route::POST('asignarCurso', [AsignarCursoController::class,'asignarCurso']);
 Route::POST('EliminarCurso', [AsignarCursoController::class,'eliminarCurso']);
 Route::POST('asignacionMasivaCurso', [AsignarCursoController::class,'asignacionMasivaCurso']);

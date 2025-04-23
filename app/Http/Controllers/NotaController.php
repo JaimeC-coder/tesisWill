@@ -327,101 +327,6 @@ class NotaController extends Controller
         return $capacidades;
     }
 
-    // public function getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo)
-    // {
-
-    //     $Gsas = Gsa::select('ags_id')
-    //         ->where('niv_id', $nivel)
-    //         ->where('gra_id', $grado)
-    //         ->where('sec_id', $seccion)
-    //         ->where('is_deleted', '!=', 1)
-    //         ->get();
-
-
-    //     $numeroPeriodos =  $tipoPeriodo->tp_id;
-
-
-    //     foreach ($Gsas as $g) {
-    //         $matricula = Matricula::where('ags_id', $g->ags_id)
-    //             ->where('is_deleted', '!=', 1)
-    //             ->first();
-
-    //         if (!$matricula) continue;
-
-    //         $alumno = Alumno::where('alu_id', $matricula->alu_id)
-    //             ->where('is_deleted', '!=', 1)
-    //             ->first();
-
-    //         if (!$alumno) continue;
-
-    //         $persona = Persona::where('per_id', $alumno->per_id)
-    //             ->where('is_deleted', '!=', 1)
-    //             ->first();
-
-    //         if (!$persona) continue;
-
-    //         $g->periodoID = $matricula->per_id;
-    //         $g->alumno = $persona->per_apellidos . ' ' . $persona->per_nombres;
-    //         $g->dni = $persona->per_dni;
-    //         $g->idAlumno = $alumno->alu_id;
-
-    //         $notas = Nota::select(['nt_bimestre', 'nt_nota', 'nt_id'])
-    //             ->where('alu_id', $alumno->alu_id)
-    //             ->where('curso_id', $curso->cur_id)
-    //             ->where('pa_id', $docente)
-    //             ->where('nt_is_deleted', '!=', 1)
-    //             ->get();
-
-    //         $notasOrganizadas = [];
-
-    //         foreach ($notas as $v) {
-    //             $capacidades = NotaCapacidad::select(['nc_descripcion', 'nc_nota', 'nt_id'])
-    //                 ->where('nt_id', $v->nt_id)
-    //                 ->get();
-
-    //             foreach ($capacidades as $index => $cap) {
-    //                 $capKey = "C" . ($index + 1);
-
-    //                 if (!isset($notasOrganizadas[$capKey])) {
-    //                     $notasOrganizadas[$capKey] = [];
-    //                 }
-
-    //                 // Solo guardar notas para los períodos que correspondan según el tipo
-    //                 if ($v->nt_bimestre <= $numeroPeriodos) {
-    //                     $notasOrganizadas[$capKey]["B" . $v->nt_bimestre] = [
-    //                         "nota" => $cap->nc_nota ?? '--',
-    //                         "idNotaPadre" => $cap->nt_id ?? 0
-
-    //                     ];
-    //                 }
-    //             }
-    //         }
-
-    //         // Completar períodos faltantes con notas nulas
-    //         foreach ($notasOrganizadas as $capKey => &$bimestres) {
-    //             for ($i = 1; $i <= $numeroPeriodos; $i++) {
-    //                 if (!isset($bimestres["B" . $i])) {
-    //                     $bimestres["B" . $i] = ["nota" => NULL];
-    //                     $bimestres["B" . $i]["idNota"] = -1;
-    //                 }
-    //             }
-
-    //             // Calcular promedio solo con las notas existentes
-    //             $notasValores = array_column($bimestres, 'nota');
-    //             $notasFiltradas = array_filter($notasValores, function ($nota) {
-    //                 return $nota !== '0' && $nota !== '--' && $nota !== NULL;
-    //             });
-
-    //             $promedio = !empty($notasFiltradas) ? $this->calcularPromedio($notasFiltradas) : '';
-    //             $bimestres["Promedio"] = ["nota" => $promedio, "idNota" => -1];
-    //         }
-
-    //         $g->notas = $notasOrganizadas;
-    //         $g->promedioValor = $this->buscarInfoNotas($g->promedio);
-    //     }
-
-    //     return $Gsas;
-    // }
 
     public function getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo)
     {
@@ -582,6 +487,7 @@ class NotaController extends Controller
                     $NotaPromoedio->save();
                     //si se registro correctamente la nota, se actualiza el promedio
                     $NotaPromoedio->nt_nota = $this->calcularPromedio($NotaPromoedio->nt_id);
+                    $NotaPromoedio->estadoPromedio = 0;
                     $NotaPromoedio->save();
                 } else {
                     $NotaCapacidadRegistro = NotaCapacidad::Create([
@@ -590,6 +496,9 @@ class NotaController extends Controller
                         'nt_id' => $idNota,
                         'nc_is_deleted' => 0
                     ]);
+                    $NotaPromoedio = Nota::where('nt_id', $idNota)->first();
+                    $NotaPromoedio->estadoPromedio = 0;
+                    $NotaPromoedio->save();
                 }
             } else {
 
@@ -614,6 +523,7 @@ class NotaController extends Controller
                     ]);
 
                     $NotaPromoedio->nt_nota = $notaSeleccionada;
+                    $NotaPromoedio->estadoPromedio = 0;
                     $NotaPromoedio->save();
                 } else {
 
@@ -624,6 +534,11 @@ class NotaController extends Controller
                         'nt_id' => $NotaPromoedio->nt_id,
                         'nc_is_deleted' => 0
                     ]);
+
+
+                    $NotaPromoedio->estadoPromedio = 0;
+                    $NotaPromoedio->save();
+
                 }
             }
 
@@ -633,4 +548,29 @@ class NotaController extends Controller
             return response()->json(['status' => 404, 'message' =>  'Error al actualizar la capacidad: ' . $th->getMessage()]);
         }
     }
+
+
+    //creame un metodo que va a actualizar todas las notas con el promedio de las capacidades
+
+    public function updateNota(){
+        $notas = Nota::where('estadoPromedio',0 )->select('nt_id','nt_nota','estadoPromedio')->get();
+
+        foreach($notas as $nota){
+            $promedio = Nota::where('nt_id',$nota->nt_id)->first();
+            $capacidadNota = NotaCapacidad::where('nt_id',$nota->nt_id)->pluck('nc_nota');
+            $nuevoPromedio = $this->calcularPromedio($capacidadNota->toArray());
+
+            $promedio->nt_nota = $nuevoPromedio;
+            $promedio->estadoPromedio = 1;
+            $promedio->save();
+        }
+        return  $notas;
+
+    }
+
+    //año ,grado ,nivel ,seccion
+
+
+
+
 }

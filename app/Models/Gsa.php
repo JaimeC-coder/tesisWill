@@ -43,5 +43,9 @@ class Gsa extends Model
     {
         return $this->hasMany(Matricula::class, 'ags_id', 'ags_id');
     }
+    public function nota()
+    {
+        return $this->hasMany(Nota::class, 'ags_id', 'ags_id');
+    }
 
 }

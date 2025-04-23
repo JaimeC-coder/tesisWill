@@ -49,6 +49,7 @@ Route::group(['prefix' => 'reporte'], function () {
     Route::post('sexo', [ReportController::class, 'sexo']);
     Route::post('countPersonal', [ReportController::class, 'countPersonal']);
     Route::post('vacante', [ReportController::class, 'vacante']);
+    Route::get('gestion/pdf', [ReportController::class, 'getReportCoursePDF']);
 });
 Route::group(['prefix' => 'asignacion'], function () {
     Route::post('listCurso', [AsignarGradoController::class, 'listCurso']);
@@ -58,4 +59,5 @@ Route::group(['prefix' => 'asignacion'], function () {
 
 
 
-
+Route::get('prueba',[NotaController::class,'updateNota']);
+Route::get('prueba2',[NotaController::class,'reportShow']);

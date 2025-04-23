@@ -28,7 +28,8 @@
         <div class="section-body mt-4">
             <div class="container-fluid">
                 <div class="tab-content">
-                    <form action="{{ route('reporte.gestion') }}" method="GET" role="form" enctype="multipart/form-data">
+                    <form action="{{ route('reporte.gestion') }}" method="GET" role="form"
+                        enctype="multipart/form-data">
                         <div class="tab-pane active" id="aula-all">
                             <div class="card">
                                 <div class="card-body">
@@ -46,7 +47,8 @@
                                             </div>
                                             <div class="col-md-10">
                                                 <label class="col-form-label">Nivel </label>
-                                                <select class="form-control show-tick ml-3" name="nivel" id="nivel" disabled>
+                                                <select class="form-control show-tick ml-3" name="nivel" id="nivel"
+                                                    disabled>
                                                     <option value="0" selected disabled>-- Selecciona --</option>
                                                 </select>
                                             </div>
@@ -54,7 +56,8 @@
                                         <div class="row col-md-4">
                                             <div class="col-md-10">
                                                 <label class="col-form-label">Grado </label>
-                                                <select class="form-control show-tick ml-3" name="grado" id="grado" disabled>
+                                                <select class="form-control show-tick ml-3" name="grado" id="grado"
+                                                    disabled>
                                                     <option value="0" selected disabled>-- Selecciona --</option>
 
                                                 </select>
@@ -62,7 +65,8 @@
                                             <div class="col-md-10">
                                                 <label class="col-form-label">Secciones </label>
 
-                                                <select class="form-control show-tick ml-3" name="seccion" id="seccion" disabled>
+                                                <select class="form-control show-tick ml-3" name="seccion" id="seccion"
+                                                    disabled>
                                                     <option value="0" selected disabled>-- Selecciona --</option>
                                                 </select>
                                             </div>
@@ -72,25 +76,25 @@
                                         <div class="col-md-4 d-flex align-items-center justify-content-center">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <input type="submit" value="Buscar" class="btn btn-primary btn-block" disabled id="btnbuscar">
+                                                    <input type="submit" value="Buscar" class="btn btn-primary btn-block"
+                                                        disabled id="btnbuscar">
 
                                                 </div>
                                                 <div class="col-md-6">
 
 
                                                     <div class="dropdown" id="dropdown">
-                                                        <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false" disabled>
-                                                          Opciones
+                                                        <button class="btn btn-secondary dropdown-toggle" type="button"
+                                                            data-toggle="dropdown" aria-expanded="false" disabled
+                                                            id="btnDatosprueba">
+                                                            Opciones
                                                         </button>
                                                         <div class="dropdown-menu">
-                                                            <a class="dropdown-item"
-                                                            :href="`/report/courses/pdf?año=${params.año}&nivel=${params.nivel}&grado=${params.grado}&seccion=${params.seccion}`"
-                                                            target="_blank">Generar PDF</a>
-                                                            <a class="dropdown-item" href="#" data-toggle="modal"
-                                                            data-target="#exampleModal" @click="showChartInModal">Ver
-                                                            Gráfico</a>
+                                                            <button class="dropdown-item" id="buttonrepor"
+                                                                type="button">Generar PDF</button>
+                                                         
                                                         </div>
-                                                      </div>
+                                                    </div>
 
                                                 </div>
                                             </div>
@@ -98,6 +102,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div id="listar-info" class="card">
                                 <div class="card-header">
                                     <h3 class="card-title">Reporte Por Curso</h3>
@@ -112,42 +117,34 @@
                                                     <th class="dark">Curso</th>
                                                     <th class="dark">Alumnos Matriculados</th>
                                                     <th class="dark">Aprobados(%)</th>
+                                                    <th class="dark">En proceso(%)</th>
                                                     <th class="dark">Desaprobados(%)</th>
-                                                    <th class="dark">Promedio General</th>
+
                                                 </tr>
                                             </thead>
                                             <tbody>
 
-                                                @if (isset($result) && $result != null)
-                                                    @foreach ($result as $curso)
+                                                @if (isset($resultados) && $resultados != null)
+                                                    @foreach ($resultados as $curso)
                                                         <tr>
                                                             <td>{{ $loop->iteration }}</td>
-                                                            <td>{{ $curso->curso }}</td>
-                                                            <td>{{ $curso->total_alumnos }}</td>
-                                                            <td
-                                                                class="{{ $curso->porcentaje_aprobados < 50 ? 'text-danger' : '' }}">
-                                                                {{ $curso->porcentaje_aprobados }}%
+                                                            <td>{{ $curso['curso_nombre'] }}</td>
+                                                            <td>{{ $curso['total_notas'] }}</td>
+                                                            <td class="text-success">
+                                                                {{ $curso['porcentaje_aprobados'] }}%
                                                             </td>
-                                                            <td
-                                                                class="{{ $curso->porcentaje_desaprobados < 50 ? 'text-danger' : '' }}">
-                                                                {{ $curso->porcentaje_desaprobados }}%
+                                                            <td class="text-warning">
+                                                                {{ $curso['porcentaje_B'] }}%
                                                             </td>
-                                                            {{-- <td class="{{ $curso->promedio_notas < 11 ? 'text-danger' : '' }}">
-                                                                {{ $curso->promedio_notas }}
-                                                            </td> --}}
+                                                            <td class="text-danger">
+                                                                {{ $curso['porcentaje_C'] }}%
+                                                            </td>
+
                                                         </tr>
                                                     @endforeach
+                                                @elseif($resultados == null)
                                                     <tr>
-                                                        <td colspan="5">
-                                                            PROMEDIO GENERAL DEL GRADO:
-                                                        </td>
-                                                        {{-- <td class="font-weight-bold">
-                                                            {{ $promedio_general }}
-                                                        </td> --}}
-                                                    </tr>
-                                                @elseif($result == null)
-                                                    <tr>
-                                                        <td colspan="6">
+                                                        <td colspan="7">
                                                             <img src="/assets/images/report-search.svg" alt="Filtrar"
                                                                 width="20%">
                                                             <p class="mt-4">
@@ -157,7 +154,7 @@
                                                     </tr>
                                                 @else
                                                     <tr>
-                                                        <td colspan="6">
+                                                        <td colspan="7">
                                                             <img src="/assets/images/report-search.svg" alt="Filtrar"
                                                                 width="20%">
                                                             <p class="mt-4">
@@ -170,45 +167,6 @@
 
 
 
-                                                {{-- <tr v-if="cursosList.length === 0 && isFirstMounted">
-                                                <td colspan="6">
-                                                    <img src="/assets/images/report-search.svg" alt="Filtrar" width="20%">
-                                                    <p class="mt-4">
-                                                        ¡Esperando buscar!
-                                                    </p>
-                                                </td>
-                                            </tr>
-                                            <tr v-else-if="cursosList.length === 0 && !isFirstMounted">
-                                                <td colspan="6">
-                                                    <img src="/assets/images/no-results.svg" alt="Filtrar" width="20%">
-                                                    <p class="mt-4">
-                                                        No se han encontrado resultados.
-                                                    </p>
-                                                </td>
-                                            </tr> --}}
-                                                {{-- <template v-else>
-                                                <tr v-for="(item, index) in cursosList" :key="item.cur_id">
-                                                    <td>{{ index + 1 }}</td>
-                                                    <td>{{ item.curso }}</td>
-                                                    <td>{{ item.total_alumnos }}</td>
-                                                    <td
-                                                        :class="{ 'text-danger': parseFloat(item.porcentaje_aprobados) < 50 }">
-                                                        {{ item.porcentaje_aprobados }}%</td>
-                                                    <td>
-                                                        {{ item.porcentaje_desaprobados }}%
-                                                    </td>
-                                                    <td :class="{ 'text-danger': parseFloat(item.promedio_notas) < 11 }">{{
-                                                        item.promedio_notas }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="5">
-                                                        PROMEDIO GENERAL DEL GRADO:
-                                                    </td>
-                                                    <td class="font-weight-bold">
-                                                        {{ calcularPromedioNotas }}
-                                                    </td>
-                                                </tr>
-                                            </template> --}}
                                             </tbody>
 
                                         </table>
@@ -253,4 +211,20 @@
 
 @section('js')
     <script src="{{ asset('js/reportes/gestion.js') }}"></script>
+
+    <script>
+        let button = document.getElementById('buttonrepor');
+        button.addEventListener('click', function() {
+            alert('Generando PDF...');
+            let urlParams = new URLSearchParams(window.location.search);
+            let anio = urlParams.get('anio');
+            let nivel = urlParams.get('nivel');
+            let grado = urlParams.get('grado');
+            let seccion = urlParams.get('seccion');
+            // Redirigir a la URL con los parámetros
+            window.open('/api/reporte/gestion/pdf?anio=' + anio + '&nivel=' + nivel + '&grado=' + grado + '&seccion=' +
+                seccion, '_blank');
+        });
+        //obtener los datos de la url
+    </script>
 @endsection

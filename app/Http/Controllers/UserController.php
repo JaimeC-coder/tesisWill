@@ -9,6 +9,7 @@ use App\Models\Persona;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
 use function Illuminate\Log\log;
@@ -54,135 +55,49 @@ class UserController extends Controller
     public function store(Request $request)
     {
         return $request;
-        // $newRequest = $request->all();
-        // DB::transaction(function () use ($newRequest) {
-        //     if(isset($newRequest['per_id_Alumno']) && $newRequest['per_id_Alumno'] != null && isset($newRequest['per_id_Apoderado']) && $newRequest['per_id_Apoderado'] != null ){
-        //         log('entro if');
-        //         $Apoderado = Apoderado::create([
-        //             'per_id' => $newRequest['per_id_Apoderado'],
-        //             'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-        //             'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado' ],
-        //         ]);
 
-        //     }else if ($newRequest['per_id_Alumno'] && $newRequest['per_id_Alumno'] != null && !$newRequest['per_id_Apoderado'] && $newRequest['per_id_Apoderado'] == null ){ //apoderado
-        //         log('entro else if 2');
-        //         $per_id_Apoderado = Persona::create([
-        //             'per_dni' => $newRequest['per_dni_Apoderado'],
-        //             'per_nombres' => $newRequest['per_nombres_Apoderado'],
-        //             'per_apellidos' => $newRequest['per_apellidos_Apoderado'],
-        //             'per_email' => $newRequest['per_email_Apoderado'],
-        //             'per_sexo' => $newRequest['per_sexo_Apoderado'],
-        //             'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Apoderado'],
-        //             'per_estado_civil' => $newRequest['per_estado_civil_Apoderado'],
-        //             'per_celular' => $newRequest['per_celular_Apoderado'],
-        //             'per_pais' => $newRequest['per_pais_Apoderado'],
-        //             'per_departamento' => $newRequest['per_departamento_Apoderado'],
-        //             'per_provincia' => $newRequest['per_provincia_Apoderado'],
-        //             'per_distrito' => $newRequest['per_distrito_Apoderado'],
-        //             'per_direccion' => $newRequest['per_direccion_Apoderado']
-        //         ]);
+        DB::beginTransaction();
+        try {
+            if(!$request->per_id){
+                $Persona = Persona::create([
+                    'per_dni' => $request->per_dni,
+                    'per_nombres' => $request->nombres,
+                    'per_apellidos' => $request->apellidos,//!falta
+                    'per_email' => $request->emailhidden,
+                    'per_sexo' => $request->per_sexo,
+                    'per_fecha_nacimiento' => $request->per_fecha_nacimiento,
+                    'per_estado_civil' => $request->per_estado_civil,
+                    'per_pais' => $request->pais, //!falta
+                    'per_departamento' => $request->per_departamento,
+                    'per_provincia' => $request->per_provincia,
+                    'per_distrito' => $request->per_distrito,
+                    'per_direccion' => $request->per_direccion,
+                ]);
+                $request->per_id = $Persona->per_id;
+            }
 
+            User::create([
+                'per_id' => $request->per_id,
+                'name' => $request->nameUserhidden,
+                'email' => $request->emailhidden,
+                'password' => Hash::make($request->password),
+                'rol_id' => 1,
+                'estado' => $request->estado
+            ]);
 
-        //         $Apoderado = Apoderado::create([
-        //             'per_id' =>$per_id_Apoderado->per_id,
-        //             'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-        //             'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
-        //         ]);
+            DB::commit();
 
-        //     }else if (!isset($newRequest['per_id_Alumno']) && $newRequest['per_id_Alumno'] == null && isset($newRequest['per_id_Apoderado']) && $newRequest['per_id_Apoderado'] != null){ //alumno
-        //         log('entro else if 3');
-        //         $per_id_alumno = Persona::create([
-        //             'per_dni' => $newRequest['per_dni_Alumno'],
-        //             'per_nombres' => $newRequest['per_nombres_Alumno'],
-        //             'per_apellidos' => $newRequest['per_apellidos_Alumno'],
-        //             'per_email' => $newRequest['per_email_Alumno'],
-        //             'per_sexo' => $newRequest['per_sexo_Alumno'],
-        //             'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Alumno'],
-        //             'per_estado_civil' => $newRequest['per_estado_civil_Alumno'],
-        //             'per_celular' => $newRequest['per_celular_Alumno'],
-        //             'per_pais' => $newRequest['per_pais_Alumno'],
-        //             'per_departamento' => $newRequest['per_departamento_Alumno'],
-        //             'per_provincia' => $newRequest['per_provincia_Alumno'],
-        //             'per_distrito' => $newRequest['per_distrito_Alumno'],
-        //             'per_direccion' => $newRequest['per_direccion_Alumno'],
-        //         ]);
-        //         $newRequest['per_id_Alumno'] = $per_id_alumno->per_id;
+           return redirect()->route('usuario.inicio')->with('success', 'Usuario creado correctamente');
 
-        //         $Apoderado = Apoderado::create([
-        //             'per_id' => $newRequest['per_id_Apoderado'],
-        //             'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-        //             'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
-        //         ]);
-
-
-        //     }else{
-        //         log('entro else');
-        //         $per_id_Apoderado = Persona::create([
-        //             'per_dni' => $newRequest['per_dni_Apoderado'],
-        //             'per_nombres' => $newRequest['per_nombres_Apoderado'],
-        //             'per_apellidos' => $newRequest['per_apellidos_Apoderado'],
-        //             'per_email' => $newRequest['per_email_Apoderado'],
-        //             'per_sexo' => $newRequest['per_sexo_Apoderado'],
-        //             'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Apoderado'],
-        //             'per_estado_civil' => $newRequest['per_estado_civil_Apoderado'],
-        //             'per_celular' => $newRequest['per_celular_Apoderado'],
-        //             'per_pais' => $newRequest['per_pais_Apoderado'],
-        //             'per_departamento' => $newRequest['per_departamento_Apoderado'],
-        //             'per_provincia' => $newRequest['per_provincia_Apoderado'],
-        //             'per_distrito' => $newRequest['per_distrito_Apoderado'],
-        //             'per_direccion' => $newRequest['per_direccion_Apoderado']
-        //         ]);
-        //         $newRequest['per_id_Alumno'] = $per_id_Apoderado->per_id;
-
-
-
-        //         $per_id_alumno = Persona::create([
-        //             'per_dni' => $newRequest['per_dni_Alumno'],
-        //             'per_nombres' => $newRequest['per_nombres_Alumno'],
-        //             'per_apellidos' => $newRequest['per_apellidos_Alumno'],
-        //             'per_email' => $newRequest['per_email_Alumno'],
-        //             'per_sexo' => $newRequest['per_sexo_Alumno'],
-        //             'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Alumno'],
-        //             'per_estado_civil' => $newRequest['per_estado_civil_Alumno'],
-        //             'per_celular' => $newRequest['per_celular_Alumno'],
-        //             'per_pais' => $newRequest['per_pais_Alumno'],
-        //             'per_departamento' => $newRequest['per_departamento_Alumno'],
-        //             'per_provincia' => $newRequest['per_provincia_Alumno'],
-        //             'per_distrito' => $newRequest['per_distrito_Alumno'],
-        //             'per_direccion' => $newRequest['per_direccion_Alumno']
-        //         ]);
-        //         $newRequest['per_id_Alumno'] = $per_id_alumno->per_id;
-
-
-        //         $Apoderado = Apoderado::create([
-        //             'per_id' =>$per_id_Apoderado->per_id,
-        //             'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-        //             'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
-        //         ]);
-        //     }
-            log('salio');
-
-        //     Alumno::create([
-        //         'per_id' => $newRequest['per_id_Alumno'],
-        //         'apo_id' => $Apoderado ? $Apoderado->apo_id : null,
-        //         'alu_estado' => 1
-        //     ]);
-
-        // });
-        return redirect()->route('alumno.inicio')->with('success', 'Alumno registrado correctamente');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            dd($e);
+            return redirect()->route('usuario.inicio')->with('error', 'Error al crear el usuario');
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(User $user)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit(User $usuario)
     {
         $roles = Role::all();
@@ -195,8 +110,6 @@ class UserController extends Controller
 
         return view('view.usuario.edit',compact('sexo','estados','estadoCivil','vive','parentesco','departamentos','usuario','roles'));
 
-
-
     }
 
     /**
@@ -205,47 +118,32 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         return $request;
-        // $newRequest = $request->all();
+        // $datos = $request['params']['data'];
+        // $persona = Persona::find($datos['per_id']);
+        // $persona->per_dni = $datos['dni'];
+        // $persona->per_nombres = $datos['nombres'];
+        // $persona->per_apellidos = $datos['apellidos'];
+        // $persona->per_email = $datos['email'];
+        // $persona->per_sexo = $datos['sexo'];
+        // $persona->per_fecha_nacimiento = $datos['fecha_nacimiento'];
+        // $persona->per_estado_civil = $datos['estado_civil'];
+        // $persona->per_celular = $datos['celular'];
+        // $persona->per_pais = $datos['pais'];
+        // $persona->per_departamento = $datos['departamento'];
+        // $persona->per_provincia = $datos['provincia'];
+        // $persona->per_distrito = $datos['distrito'];
+        // $persona->per_direccion = $datos['direccion'];
+        // $persona->save();
 
-        // DB::transaction(function () use ($newRequest, $alumno) {
-        //     $alumno->persona->update([
-        //         'per_dni' => $newRequest['per_dni_Alumno'],
-        //         'per_nombres' => $newRequest['per_nombres_Alumno'],
-        //         'per_apellidos' => $newRequest['per_apellidos_Alumno'],
-        //         'per_email' => $newRequest['per_email_Alumno'],
-        //         'per_sexo' => $newRequest['per_sexo_Alumno'],
-        //         'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Alumno'],
-        //         'per_estado_civil' => $newRequest['per_estado_civil_Alumno'],
-        //         'per_celular' => $newRequest['per_celular_Alumno'],
-        //         'per_pais' => $newRequest['per_pais_Alumno'],
-        //         'per_departamento' => $newRequest['per_departamento_Alumno'],
-        //         'per_provincia' => $newRequest['per_provincia_Alumno'],
-        //         'per_distrito' => $newRequest['per_distrito_Alumno'],
-        //         'per_direccion' => $newRequest['per_direccion_Alumno'],
-        //     ]);
-
-        //     $alumno->apoderado->persona->update([
-        //         'per_dni' => $newRequest['per_dni_Apoderado'],
-        //         'per_nombres' => $newRequest['per_nombres_Apoderado'],
-        //         'per_apellidos' => $newRequest['per_apellidos_Apoderado'],
-        //         'per_email' => $newRequest['per_email_Apoderado'],
-        //         'per_sexo' => $newRequest['per_sexo_Apoderado'],
-        //         'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Apoderado'],
-        //         'per_estado_civil' => $newRequest['per_estado_civil_Apoderado'],
-        //         'per_celular' => $newRequest['per_celular_Apoderado'],
-        //         'per_pais' => $newRequest['per_pais_Apoderado'],
-        //         'per_departamento' => $newRequest['per_departamento_Apoderado'],
-        //         'per_provincia' => $newRequest['per_provincia_Apoderado'],
-        //         'per_distrito' => $newRequest['per_distrito_Apoderado'],
-        //         'per_direccion' => $newRequest['per_direccion_Apoderado'],
-        //     ]);
-
-        //     $alumno->apoderado->update([
-        //         'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-        //         'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
-        //     ]);
-
-        // });
+        // $usuario = User::find($datos['id_user']);
+        // $usuario->name = $datos['name'];
+        // $usuario->email = $datos['email'];
+        // $usuario->rol_id = $datos['id_rol'];
+        // if(isset($datos['password']) == true){
+        //     $usuario->password = Hash::make($datos['password']);
+        // }
+        // $usuario->estado = $datos['estado'];
+        // $usuario->save();
 
         return redirect()->route('usuario.inicio')->with('success', 'Usuario actualizado correctamente');
 

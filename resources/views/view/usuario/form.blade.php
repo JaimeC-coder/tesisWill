@@ -87,8 +87,7 @@
                         <div class="form-group">
                             <label>País <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" required
-                                value="{{ $usuario->persona->per_pais ?? '' }}" disabled name="per_pais"
-                                id="per_pais">
+                                value="{{ $usuario->persona->per_pais ?? '' }}" disabled name="per_pais" id="per_pais">
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-12">
@@ -133,7 +132,9 @@
                         <div class="form-group">
                             <label>Correo </label>
                             <input type="email" class="form-control"
-                                value="{{ $usuario->persona->per_email ?? '' }}" id="per_email" name="per_email">
+                                value="{{ $usuario->persona->per_email ?? '' }}" id="per_email" name="per_email" disabled>
+                            <input type="hidden"  id="emailhidden" name="emailhidden" >
+                            <input type="hidden"  id="nameUserhidden" name="nameUserhidden" >
                         </div>
                     </div>
                 </div>
@@ -157,9 +158,9 @@
                 <div class="col-lg-6 col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Nombre de Usuario <span class="text-danger">*</span></label>
-                        <input id="usuario" name="usuario" type="text"
-                            value="{{ $usuario->name ?? '' }}" minlength="4" maxlength="20"
-                            class="form-control" aria-invalid="true" autofocus required>
+                        <input id="usuario" name="usuario" type="text" value="{{ $usuario->name ?? '' }}"
+                            minlength="4" maxlength="20" class="form-control" aria-invalid="true" autofocus
+                            required>
                     </div>
                 </div>
 
@@ -169,7 +170,7 @@
                     <select name="id_rol" class="form-control show-tick" required>
                         <option value="0" selected disabled>-- Selecciona --</option>
                         @foreach ($roles as $rol1)
-                            <option value="{{ $rol1->name }}"  @if (isset($usuario->roles[0]->name) && $usuario->roles[0]->name == $rol1->name) selected @endif>
+                            <option value="{{ $rol1->name }}" @if (isset($usuario->roles[0]->name) && $usuario->roles[0]->name == $rol1->name) selected @endif>
                                 {{ $rol1->name }}</option>
                         @endforeach
                     </select>
@@ -179,7 +180,7 @@
                     <div class="form-group">
                         <label>Correo Electrónico <span class="text-danger">*</span></label>
                         <input id="email" name="email" type="email" value="{{ $usuario->email ?? '' }}"
-                            class="form-control" aria-invalid="true" autofocus required>
+                            class="form-control " aria-invalid="true" autofocus required disabled >
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12">
@@ -194,11 +195,10 @@
                     <label>Estado <span class="text-danger">*</span></label>
                     <select name="estado" class="form-control show-tick" required>
                         <option value="" disabled>-- Selecciona --</option>
-                       @foreach ($estados as  $key => $tipo)
+                        @foreach ($estados as $key => $tipo)
                             <option value="{{ $key }}" @if (isset($usuario->estado) && $usuario->estado == $key) selected @endif>
                                 {{ $tipo }}</option>
-
-                       @endforeach
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-lg-12 col-md-6 col-sm-12 mt-3 d-none">
@@ -220,6 +220,6 @@
 </div>
 
 @section('js')
-<script src="{{ asset('js/informacionUsuario.js') }}"></script>
+    <script src="{{ asset('js/usuario/usuario.js') }}"></script>
     <script src="{{ asset('js/distrito.js') }}"></script>
 @endsection

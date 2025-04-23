@@ -9,9 +9,9 @@ use App\Http\Controllers\MatriculaController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ReportController;
-
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Http\Request;
 
 Route::POST('provincia', [DepartamentoController::class, 'searchProvincia']);
 Route::POST('distrito', [DepartamentoController::class, 'searchDistrito']);
@@ -25,6 +25,15 @@ Route::POST('EliminarCurso', [AsignarCursoController::class,'eliminarCurso']);
 Route::POST('asignacionMasivaCurso', [AsignarCursoController::class,'asignacionMasivaCurso']);
 Route::POST('EliminacionMasivaCurso', [AsignarCursoController::class,'eliminacionMasivaCurso']);
 Route::GET('notas1', [NotaController::class, 'inicioaPI']);
+Route::GET('verificar-correo', [UserController::class, 'verificar-correo']);
+
+Route::post('verificar-correo', function (Request $request) {
+    $email = $request->input('email');
+    $existe = \App\Models\Persona::where('per_email', $email)->exists(); // ajustá según tu modelo
+
+    return response()->json(['existe' => $existe]);
+});
+
 
 Route::group(['prefix' => 'anio'], function () {
     Route::post('nivel', [AnioController::class, 'nivel']);

@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Alumno;
-use App\Models\Apoderado;
 use App\Models\Departamento;
 use App\Models\Persona;
 use App\Models\User;
@@ -11,8 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Str;
 
-use function Illuminate\Log\log;
 
 class UserController extends Controller
 {
@@ -45,8 +43,7 @@ class UserController extends Controller
         $roles = Role::all();
         $departamentos = Departamento::all();
 
-        return view('view.usuario.create', compact('usuario', 'estados','sexo', 'estadoCivil', 'vive', 'parentesco', 'departamentos','roles'));
-
+        return view('view.usuario.create', compact('usuario', 'estados', 'sexo', 'estadoCivil', 'vive', 'parentesco', 'departamentos', 'roles'));
     }
 
     /**
@@ -54,45 +51,47 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        return $request;
+
 
         DB::beginTransaction();
         try {
-            if(!$request->per_id){
+            if (!$request->per_id || $request->per_id == null) {
                 $Persona = Persona::create([
                     'per_dni' => $request->per_dni,
-                    'per_nombres' => $request->nombres,
-                    'per_apellidos' => $request->apellidos,//!falta
+                    'per_nombres' => Str::ucfirst($request->nombreshidden),
+                    'per_apellidos' => Str::ucfirst($request->apellidoshidden),
                     'per_email' => $request->emailhidden,
                     'per_sexo' => $request->per_sexo,
                     'per_fecha_nacimiento' => $request->per_fecha_nacimiento,
                     'per_estado_civil' => $request->per_estado_civil,
-                    'per_pais' => $request->pais, //!falta
+                    'per_pais' => $request->paishidden ?? 'PERU',
+                    'per_celular' => $request->per_celular,
                     'per_departamento' => $request->per_departamento,
                     'per_provincia' => $request->per_provincia,
                     'per_distrito' => $request->per_distrito,
                     'per_direccion' => $request->per_direccion,
                 ]);
-                $request->per_id = $Persona->per_id;
+                $request['per_id'] = $Persona->per_id;
             }
 
-            User::create([
+            $user = User::create([
                 'per_id' => $request->per_id,
-                'name' => $request->nameUserhidden,
+                'name' => Str::ucfirst($request->nameUserhidden),
                 'email' => $request->emailhidden,
                 'password' => Hash::make($request->password),
                 'rol_id' => 1,
                 'estado' => $request->estado
             ]);
+            $user->assignRole($request->rolName);
+
 
             DB::commit();
 
-           return redirect()->route('usuario.inicio')->with('success', 'Usuario creado correctamente');
-
+            return redirect()->route('usuarios.inicio')->with('success', 'Usuario creado correctamente');
         } catch (\Exception $e) {
             DB::rollBack();
             dd($e);
-            return redirect()->route('usuario.inicio')->with('error', 'Error al crear el usuario');
+            return redirect()->route('usuarios.inicio')->with('error', 'Error al crear el usuario');
         }
     }
 
@@ -108,8 +107,7 @@ class UserController extends Controller
         $parentesco = $this->parentesco;
         $departamentos = Departamento::all();
 
-        return view('view.usuario.edit',compact('sexo','estados','estadoCivil','vive','parentesco','departamentos','usuario','roles'));
-
+        return view('view.usuario.edit', compact('sexo', 'estados', 'estadoCivil', 'vive', 'parentesco', 'departamentos', 'usuario', 'roles'));
     }
 
     /**
@@ -117,36 +115,40 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        return $request;
-        // $datos = $request['params']['data'];
-        // $persona = Persona::find($datos['per_id']);
-        // $persona->per_dni = $datos['dni'];
-        // $persona->per_nombres = $datos['nombres'];
-        // $persona->per_apellidos = $datos['apellidos'];
-        // $persona->per_email = $datos['email'];
-        // $persona->per_sexo = $datos['sexo'];
-        // $persona->per_fecha_nacimiento = $datos['fecha_nacimiento'];
-        // $persona->per_estado_civil = $datos['estado_civil'];
-        // $persona->per_celular = $datos['celular'];
-        // $persona->per_pais = $datos['pais'];
-        // $persona->per_departamento = $datos['departamento'];
-        // $persona->per_provincia = $datos['provincia'];
-        // $persona->per_distrito = $datos['distrito'];
-        // $persona->per_direccion = $datos['direccion'];
-        // $persona->save();
+       // return $request->all();
 
-        // $usuario = User::find($datos['id_user']);
-        // $usuario->name = $datos['name'];
-        // $usuario->email = $datos['email'];
-        // $usuario->rol_id = $datos['id_rol'];
-        // if(isset($datos['password']) == true){
-        //     $usuario->password = Hash::make($datos['password']);
-        // }
-        // $usuario->estado = $datos['estado'];
-        // $usuario->save();
 
-        return redirect()->route('usuario.inicio')->with('success', 'Usuario actualizado correctamente');
+        $persona = Persona::find($request->per_id);
+        //$persona->per_dni = $request->dni;
+        $persona->per_nombres = $request->nombreshidden;
+        $persona->per_apellidos = $request->apellidoshidden;
+        $persona->per_email = $request->emailhidden;
+        $persona->per_sexo = $request->per_sexo;
+        $persona->per_fecha_nacimiento = $request->per_fecha_nacimiento;
+        $persona->per_estado_civil = $request->per_estado_civil;
+        $persona->per_celular = $request->per_celular;
+        $persona->per_pais = $request->paishidden ?? 'PERU';
+        //  $persona->per_departamento = $request->departamento;
+        //  $persona->per_provincia = $request->provincia;
+        //$persona->per_distrito = $request->distrito;
+        $persona->per_direccion = $request->per_direccion;
+        $persona->save();
 
+        $usuario = $usuario = User::where('per_id', $request->per_id)->first();
+
+        $usuario->name = $request->nameUserhidden;
+        $usuario->email = $request->emailhidden;
+        $usuario->rol_id = 1;
+        if (isset($request->password) == true) {
+            $usuario->password = Hash::make($request->password);
+        }
+        $usuario->estado = $request->estado;
+
+        $usuario->syncRoles($request->rolName);
+
+        $usuario->save();
+
+        return redirect()->route('usuarios.inicio')->with('success', 'Usuario actualizado correctamente');
     }
 
     /**
@@ -163,7 +165,6 @@ class UserController extends Controller
             DB::commit();
 
             return redirect()->route('usuario.inicio')->with('success', 'Año escolar eliminado correctamente');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('usuario.inicio')->with('error', 'Error al eliminar el año escolar');
@@ -172,9 +173,8 @@ class UserController extends Controller
 
     public function inicio()
     {
-        $usuarios = user::where('is_deleted', '!=', 1)->get();
-       // return $alumnos;
+        $usuarios = user::where('is_deleted', '!=', 1)->orderBy('created_at', 'desc')->get();
+        // return $alumnos;
         return view('view.usuario.inicio', compact('usuarios'));
-
     }
 }

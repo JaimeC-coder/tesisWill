@@ -11,6 +11,7 @@
                 </div>
             </div>
 
+
             <div class="card-body">
                 <div class="row clearfix">
                     <div class="col-lg-4 col-md-6 col-sm-12">
@@ -123,9 +124,9 @@
                     <div class="col-lg-4 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Celular</label>
-                            <input type="number" class="form-control"
-                                value="{{ $usuario->persona->per_celular ?? '' }}" id="per_celular"
-                                name="per_celular" minlength="9" maxlength="9">
+                            <input type="number"  value="{{ $usuario->persona->per_celular ?? '' }}" class="form-control" minlength="9" maxlength="100" required  id="per_celular" name="per_celular" autofocus >
+
+
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-12">
@@ -135,6 +136,10 @@
                                 value="{{ $usuario->persona->per_email ?? '' }}" id="per_email" name="per_email" disabled>
                             <input type="hidden"  id="emailhidden" name="emailhidden" >
                             <input type="hidden"  id="nameUserhidden" name="nameUserhidden" >
+
+                            <input type="hidden"  id="paishidden" name="paishidden" >
+                            <input type="hidden"  id="apellidoshidden" name="apellidoshidden" >
+                            <input type="hidden"  id="nombreshidden" name="nombreshidden" >
                         </div>
                     </div>
                 </div>
@@ -167,7 +172,7 @@
 
                 <div class="col-lg-6 col-md-6 col-sm-12">
                     <label>Rol <span class="text-danger">*</span></label>
-                    <select name="id_rol" class="form-control show-tick" required>
+                    <select name="rolName" class="form-control show-tick" required>
                         <option value="0" selected disabled>-- Selecciona --</option>
                         @foreach ($roles as $rol1)
                             <option value="{{ $rol1->name }}" @if (isset($usuario->roles[0]->name) && $usuario->roles[0]->name == $rol1->name) selected @endif>

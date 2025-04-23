@@ -5,19 +5,35 @@ const nivel = document.getElementById('nivel');
 const grado = document.getElementById('grado');
 const seccion = document.getElementById('seccion');
 const btnHorario = document.getElementById('btnbuscar');
-const btnregister = document.getElementById('dropdown');
+const btnregister = document.getElementById('btnDatosprueba');
 
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded',async  function () {
+    activateButton();
     anio.addEventListener("change", handleAnioChange);
     nivel.addEventListener("change", handleNivelChange);
     grado.addEventListener("change", handleGradoChange);
     seccion.addEventListener("change", function () { btnHorario.disabled = !seccion.value;
         btnregister.disabled = !seccion.value; }
     );
-    
+    await selectFromURL();
 }
 );
+
+function activateButton(){
+    let urlParams = new URLSearchParams(window.location.search);
+
+
+    let seccion = urlParams.get('seccion');
+    //Si no hay seccion seleccionada, deshabilitar el boton
+    if (seccion) {
+        btnHorario.disabled = false;
+        btnregister.disabled = false;
+    } else {
+        btnHorario.disabled = true;
+        btnregister.disabled = true;
+    }
+}
 
 function handleAnioChange() {
     const anioId = anio.value;
@@ -45,14 +61,36 @@ function handleGradoChange() {
 }
 
 
-// function handleSeccionChange() {
-//     const gradoId = grado.value;
-//     const nivelId = nivel.value;
+async function selectFromURL() {
+    let urlParams = new URLSearchParams(window.location.search);
 
-//     // if (gradoId) {
-//     //     loadCursos(gradoId, nivelId);
-//     // }
-// }
+    const anioParam = urlParams.get('anio');
+    const nivelParam = urlParams.get('nivel');
+    const gradoParam = urlParams.get('grado');
+    const seccionParam = urlParams.get('seccion');
+
+    if (anioParam) {
+        anio.value = anioParam;
+        await loadNiveles(anioParam);
+        if (nivelParam) {
+            nivel.value = nivelParam;
+            nivel.disabled = false;
+            await loadGrados(nivelParam);
+            if (gradoParam) {
+                grado.value = gradoParam;
+                grado.disabled = false;
+                await loadSecciones(gradoParam);
+                if (seccionParam) {
+                    seccion.value = seccionParam;
+                    seccion.disabled = false;
+                    btnHorario.disabled = false;
+                    btnregister.disabled = false;
+                }
+            }
+        }
+    }
+}
+
 
 function updateSelectOptions(selectElement, options, textKey, valueKey) {
     console.log(options);

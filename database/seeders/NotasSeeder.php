@@ -563,6 +563,7 @@ class NotasSeeder extends Seeder
                     $nota[6] <= 16.4 => 'A',
                     default => 'AD',
                 },
+                'estadoPromedio' => 0,
                 'nt_is_deleted' => $nota[7],
                 'curso_id' => $nota[8],
                 'created_at' => now(),

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('nt_nota', 18)->default('');
             $table->char('nt_is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
             $table->foreign('per_id')->references('per_id')->on('periodos');
+            $table->char('estadoPromedio', 1)->default('0')->comment('1: actualizado; 0:falta actualizar');
             $table->foreign('alu_id')->references('alu_id')->on('alumnos');
             $table->foreign('pa_id')->references('pa_id')->on('personal_academicos');
             $table->foreign('ags_id')->references('ags_id')->on('gsas');

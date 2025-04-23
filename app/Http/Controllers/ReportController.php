@@ -20,6 +20,8 @@ use App\Models\PersonalAcademico;
 use App\Models\Provincia;
 use App\Models\Rol;
 use App\Models\Seccion;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -165,18 +167,89 @@ class ReportController extends Controller
         $nivel = $request->nivel;
         $grado = $request->grado;
         $seccion = $request->seccion;
-
-
-
-        if ($anio == null || $nivel == null || $grado == null || $seccion == null) {
-            $result = [];
+       if ($anio == null || $nivel == null || $grado == null || $seccion == null) {
+            $resultados = [];
         } else {
             $result = $this->getCoursesWithAvgsAndNotes($anio, $nivel, $grado, $seccion);
+            // Agrupar por curso_id
+            $resultados = $this->dataREST($result);
         }
-
-        // return $result;
-        return view('view.reporte.gestion', compact('result', 'anios'));
+        return view('view.reporte.gestion', compact('resultados', 'anios'));
     }
+
+    public function dataREST($result){
+        $agrupadoPorCurso = $result->groupBy('curso_id');
+
+        $resultados = [];
+
+        foreach ($agrupadoPorCurso as $cursoId => $notasCurso) {
+            $totalNotas = $notasCurso->count();
+
+            $countA_AD = $notasCurso->filter(function ($nota) {
+                return $nota->nt_nota === 'A' || $nota->nt_nota === 'AD';
+            })->count();
+
+            $porcentaje = $totalNotas > 0 ? ($countA_AD / $totalNotas) * 100 : 0;
+
+            $countB = $notasCurso->filter(function ($nota) {
+                return $nota->nt_nota === 'B';
+            })->count();
+
+            $porcentajeB = $totalNotas > 0 ? ($countB / $totalNotas) * 100 : 0;
+
+            $countC = $notasCurso->filter(function ($nota) {
+                return $nota->nt_nota === 'C';
+            })->count();
+
+            $porcentajeC = $totalNotas > 0 ? ($countC / $totalNotas) * 100 : 0;
+
+            // Obtener el nombre del curso usando la relación
+            $nombreCurso = optional($notasCurso->first()->curso)->cur_nombre;
+            $total = round($porcentaje, 2) + round($porcentajeB, 2) + round($porcentajeC, 2);
+
+            $resultados[] = [
+                'curso_id' => $cursoId,
+                'curso_nombre' => $nombreCurso,
+                'total_notas' => $totalNotas,
+                'aprobados_A_AD' => $countA_AD,
+                'aprobados_B' => $countB,
+                'aprobados_C' => $countC,
+                'porcentaje_aprobados' => round($porcentaje, 2),
+                'porcentaje_B' => round($porcentajeB, 2),
+                'porcentaje_C' => round($porcentajeC, 2),
+                'Total' => round($total, 1)
+            ];
+
+        }
+        return $resultados;
+    }
+
+
+    public function getReportCoursePDF(Request $request)
+    {
+        $anio = $request->anio;
+        $nivel = $request->nivel;
+        $grado = $request->grado;
+        $seccion = $request->seccion;
+
+        $result = $this->getCoursesWithAvgsAndNotes($anio, $nivel, $grado, $seccion);
+        // Agrupar por curso_id
+        $cursosList = $this->dataREST($result);
+
+
+        $nivel = Nivel::where('niv_id', $nivel)->select('niv_descripcion')->first();
+        $grado = Grado::where('gra_id', $grado)->select('gra_descripcion')->first();
+        $seccion = Seccion::where('sec_id', $seccion)->select('sec_descripcion')->first();
+
+        $headers = [
+            'nivel' => $nivel->niv_descripcion,
+            'grado' => $grado->gra_descripcion,
+            'seccion' => $seccion->sec_descripcion,
+        ];
+        $pdf = Pdf::loadView('view.reporte.promediosCursos', compact('cursosList', 'headers'));
+        return $pdf->stream();
+    }
+
 
 
     public function alumno(Request $request)
@@ -227,8 +300,23 @@ class ReportController extends Controller
     public function getCoursesWithAvgsAndNotes($year, $level, $grade, $section)
     {
 
-        $result = DB::select('CALL sp_coursesWithAvgsAndNotes(?, ?, ?, ?)', [$year, $level, $grade, $section]);
-        return $result;
+
+        // Obtener todos los GSA que coincidan
+        $GSANotas = Gsa::where('niv_id', $level)
+            ->where('gra_id', $grade)
+            ->where('sec_id', $section)
+            ->where('is_deleted', '!=', 1)
+            ->pluck('ags_id');
+
+        // Obtener las notas con el curso cargado (eager loading)
+        $notas = Nota::with('curso') // Carga la relación para obtener el nombre del curso
+            ->whereIn('ags_id', $GSANotas)
+            ->where('per_id', $year)
+            ->where('nt_is_deleted', '!=', 1)
+            ->get();
+
+
+        return $notas;
     }
 
 
@@ -237,18 +325,18 @@ class ReportController extends Controller
     {
         $data = $request['params']['data'];
 
-        $año = Anio::where('año_estado',1)->first();
+        $año = Anio::where('año_estado', 1)->first();
 
-        $Persona = Persona::where('per_id',$data["per_id"])->first();
-        $departamento = Departamento::where('idDepa',$Persona->per_departamento)->first();
-        $provincia = Provincia::where('idProv',$Persona->per_provincia)->first();
-        $distrito = Distrito::where('idDist',$Persona->per_distrito)->first();
+        $Persona = Persona::where('per_id', $data["per_id"])->first();
+        $departamento = Departamento::where('idDepa', $Persona->per_departamento)->first();
+        $provincia = Provincia::where('idProv', $Persona->per_provincia)->first();
+        $distrito = Distrito::where('idDist', $Persona->per_distrito)->first();
 
-        $alumno = $data["per_nombres"]." ".$data["per_apellidos"];
+        $alumno = $data["per_nombres"] . " " . $data["per_apellidos"];
 
-        if(isset($data["per_nombre_completo"]) == false){
-            $alumno = $data["per_nombres"]." ".$data["per_apellidos"];
-        }else{
+        if (isset($data["per_nombre_completo"]) == false) {
+            $alumno = $data["per_nombres"] . " " . $data["per_apellidos"];
+        } else {
             $alumno = $data["per_nombre_completo"];
         }
         $idNivel = $data["idNivel"];
@@ -274,11 +362,11 @@ class ReportController extends Controller
         $distrito = ($Persona->per_distrito == 0 ? 'CHEPÉN' : $distrito->distrito);
 
         // Obteniendo imagen y convintiendolo a base64
-        $educacion =Storage::path('cao\escudoMinedu.png');
+        $educacion = Storage::path('cao\escudoMinedu.png');
         $contenidoBinario1 = file_get_contents($educacion);
         $imagenEducacion = base64_encode($contenidoBinario1);
 
-        $nombreDocumento = "FICHA DE MATRICULA - ".$alumno.".pdf";
+        $nombreDocumento = "FICHA DE MATRICULA - " . $alumno . ".pdf";
 
         // Creando Pdf
         include_once "../vendor/autoload.php";
@@ -294,7 +382,7 @@ class ReportController extends Controller
                 <meta charset="UTF-8">
                 <meta http-equiv="X-UA-Compatible" content="IE=edge">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>'.$nombreDocumento.'</title>
+                <title>' . $nombreDocumento . '</title>
             </head>
             <style>
                 body {
@@ -340,7 +428,7 @@ class ReportController extends Controller
                     <tbody>
                         <tr>
                             <td width="20%" align="center">
-                                <img src="data:image/jpg;base64,'.$imagenEducacion.'" alt="escudo" class="logo" />
+                                <img src="data:image/jpg;base64,' . $imagenEducacion . '" alt="escudo" class="logo" />
                                 <h4 class="title-minedu">Ministerio de Educación</h4>
                             </td>
                             <td width="50%">
@@ -365,14 +453,14 @@ class ReportController extends Controller
                                         </tr>
                                         <tr>
                                             <th colspan="2" class="bg-gray" align="left">N°</th>
-                                            <td align="center" class="box-1">'.$dni[0].'</td>
-                                            <td align="center" class="box-1">'.$dni[1].'</td>
-                                            <td align="center" class="box-1">'.$dni[2].'</td>
-                                            <td align="center" class="box-1">'.$dni[3].'</td>
-                                            <td align="center" class="box-1">'.$dni[4].'</td>
-                                            <td align="center" class="box-1">'.$dni[5].'</td>
-                                            <td align="center" class="box-1">'.$dni[6].'</td>
-                                            <td align="center" class="box-1">'.$dni[7].'</td>
+                                            <td align="center" class="box-1">' . $dni[0] . '</td>
+                                            <td align="center" class="box-1">' . $dni[1] . '</td>
+                                            <td align="center" class="box-1">' . $dni[2] . '</td>
+                                            <td align="center" class="box-1">' . $dni[3] . '</td>
+                                            <td align="center" class="box-1">' . $dni[4] . '</td>
+                                            <td align="center" class="box-1">' . $dni[5] . '</td>
+                                            <td align="center" class="box-1">' . $dni[6] . '</td>
+                                            <td align="center" class="box-1">' . $dni[7] . '</td>
                                             <td colspan="4"></td>
                                         </tr>
                                         <tr>
@@ -449,11 +537,11 @@ class ReportController extends Controller
                                             <th class="bg-gray" colspan="4">Nacimiento Registrado(2)</th>
                                         </tr>
                                         <tr>
-                                            <td align="center">'.$alumno.'</td>
+                                            <td align="center">' . $alumno . '</td>
                                             <td align="center" class="box-1">H</td>
-                                            <td align="center" class="box-1">'.($sexo == 'M' ? 'X' : '').'</td>
+                                            <td align="center" class="box-1">' . ($sexo == 'M' ? 'X' : '') . '</td>
                                             <td align="center" class="box-1">M</td>
-                                            <td align="center" class="box-1">'.($sexo == 'F' ? 'X' : '').'</td>
+                                            <td align="center" class="box-1">' . ($sexo == 'F' ? 'X' : '') . '</td>
                                             <td>SOLTERO</td>
                                             <td align="center" class="box-1">Sí</td>
                                             <td align="center" class="box-1">X</td>
@@ -487,25 +575,25 @@ class ReportController extends Controller
                                             <td rowspan="2" colspan="12">CASTELLANO</td>
                                         </tr>
                                         <tr>
-                                            <td align="center">'.$fechaNacimiento[2].'</td>
-                                            <td align="center">'.$fechaNacimiento[1].'</td>
-                                            <td align="center">'.$fechaNacimiento[0].'</td>
+                                            <td align="center">' . $fechaNacimiento[2] . '</td>
+                                            <td align="center">' . $fechaNacimiento[1] . '</td>
+                                            <td align="center">' . $fechaNacimiento[0] . '</td>
                                         </tr>
                                         <tr>
                                             <td class="bg-gray">Lugar de nacimiento</td>
-                                            <td colspan="3">'.$distrito.'</td>
+                                            <td colspan="3">' . $distrito . '</td>
                                             <td class="bg-gray">Segunda lengua</td>
                                             <td colspan="12">NINGUNO</td>
                                         </tr>
                                         <tr>
                                             <td class="bg-gray">País</td>
-                                            <td colspan="3">'.$pais.'</td>
+                                            <td colspan="3">' . $pais . '</td>
                                             <td class="bg-gray">Religión</td>
                                             <td colspan="12"></td>
                                         </tr>
                                         <tr>
                                             <td class="bg-gray">Departamento</td>
-                                            <td colspan="3">'.$departamento.'</td>
+                                            <td colspan="3">' . $departamento . '</td>
                                             <td class="bg-gray">Número de hermanos</td>
                                             <td colspan="3"></td>
                                             <td class="bg-gray" colspan="6">Lugar que ocupa</td>
@@ -513,7 +601,7 @@ class ReportController extends Controller
                                         </tr>
                                         <tr>
                                             <td class="bg-gray">Provincia</td>
-                                            <td colspan="3">'.$provincia.'</td>
+                                            <td colspan="3">' . $provincia . '</td>
                                             <td class="bg-gray">Tipo de Discapacidad(3)</td>
                                             <td class="box-1 bg-gray" align="center">DI</td>
                                             <td class="box-1" align="center"></td>
@@ -530,7 +618,7 @@ class ReportController extends Controller
                                         </tr>
                                         <tr>
                                             <td class="bg-gray">Distrito</td>
-                                            <td colspan="3">'.$distrito.'</td>
+                                            <td colspan="3">' . $distrito . '</td>
                                             <td class="bg-gray">Certif. de discapacidad *</td>
                                             <td class="bg-gray" colspan="4">Tiene:</td>
                                             <td colspan="2" align="center"></td>
@@ -842,13 +930,13 @@ class ReportController extends Controller
                                             <td colspan="2" class="bg-gray">Teléfono</td>
                                         </tr>
                                         <tr>
-                                            <td colspan="1" style="height: 0.7rem;">'.$año->año_descripcion.'</td>
-                                            <td colspan="3" style="height: 0.7rem;">'.$direccion.'</td>
-                                            <td colspan="2" style="height: 0.7rem;">'.$distrito.'</td>
-                                            <td colspan="3" style="height: 0.7rem;">'.$departamento.'</td>
-                                            <td colspan="2" style="height: 0.7rem;">'.$provincia.'</td>
-                                            <td colspan="2" style="height: 0.7rem;">'.$distrito.'</td>
-                                            <td colspan="2" style="height: 0.7rem;">'.$celular.'</td>
+                                            <td colspan="1" style="height: 0.7rem;">' . $año->año_descripcion . '</td>
+                                            <td colspan="3" style="height: 0.7rem;">' . $direccion . '</td>
+                                            <td colspan="2" style="height: 0.7rem;">' . $distrito . '</td>
+                                            <td colspan="3" style="height: 0.7rem;">' . $departamento . '</td>
+                                            <td colspan="2" style="height: 0.7rem;">' . $provincia . '</td>
+                                            <td colspan="2" style="height: 0.7rem;">' . $distrito . '</td>
+                                            <td colspan="2" style="height: 0.7rem;">' . $celular . '</td>
                                         </tr>
                                         <tr>
                                             <td colspan="1" style="height: 0.7rem;"></td>
@@ -948,18 +1036,18 @@ class ReportController extends Controller
                                         <tr>
                                             <td colspan="1" class="bg-gray">Apellidos y nombres</td>
                                             <td colspan="4"></td>
-                                            <td colspan="4">'.$apoderado.'</td>
+                                            <td colspan="4">' . $apoderado . '</td>
                                         </tr>
                                         <tr>
                                             <td colspan="1" class="bg-gray">Vive</td>
                                             <td colspan="1" class="bg-gray">Si</td>
-                                            <td colspan="1" class="box-1">'.($parentesco == 'PADRE' ? ($vive == 1 ? 'X' : '') : '').'</td>
+                                            <td colspan="1" class="box-1">' . ($parentesco == 'PADRE' ? ($vive == 1 ? 'X' : '') : '') . '</td>
                                             <td colspan="1" class="bg-gray">No</td>
-                                            <td colspan="1" class="box-1">'.($parentesco == 'PADRE' ? ($vive == 0 ? 'X' : '') : '') .'</td>
+                                            <td colspan="1" class="box-1">' . ($parentesco == 'PADRE' ? ($vive == 0 ? 'X' : '') : '') . '</td>
                                             <td colspan="1" class="bg-gray">Si</td>
-                                            <td colspan="1" class="box-1">'.($parentesco == 'MADRE' ? ($vive == 1 ? 'X' : '') : '') .'</td>
+                                            <td colspan="1" class="box-1">' . ($parentesco == 'MADRE' ? ($vive == 1 ? 'X' : '') : '') . '</td>
                                             <td colspan="1" class="bg-gray">No</td>
-                                            <td colspan="1" class="box-1">'.($parentesco == 'MADRE' ? ($vive == 0 ? 'X' : '') : '') .'</td>
+                                            <td colspan="1" class="box-1">' . ($parentesco == 'MADRE' ? ($vive == 0 ? 'X' : '') : '') . '</td>
                                         </tr>
                                         <tr>
                                             <td rowspan="2" colspan="1" class="bg-gray">Fecha de Nacimiento</td>
@@ -986,18 +1074,18 @@ class ReportController extends Controller
                                         <tr>
                                             <td colspan="1" class="bg-gray">Vive con el Estudiante</td>
                                             <td colspan="1" class="bg-gray">Si</td>
-                                            <td colspan="1" class="box-1">'.($parentesco == 'PADRE' ? ($vive == 1 ? 'X' : '') : '').'</td>
+                                            <td colspan="1" class="box-1">' . ($parentesco == 'PADRE' ? ($vive == 1 ? 'X' : '') : '') . '</td>
                                             <td colspan="1" class="bg-gray">No</td>
-                                            <td colspan="1" class="box-1">'.($parentesco == 'PADRE' ? ($vive == 0 ? 'X' : '') : '') .'</td>
+                                            <td colspan="1" class="box-1">' . ($parentesco == 'PADRE' ? ($vive == 0 ? 'X' : '') : '') . '</td>
                                             <td colspan="1" class="bg-gray">Si</td>
-                                            <td colspan="1" class="box-1">'.($parentesco == 'MADRE' ? ($vive == 1 ? 'X' : '') : '') .'</td>
+                                            <td colspan="1" class="box-1">' . ($parentesco == 'MADRE' ? ($vive == 1 ? 'X' : '') : '') . '</td>
                                             <td colspan="1" class="bg-gray">No</td>
-                                            <td colspan="1" class="box-1">'.($parentesco == 'MADRE' ? ($vive == 0 ? 'X' : '') : '') .'</td>
+                                            <td colspan="1" class="box-1">' . ($parentesco == 'MADRE' ? ($vive == 0 ? 'X' : '') : '') . '</td>
                                         </tr>
                                         <tr>
                                             <td colspan="1" class="bg-gray">Religión</td>
-                                            <td colspan="4">'.($parentesco == 'PADRE' ? 'Católica' : '') .'</td>
-                                            <td colspan="4">'.($parentesco == 'MADRE' ? 'Católica' : '') .'</td>
+                                            <td colspan="4">' . ($parentesco == 'PADRE' ? 'Católica' : '') . '</td>
+                                            <td colspan="4">' . ($parentesco == 'MADRE' ? 'Católica' : '') . '</td>
                                         </tr>
                                         <tr>
                                             <td style="border: none; height: 1.125rem;" colspan="9"></td>
@@ -1385,14 +1473,14 @@ class ReportController extends Controller
                                 <table width="100%" class="table" style="text-align: center;font-size: 10px;">
                                     <tbody>
                                         <tr>
-                                            <td colspan="5" class="bg-gray">'.(intval($año->año_descripcion)+0).'</td>
-                                            <td colspan="5" class="bg-gray">'.(intval($año->año_descripcion)+1).'</td>
-                                            <td colspan="5" class="bg-gray">'.(intval($año->año_descripcion)+2).'</td>
-                                            <td colspan="5" class="bg-gray">'.(intval($año->año_descripcion)+3).'</td>
-                                            <td colspan="5" class="bg-gray">'.(intval($año->año_descripcion)+4).'</td>
-                                            <td colspan="5" class="bg-gray">'.(intval($año->año_descripcion)+5).'</td>
-                                            <td colspan="5" class="bg-gray">'.(intval($año->año_descripcion)+6).'</td>
-                                            <td colspan="5" class="bg-gray">'.(intval($año->año_descripcion)+7).'</td>
+                                            <td colspan="5" class="bg-gray">' . (intval($año->año_descripcion) + 0) . '</td>
+                                            <td colspan="5" class="bg-gray">' . (intval($año->año_descripcion) + 1) . '</td>
+                                            <td colspan="5" class="bg-gray">' . (intval($año->año_descripcion) + 2) . '</td>
+                                            <td colspan="5" class="bg-gray">' . (intval($año->año_descripcion) + 3) . '</td>
+                                            <td colspan="5" class="bg-gray">' . (intval($año->año_descripcion) + 4) . '</td>
+                                            <td colspan="5" class="bg-gray">' . (intval($año->año_descripcion) + 5) . '</td>
+                                            <td colspan="5" class="bg-gray">' . (intval($año->año_descripcion) + 6) . '</td>
+                                            <td colspan="5" class="bg-gray">' . (intval($año->año_descripcion) + 7) . '</td>
                                         </tr>
                                         <tr>
                                             <td colspan="5" style="height: 0.7rem;">80382 Carlos A. Olivares</td>
@@ -1415,7 +1503,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.($departamento).'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . ($departamento) . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1425,7 +1513,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.($provincia).'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . ($provincia) . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1435,7 +1523,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.($distrito).'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . ($distrito) . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1455,7 +1543,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.($nivel).'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . ($nivel) . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1505,7 +1593,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.($grado).'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . ($grado) . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1515,7 +1603,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.($seccion).'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . ($seccion) . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1525,7 +1613,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.($nivel == 'PRIMARIA' ? 'MAÑANA' : 'TARDE').'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . ($nivel == 'PRIMARIA' ? 'MAÑANA' : 'TARDE') . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1844,14 +1932,14 @@ class ReportController extends Controller
                                 <table width="100%" class="table" style="text-align: center;font-size: 10px;">
                                     <tbody>
                                         <tr>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+0).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+1).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+2).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+3).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+4).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+5).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+6).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+7).'</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 0) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 1) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 2) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 3) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 4) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 5) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 6) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 7) . '</td>
                                         </tr>
                                         <tr>
                                             <td colspan="2" class="box-1 bg-gray">Dia</td>
@@ -1989,14 +2077,14 @@ class ReportController extends Controller
                                 <table width="100%" class="table" style="text-align: center;font-size: 10px">
                                     <tbody>
                                         <tr>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+0).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+1).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+2).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+3).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+4).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+5).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+6).'</td>
-                                            <td colspan="6" class="bg-gray">'.(intval($año->año_descripcion)+7).'</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 0) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 1) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 2) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 3) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 4) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 5) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 6) . '</td>
+                                            <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 7) . '</td>
                                         </tr>
                                         <tr>
                                             <td colspan="6" style="height: 0.7rem;"></td>
@@ -2173,20 +2261,20 @@ class ReportController extends Controller
                                 <table width="100%" class="table" style="text-align: center;font-size: 10px">
                                     <tbody>
                                         <tr>
-                                            <td colspan="8" class="bg-gray">'.(intval($año->año_descripcion)+0).'</td>
-                                            <td colspan="8" class="bg-gray">'.(intval($año->año_descripcion)+1).'</td>
-                                            <td colspan="8" class="bg-gray">'.(intval($año->año_descripcion)+2).'</td>
-                                            <td colspan="8" class="bg-gray">'.(intval($año->año_descripcion)+3).'</td>
-                                            <td colspan="8" class="bg-gray">'.(intval($año->año_descripcion)+4).'</td>
-                                            <td colspan="8" class="bg-gray">'.(intval($año->año_descripcion)+5).'</td>
-                                            <td colspan="8" class="bg-gray">'.(intval($año->año_descripcion)+6).'</td>
-                                            <td colspan="8" class="bg-gray">'.(intval($año->año_descripcion)+7).'</td>
+                                            <td colspan="8" class="bg-gray">' . (intval($año->año_descripcion) + 0) . '</td>
+                                            <td colspan="8" class="bg-gray">' . (intval($año->año_descripcion) + 1) . '</td>
+                                            <td colspan="8" class="bg-gray">' . (intval($año->año_descripcion) + 2) . '</td>
+                                            <td colspan="8" class="bg-gray">' . (intval($año->año_descripcion) + 3) . '</td>
+                                            <td colspan="8" class="bg-gray">' . (intval($año->año_descripcion) + 4) . '</td>
+                                            <td colspan="8" class="bg-gray">' . (intval($año->año_descripcion) + 5) . '</td>
+                                            <td colspan="8" class="bg-gray">' . (intval($año->año_descripcion) + 6) . '</td>
+                                            <td colspan="8" class="bg-gray">' . (intval($año->año_descripcion) + 7) . '</td>
                                         </tr>
                                         <tr>
                                             <td colspan="2" class="box-1 bg-gray">Si</td>
-                                            <td colspan="2" class="box-1 ">'.($parentesco == 'PADRE' ? ($vive == 1 ? 'X' : '') : '').'</td>
+                                            <td colspan="2" class="box-1 ">' . ($parentesco == 'PADRE' ? ($vive == 1 ? 'X' : '') : '') . '</td>
                                             <td colspan="2" class="box-1 bg-gray">No</td>
-                                            <td colspan="2" class="box-1 ">'.($parentesco == 'PADRE' ? ($vive == 0 ? 'X' : '') : '').'</td>
+                                            <td colspan="2" class="box-1 ">' . ($parentesco == 'PADRE' ? ($vive == 0 ? 'X' : '') : '') . '</td>
                                             <td colspan="2" class="box-1 bg-gray">Si</td>
                                             <td colspan="2" class="box-1 "></td>
                                             <td colspan="2" class="box-1 bg-gray">No</td>
@@ -2218,9 +2306,9 @@ class ReportController extends Controller
                                         </tr>
                                         <tr>
                                             <td colspan="2" class="box-1 bg-gray">Si</td>
-                                            <td colspan="2" class="box-1 ">'.($parentesco == 'MADRE' ? ($vive == 1 ? 'X' : '') : '').'</td>
+                                            <td colspan="2" class="box-1 ">' . ($parentesco == 'MADRE' ? ($vive == 1 ? 'X' : '') : '') . '</td>
                                             <td colspan="2" class="box-1 bg-gray">No</td>
-                                            <td colspan="2" class="box-1 ">'.($parentesco == 'MADRE' ? ($vive == 0 ? 'X' : '') : '').'</td>
+                                            <td colspan="2" class="box-1 ">' . ($parentesco == 'MADRE' ? ($vive == 0 ? 'X' : '') : '') . '</td>
                                             <td colspan="2" class="box-1 bg-gray">Si</td>
                                             <td colspan="2" class="box-1 "></td>
                                             <td colspan="2" class="box-1 bg-gray">No</td>
@@ -2282,11 +2370,11 @@ class ReportController extends Controller
 
         $contenido = $dompdf->output();
 
-        $exists=Storage::disk('FichaMatricula')->exists($nombreDocumento);
+        $exists = Storage::disk('FichaMatricula')->exists($nombreDocumento);
         if (!$exists) {
             Storage::disk('FichaMatricula')->put($nombreDocumento, $contenido);
             /* Storage::disk('reportes')->delete($nombreDocumento); */
-        }else{
+        } else {
             Storage::disk('FichaMatricula')->delete($nombreDocumento);
             Storage::disk('FichaMatricula')->put($nombreDocumento, $contenido);
         }
@@ -2312,7 +2400,7 @@ class ReportController extends Controller
     {
         $data = $request['params']['data'];
 
-        $alumno = $data["per_nombres"]." ".$data["per_apellidos"];
+        $alumno = $data["per_nombres"] . " " . $data["per_apellidos"];
         $idNivel = $data["idNivel"];
         $nivel = $data["nivel"];
         $idGrado = $data["idGrado"];
@@ -2320,62 +2408,62 @@ class ReportController extends Controller
         $idSeccion = $data["idSeccion"];
         $seccion = $data["seccion"];
 
-        $notas = Nota::where('alu_id',$data["alu_id"])->get();
+        $notas = Nota::where('alu_id', $data["alu_id"])->get();
         foreach ($notas as $value) {
-            $asignacion = AsignarCurso::where('pa_id',$value->pa_id)->where('niv_id',$idNivel)->first();
-            $curso = Curso::where('cur_nombre',$asignacion->curso)->where('gra_id',$idGrado)->where('niv_id',$idNivel)->first();
+            $asignacion = AsignarCurso::where('pa_id', $value->pa_id)->where('niv_id', $idNivel)->first();
+            $curso = Curso::where('cur_nombre', $asignacion->curso)->where('gra_id', $idGrado)->where('niv_id', $idNivel)->first();
 
             switch ($curso->cur_nombre) {
                 case "Desarrollo personal, ciudadanía y cívica":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
-                            $datos_dpcc_b1 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_dpcc_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 2:
-                            $datos_dpcc_b2 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_dpcc_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 3:
-                            $datos_dpcc_b3 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_dpcc_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
-                            $datos_dpcc_b4 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
+                            $promedio = $suma / $total;
+                            $datos_dpcc_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
                 case "Ciencias sociales":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
-                            $datos_ccss_b1 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"],"c3"=> $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_ccss_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 2:
-                            $datos_ccss_b2 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"],"c3"=> $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_ccss_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 3:
-                            $datos_ccss_b3 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"],"c3"=> $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_ccss_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
-                            $datos_ccss_b4 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"],"c3"=> $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
+                            $promedio = $suma / $total;
+                            $datos_ccss_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
                 case "Educación para el trabajo":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
                             $datos_ept_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "pb" => $value->nt_nota];
@@ -2387,196 +2475,196 @@ class ReportController extends Controller
                             $datos_ept_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
+                            $promedio = $suma / $total;
                             $datos_ept_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
                 case "Educación física":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
-                            $datos_ef_b1 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"],"c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_ef_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 2:
-                            $datos_ef_b2 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_ef_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 3:
-                            $datos_ef_b3 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_ef_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
-                            $datos_ef_b4 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
+                            $promedio = $suma / $total;
+                            $datos_ef_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
                 case "Comunicación":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
-                            $datos_com_b1 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_com_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 2:
-                            $datos_com_b2 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_com_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 3:
-                            $datos_com_b3 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_com_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
-                            $datos_com_b4 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
+                            $promedio = $suma / $total;
+                            $datos_com_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
                 case "Arte y cultura":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
-                            $datos_arte_b1 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_arte_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 2:
-                            $datos_arte_b2 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_arte_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 3:
-                            $datos_arte_b3 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_arte_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
-                            $datos_arte_b4 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
+                            $promedio = $suma / $total;
+                            $datos_arte_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
                 case "Inglés":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
-                            $datos_ing_b1 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_ing_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 2:
-                            $datos_ing_b2 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_ing_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 3:
-                            $datos_ing_b3 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_ing_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
-                            $datos_ing_b4 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
+                            $promedio = $suma / $total;
+                            $datos_ing_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
                 case "Matemática":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
-                            $datos_mat_b1 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"],"c3"=> $notasCapacidades[2]["nc_nota"],"c4"=> $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_mat_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "c4" => $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 2:
-                            $datos_mat_b2 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"],"c3"=> $notasCapacidades[2]["nc_nota"],"c4"=> $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_mat_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "c4" => $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 3:
-                            $datos_mat_b3 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"],"c3"=> $notasCapacidades[2]["nc_nota"],"c4"=> $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_mat_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "c4" => $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
-                            $datos_mat_b4 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"],"c3"=> $notasCapacidades[2]["nc_nota"],"c4"=> $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
+                            $promedio = $suma / $total;
+                            $datos_mat_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "c4" => $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
                 case "Ciencia y tecnología":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
-                            $datos_cyt_b1 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_cyt_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 2:
-                            $datos_cyt_b2 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_cyt_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 3:
-                            $datos_cyt_b3 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_cyt_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
-                            $datos_cyt_b4 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
+                            $promedio = $suma / $total;
+                            $datos_cyt_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
                 case "Educación religiosa":
-                    $notasCapacidades = NotaCapacidad::where('nt_id',$value->nt_id)->get();
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
                     switch ($value->nt_bimestre) {
                         case 1:
-                            $datos_rel_b1 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_rel_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 2:
-                            $datos_rel_b2 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_rel_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 3:
-                            $datos_rel_b3 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
+                            $datos_rel_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
                             break;
                         case 4:
-                            $notasfinales = Nota::where('alu_id',$data["alu_id"])->where('pa_id',$value->pa_id)->get();
+                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
                             $suma = 0;
                             $total = 4;
                             foreach ($notasfinales as $v) {
                                 $suma += $v->nt_nota;
                             }
-                            $promedio = $suma/$total;
-                            $datos_rel_b4 = ["c1" => $notasCapacidades[0]["nc_nota"],"c2"=> $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
+                            $promedio = $suma / $total;
+                            $datos_rel_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
                             break;
                     }
                     break;
             }
-            $datos_trans_b1 = ["c1" => "","c2"=> ""];
-            $datos_trans_b2 = ["c1" => "","c2"=> ""];
-            $datos_trans_b3 = ["c1" => "","c2"=> ""];
-            $datos_trans_b4 = ["c1" => "","c2"=> ""];
+            $datos_trans_b1 = ["c1" => "", "c2" => ""];
+            $datos_trans_b2 = ["c1" => "", "c2" => ""];
+            $datos_trans_b3 = ["c1" => "", "c2" => ""];
+            $datos_trans_b4 = ["c1" => "", "c2" => ""];
         }
 
         // Obteniendo imagen y convintiendolo a base64
-        $cao =Storage::path('cao\insig.png');
-        $educacion =Storage::path('cao\escudo.png');
-        $sello =Storage::path('cao\sello.png');
+        $cao = Storage::path('cao\insig.png');
+        $educacion = Storage::path('cao\escudo.png');
+        $sello = Storage::path('cao\sello.png');
         $contenidoBinario1 = file_get_contents($educacion);
         $contenidoBinario2 = file_get_contents($cao);
         $contenidoBinario3 = file_get_contents($sello);
@@ -2584,7 +2672,7 @@ class ReportController extends Controller
         $imagenCAO = base64_encode($contenidoBinario2);
         $imagenSello = base64_encode($contenidoBinario3);
 
-        $nombreDocumento = "LIBRETA DE NOTAS - ".$alumno.".pdf";
+        $nombreDocumento = "LIBRETA DE NOTAS - " . $alumno . ".pdf";
 
         // Creando Pdf
         include_once "../vendor/autoload.php";
@@ -2599,7 +2687,7 @@ class ReportController extends Controller
                 <meta charset="UTF-8">
                 <meta http-equiv="X-UA-Compatible" content="IE=edge">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>'.$nombreDocumento.'</title>
+                <title>' . $nombreDocumento . '</title>
             </head>
             <style>
                 body {
@@ -2655,7 +2743,7 @@ class ReportController extends Controller
                     <tbody>
                         <tr>
                             <td align="center">
-                                <img src="data:image/jpg;base64,'.$imagenEducacion.'" alt="escudo" class="logo" />
+                                <img src="data:image/jpg;base64,' . $imagenEducacion . '" alt="escudo" class="logo" />
                             </td>
                             <td>
                                 <table width="100%" border="1" class="table">
@@ -2677,13 +2765,13 @@ class ReportController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="bg-gray">Grado:</td>
-                                        <td>'.$grado.'</td>
+                                        <td>' . $grado . '</td>
                                         <td class="bg-gray">Sección:</td>
-                                        <td>'.$seccion.'</td>
+                                        <td>' . $seccion . '</td>
                                     </tr>
                                     <tr>
                                         <td class="bg-gray">Apellidos y nombres del estudiante:</td>
-                                        <td colspan="3">'.$alumno.'</td>
+                                        <td colspan="3">' . $alumno . '</td>
                                     </tr>
                                     <tr style="display:none">
                                         <td class="bg-gray">Código del estudiante:</td>
@@ -2694,7 +2782,7 @@ class ReportController extends Controller
                                 </table>
                             </td>
                             <td align="center">
-                                <img src="data:image/jpg;base64,'.$imagenCAO.'" alt="cao" class="logo" />
+                                <img src="data:image/jpg;base64,' . $imagenCAO . '" alt="cao" class="logo" />
                             </td>
                         </tr>
                     </tbody>
@@ -2718,292 +2806,292 @@ class ReportController extends Controller
                         <tr>
                             <td rowspan="3">Desarrollo personal, ciudadanía y cívica</td>
                             <td>Construye su identidad</td>
-                            <td align="center">'.(isset($datos_dpcc_b1['c1']) == false ? '' : $datos_dpcc_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_dpcc_b2['c1']) == false ? '' : $datos_dpcc_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_dpcc_b3['c1']) == false ? '' : $datos_dpcc_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_dpcc_b4['c1']) == false ? '' : $datos_dpcc_b1['c1']).'</td>
-                            <td rowspan="3" align="center">'.(isset($datos_dpcc_b4['nf']) == false ? '' : $datos_dpcc_b4['nf']).'</td>
+                            <td align="center">' . (isset($datos_dpcc_b1['c1']) == false ? '' : $datos_dpcc_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_dpcc_b2['c1']) == false ? '' : $datos_dpcc_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_dpcc_b3['c1']) == false ? '' : $datos_dpcc_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_dpcc_b4['c1']) == false ? '' : $datos_dpcc_b1['c1']) . '</td>
+                            <td rowspan="3" align="center">' . (isset($datos_dpcc_b4['nf']) == false ? '' : $datos_dpcc_b4['nf']) . '</td>
                         </tr>
                         <tr>
                             <td>Convive y participa democráticamente en la búsqueda del bien común</td>
-                            <td align="center">'.(isset($datos_dpcc_b1['c2']) == false ? '' : $datos_dpcc_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_dpcc_b2['c2']) == false ? '' : $datos_dpcc_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_dpcc_b3['c2']) == false ? '' : $datos_dpcc_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_dpcc_b4['c2']) == false ? '' : $datos_dpcc_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_dpcc_b1['c2']) == false ? '' : $datos_dpcc_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_dpcc_b2['c2']) == false ? '' : $datos_dpcc_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_dpcc_b3['c2']) == false ? '' : $datos_dpcc_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_dpcc_b4['c2']) == false ? '' : $datos_dpcc_b4['c2']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_dpcc_b1['pb']) == false ? '' : $datos_dpcc_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_dpcc_b2['pb']) == false ? '' : $datos_dpcc_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_dpcc_b3['pb']) == false ? '' : $datos_dpcc_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_dpcc_b4['pb']) == false ? '' : $datos_dpcc_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_dpcc_b1['pb']) == false ? '' : $datos_dpcc_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_dpcc_b2['pb']) == false ? '' : $datos_dpcc_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_dpcc_b3['pb']) == false ? '' : $datos_dpcc_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_dpcc_b4['pb']) == false ? '' : $datos_dpcc_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td rowspan="4">Ciencias sociales
                             </td>
                             <td>Construye interpretaciones históricas</td>
-                            <td align="center">'.(isset($datos_ccss_b1['c1']) == false ? '' : $datos_ccss_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b2['c1']) == false ? '' : $datos_ccss_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b3['c1']) == false ? '' : $datos_ccss_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b4['c1']) == false ? '' : $datos_ccss_b4['c1']).'</td>
-                            <td rowspan="4" align="center">'.(isset($datos_ccss_b4['nf']) == false ? '' : $datos_ccss_b4['nf']).'</td>
+                            <td align="center">' . (isset($datos_ccss_b1['c1']) == false ? '' : $datos_ccss_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b2['c1']) == false ? '' : $datos_ccss_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b3['c1']) == false ? '' : $datos_ccss_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b4['c1']) == false ? '' : $datos_ccss_b4['c1']) . '</td>
+                            <td rowspan="4" align="center">' . (isset($datos_ccss_b4['nf']) == false ? '' : $datos_ccss_b4['nf']) . '</td>
                         </tr>
                         <tr>
                             <td>Gestiona responsablemente el espacio y el ambiente </td>
-                            <td align="center">'.(isset($datos_ccss_b1['c2']) == false ? '' : $datos_ccss_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b2['c2']) == false ? '' : $datos_ccss_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b3['c2']) == false ? '' : $datos_ccss_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b4['c2']) == false ? '' : $datos_ccss_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_ccss_b1['c2']) == false ? '' : $datos_ccss_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b2['c2']) == false ? '' : $datos_ccss_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b3['c2']) == false ? '' : $datos_ccss_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b4['c2']) == false ? '' : $datos_ccss_b4['c2']) . '</td>
                         </tr>
                         <tr>
                             <td>Gestiona responsablemente los recursos económicos</td>
-                            <td align="center">'.(isset($datos_ccss_b1['c3']) == false ? '' : $datos_ccss_b1['c3']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b2['c3']) == false ? '' : $datos_ccss_b2['c3']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b3['c3']) == false ? '' : $datos_ccss_b3['c3']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b4['c3']) == false ? '' : $datos_ccss_b4['c3']).'</td>
+                            <td align="center">' . (isset($datos_ccss_b1['c3']) == false ? '' : $datos_ccss_b1['c3']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b2['c3']) == false ? '' : $datos_ccss_b2['c3']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b3['c3']) == false ? '' : $datos_ccss_b3['c3']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b4['c3']) == false ? '' : $datos_ccss_b4['c3']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_ccss_b1['pb']) == false ? '' : $datos_ccss_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b2['pb']) == false ? '' : $datos_ccss_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b3['pb']) == false ? '' : $datos_ccss_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_ccss_b4['pb']) == false ? '' : $datos_ccss_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_ccss_b1['pb']) == false ? '' : $datos_ccss_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b2['pb']) == false ? '' : $datos_ccss_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b3['pb']) == false ? '' : $datos_ccss_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ccss_b4['pb']) == false ? '' : $datos_ccss_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td rowspan="2">Educación para el trabajo</td>
                             <td>Gestiona proyectos de emprendimiento económico o social</td>
-                            <td align="center">'.(isset($datos_ept_b1['c1']) == false ? '' : $datos_ept_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_ept_b2['c1']) == false ? '' : $datos_ept_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_ept_b3['c1']) == false ? '' : $datos_ept_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_ept_b4['c1']) == false ? '' : $datos_ept_b4['c1']).'</td>
-                            <td rowspan="2" align="center">'.(isset($datos_ept_b4['nf']) == false ? '' : $datos_ept_b4['nf']).'</td>
+                            <td align="center">' . (isset($datos_ept_b1['c1']) == false ? '' : $datos_ept_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ept_b2['c1']) == false ? '' : $datos_ept_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ept_b3['c1']) == false ? '' : $datos_ept_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ept_b4['c1']) == false ? '' : $datos_ept_b4['c1']) . '</td>
+                            <td rowspan="2" align="center">' . (isset($datos_ept_b4['nf']) == false ? '' : $datos_ept_b4['nf']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_ept_b1['pb']) == false ? '' : $datos_ept_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_ept_b2['pb']) == false ? '' : $datos_ept_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_ept_b3['pb']) == false ? '' : $datos_ept_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_ept_b4['pb']) == false ? '' : $datos_ept_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_ept_b1['pb']) == false ? '' : $datos_ept_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ept_b2['pb']) == false ? '' : $datos_ept_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ept_b3['pb']) == false ? '' : $datos_ept_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ept_b4['pb']) == false ? '' : $datos_ept_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td rowspan="4">Educación física</td>
                             <td>Se desenvuelve de manera autónoma a través de su motricidad</td>
-                            <td align="center">'.(isset($datos_ef_b1['c1']) == false ? '' : $datos_ef_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_ef_b2['c1']) == false ? '' : $datos_ef_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_ef_b3['c1']) == false ? '' : $datos_ef_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_ef_b4['c1']) == false ? '' : $datos_ef_b4['c1']).'</td>
-                            <td rowspan="4" align="center">'.(isset($datos_ef_b4['nf']) == false ? '' : $datos_ef_b4['nf']).'</td>
+                            <td align="center">' . (isset($datos_ef_b1['c1']) == false ? '' : $datos_ef_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b2['c1']) == false ? '' : $datos_ef_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b3['c1']) == false ? '' : $datos_ef_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b4['c1']) == false ? '' : $datos_ef_b4['c1']) . '</td>
+                            <td rowspan="4" align="center">' . (isset($datos_ef_b4['nf']) == false ? '' : $datos_ef_b4['nf']) . '</td>
                         </tr>
                         <tr>
                             <td>Asume una vida saludable</td>
-                            <td align="center">'.(isset($datos_ef_b1['c2']) == false ? '' : $datos_ef_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_ef_b2['c2']) == false ? '' : $datos_ef_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_ef_b3['c2']) == false ? '' : $datos_ef_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_ef_b4['c2']) == false ? '' : $datos_ef_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_ef_b1['c2']) == false ? '' : $datos_ef_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b2['c2']) == false ? '' : $datos_ef_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b3['c2']) == false ? '' : $datos_ef_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b4['c2']) == false ? '' : $datos_ef_b4['c2']) . '</td>
                         </tr>
                         <tr>
                             <td>Interactúa a través de sus habilidades sociomotrices</td>
-                            <td align="center">'.(isset($datos_ef_b1['c3']) == false ? '' : $datos_ef_b1['c3']).'</td>
-                            <td align="center">'.(isset($datos_ef_b2['c3']) == false ? '' : $datos_ef_b2['c3']).'</td>
-                            <td align="center">'.(isset($datos_ef_b3['c3']) == false ? '' : $datos_ef_b3['c3']).'</td>
-                            <td align="center">'.(isset($datos_ef_b4['c3']) == false ? '' : $datos_ef_b4['c3']).'</td>
+                            <td align="center">' . (isset($datos_ef_b1['c3']) == false ? '' : $datos_ef_b1['c3']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b2['c3']) == false ? '' : $datos_ef_b2['c3']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b3['c3']) == false ? '' : $datos_ef_b3['c3']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b4['c3']) == false ? '' : $datos_ef_b4['c3']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_ef_b1['pb']) == false ? '' : $datos_ef_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_ef_b2['pb']) == false ? '' : $datos_ef_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_ef_b3['pb']) == false ? '' : $datos_ef_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_ef_b4['pb']) == false ? '' : $datos_ef_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_ef_b1['pb']) == false ? '' : $datos_ef_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b2['pb']) == false ? '' : $datos_ef_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b3['pb']) == false ? '' : $datos_ef_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ef_b4['pb']) == false ? '' : $datos_ef_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td rowspan="4">Comunicación</td>
                             <td>Se comunica oralmente en su lengua materna </td>
-                            <td align="center">'.(isset($datos_com_b1['c1']) == false ? '' : $datos_com_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_com_b2['c1']) == false ? '' : $datos_com_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_com_b3['c1']) == false ? '' : $datos_com_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_com_b4['c1']) == false ? '' : $datos_com_b4['c1']).'</td>
-                            <td rowspan="4" align="center">'.(isset($datos_com_b4['nf']) == false ? '' : $datos_com_b4['nf']).'</td>
+                            <td align="center">' . (isset($datos_com_b1['c1']) == false ? '' : $datos_com_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_com_b2['c1']) == false ? '' : $datos_com_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_com_b3['c1']) == false ? '' : $datos_com_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_com_b4['c1']) == false ? '' : $datos_com_b4['c1']) . '</td>
+                            <td rowspan="4" align="center">' . (isset($datos_com_b4['nf']) == false ? '' : $datos_com_b4['nf']) . '</td>
                         </tr>
                         <tr>
                             <td>Lee diversos tipos de textos escritos en su lengua materna</td>
-                            <td align="center">'.(isset($datos_com_b1['c2']) == false ? '' : $datos_com_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_com_b2['c2']) == false ? '' : $datos_com_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_com_b3['c2']) == false ? '' : $datos_com_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_com_b4['c2']) == false ? '' : $datos_com_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_com_b1['c2']) == false ? '' : $datos_com_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_com_b2['c2']) == false ? '' : $datos_com_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_com_b3['c2']) == false ? '' : $datos_com_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_com_b4['c2']) == false ? '' : $datos_com_b4['c2']) . '</td>
                         </tr>
                         <tr>
                             <td>Escribe diversos tipos de textos en su lengua materna</td>
-                            <td align="center">'.(isset($datos_com_b1['c3']) == false ? '' : $datos_com_b1['c3']).'</td>
-                            <td align="center">'.(isset($datos_com_b2['c3']) == false ? '' : $datos_com_b2['c3']).'</td>
-                            <td align="center">'.(isset($datos_com_b3['c3']) == false ? '' : $datos_com_b3['c3']).'</td>
-                            <td align="center">'.(isset($datos_com_b4['c3']) == false ? '' : $datos_com_b4['c3']).'</td>
+                            <td align="center">' . (isset($datos_com_b1['c3']) == false ? '' : $datos_com_b1['c3']) . '</td>
+                            <td align="center">' . (isset($datos_com_b2['c3']) == false ? '' : $datos_com_b2['c3']) . '</td>
+                            <td align="center">' . (isset($datos_com_b3['c3']) == false ? '' : $datos_com_b3['c3']) . '</td>
+                            <td align="center">' . (isset($datos_com_b4['c3']) == false ? '' : $datos_com_b4['c3']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_com_b1['pb']) == false ? '' : $datos_com_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_com_b2['pb']) == false ? '' : $datos_com_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_com_b3['pb']) == false ? '' : $datos_com_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_com_b4['pb']) == false ? '' : $datos_com_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_com_b1['pb']) == false ? '' : $datos_com_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_com_b2['pb']) == false ? '' : $datos_com_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_com_b3['pb']) == false ? '' : $datos_com_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_com_b4['pb']) == false ? '' : $datos_com_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td rowspan="3">Arte y cultura</td>
                             <td>Aprecia de manera crítica manifestaciones artísticoculturales</td>
-                            <td align="center">'.(isset($datos_arte_b1['c1']) == false ? '' : $datos_arte_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_arte_b2['c1']) == false ? '' : $datos_arte_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_arte_b3['c1']) == false ? '' : $datos_arte_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_arte_b4['c1']) == false ? '' : $datos_arte_b4['c1']).'</td>
-                            <td rowspan="3" align="center">'.(isset($datos_arte_b4['nf']) == false ? '' : $datos_arte_b4['nf']).'</td>
+                            <td align="center">' . (isset($datos_arte_b1['c1']) == false ? '' : $datos_arte_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_arte_b2['c1']) == false ? '' : $datos_arte_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_arte_b3['c1']) == false ? '' : $datos_arte_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_arte_b4['c1']) == false ? '' : $datos_arte_b4['c1']) . '</td>
+                            <td rowspan="3" align="center">' . (isset($datos_arte_b4['nf']) == false ? '' : $datos_arte_b4['nf']) . '</td>
                         </tr>
                         <tr>
                             <td>Crea proyectos desde los lenguajes artísticos </td>
-                            <td align="center">'.(isset($datos_arte_b1['c2']) == false ? '' : $datos_arte_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_arte_b2['c2']) == false ? '' : $datos_arte_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_arte_b3['c2']) == false ? '' : $datos_arte_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_arte_b4['c2']) == false ? '' : $datos_arte_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_arte_b1['c2']) == false ? '' : $datos_arte_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_arte_b2['c2']) == false ? '' : $datos_arte_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_arte_b3['c2']) == false ? '' : $datos_arte_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_arte_b4['c2']) == false ? '' : $datos_arte_b4['c2']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_arte_b1['pb']) == false ? '' : $datos_arte_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_arte_b2['pb']) == false ? '' : $datos_arte_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_arte_b3['pb']) == false ? '' : $datos_arte_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_arte_b4['pb']) == false ? '' : $datos_arte_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_arte_b1['pb']) == false ? '' : $datos_arte_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_arte_b2['pb']) == false ? '' : $datos_arte_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_arte_b3['pb']) == false ? '' : $datos_arte_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_arte_b4['pb']) == false ? '' : $datos_arte_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td rowspan="4">Inglés</td>
                             <td>Se comunica oralmente en inglés como lengua extranjera</td>
-                            <td align="center">'.(isset($datos_ing_b1['c1']) == false ? '' : $datos_ing_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_ing_b2['c1']) == false ? '' : $datos_ing_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_ing_b3['c1']) == false ? '' : $datos_ing_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_ing_b4['c1']) == false ? '' : $datos_ing_b4['c1']).'</td>
-                            <td rowspan="4" align="center">'.(isset($datos_ing_b4['nf']) == false ? '' : $datos_ing_b4['nf']).'</td>
+                            <td align="center">' . (isset($datos_ing_b1['c1']) == false ? '' : $datos_ing_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b2['c1']) == false ? '' : $datos_ing_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b3['c1']) == false ? '' : $datos_ing_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b4['c1']) == false ? '' : $datos_ing_b4['c1']) . '</td>
+                            <td rowspan="4" align="center">' . (isset($datos_ing_b4['nf']) == false ? '' : $datos_ing_b4['nf']) . '</td>
                         </tr>
                         <tr>
                             <td>Lee diversos tipos de textos escritos en inglés como lengua extranjera</td>
-                            <td align="center">'.(isset($datos_ing_b1['c2']) == false ? '' : $datos_ing_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_ing_b2['c2']) == false ? '' : $datos_ing_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_ing_b3['c2']) == false ? '' : $datos_ing_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_ing_b4['c2']) == false ? '' : $datos_ing_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_ing_b1['c2']) == false ? '' : $datos_ing_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b2['c2']) == false ? '' : $datos_ing_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b3['c2']) == false ? '' : $datos_ing_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b4['c2']) == false ? '' : $datos_ing_b4['c2']) . '</td>
                         </tr>
                         <tr>
                             <td>Escribe diversos tipos de textos en inglés como lengua extranjera</td>
-                            <td align="center">'.(isset($datos_ing_b1['c3']) == false ? '' : $datos_ing_b1['c3']).'</td>
-                            <td align="center">'.(isset($datos_ing_b2['c3']) == false ? '' : $datos_ing_b2['c3']).'</td>
-                            <td align="center">'.(isset($datos_ing_b3['c3']) == false ? '' : $datos_ing_b3['c3']).'</td>
-                            <td align="center">'.(isset($datos_ing_b4['c3']) == false ? '' : $datos_ing_b4['c3']).'</td>
+                            <td align="center">' . (isset($datos_ing_b1['c3']) == false ? '' : $datos_ing_b1['c3']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b2['c3']) == false ? '' : $datos_ing_b2['c3']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b3['c3']) == false ? '' : $datos_ing_b3['c3']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b4['c3']) == false ? '' : $datos_ing_b4['c3']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_ing_b1['pb']) == false ? '' : $datos_ing_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_ing_b2['pb']) == false ? '' : $datos_ing_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_ing_b3['pb']) == false ? '' : $datos_ing_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_ing_b4['pb']) == false ? '' : $datos_ing_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_ing_b1['pb']) == false ? '' : $datos_ing_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b2['pb']) == false ? '' : $datos_ing_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b3['pb']) == false ? '' : $datos_ing_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_ing_b4['pb']) == false ? '' : $datos_ing_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td rowspan="5">Matemática</td>
                             <td>Resuelve problemas de cantidad</td>
-                            <td align="center">'.(isset($datos_mat_b1['c1']) == false ? '' : $datos_mat_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_mat_b2['c1']) == false ? '' : $datos_mat_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_mat_b3['c1']) == false ? '' : $datos_mat_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_mat_b4['c1']) == false ? '' : $datos_mat_b4['c1']).'</td>
-                            <td rowspan="5" align="center">'.(isset($datos_mat_b4['nf']) == false ? '' : $datos_mat_b4['nf']).'</td>
+                            <td align="center">' . (isset($datos_mat_b1['c1']) == false ? '' : $datos_mat_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b2['c1']) == false ? '' : $datos_mat_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b3['c1']) == false ? '' : $datos_mat_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b4['c1']) == false ? '' : $datos_mat_b4['c1']) . '</td>
+                            <td rowspan="5" align="center">' . (isset($datos_mat_b4['nf']) == false ? '' : $datos_mat_b4['nf']) . '</td>
                         </tr>
                         <tr>
                             <td>Resuelve problemas de regularidad, equivalencia y cambio</td>
-                            <td align="center">'.(isset($datos_mat_b1['c2']) == false ? '' : $datos_mat_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_mat_b2['c2']) == false ? '' : $datos_mat_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_mat_b3['c2']) == false ? '' : $datos_mat_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_mat_b4['c2']) == false ? '' : $datos_mat_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_mat_b1['c2']) == false ? '' : $datos_mat_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b2['c2']) == false ? '' : $datos_mat_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b3['c2']) == false ? '' : $datos_mat_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b4['c2']) == false ? '' : $datos_mat_b4['c2']) . '</td>
                         </tr>
                         <tr>
                             <td>Resuelve problemas de forma, movimiento y localización</td>
-                            <td align="center">'.(isset($datos_mat_b1['c3']) == false ? '' : $datos_mat_b1['c3']).'</td>
-                            <td align="center">'.(isset($datos_mat_b2['c3']) == false ? '' : $datos_mat_b2['c3']).'</td>
-                            <td align="center">'.(isset($datos_mat_b3['c3']) == false ? '' : $datos_mat_b3['c3']).'</td>
-                            <td align="center">'.(isset($datos_mat_b4['c3']) == false ? '' : $datos_mat_b4['c3']).'</td>
+                            <td align="center">' . (isset($datos_mat_b1['c3']) == false ? '' : $datos_mat_b1['c3']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b2['c3']) == false ? '' : $datos_mat_b2['c3']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b3['c3']) == false ? '' : $datos_mat_b3['c3']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b4['c3']) == false ? '' : $datos_mat_b4['c3']) . '</td>
                         </tr>
                         <tr>
                             <td>Resuelve problemas de gestión de datos e incertidumbre</td>
-                            <td align="center">'.(isset($datos_mat_b1['c4']) == false ? '' : $datos_mat_b1['c4']).'</td>
-                            <td align="center">'.(isset($datos_mat_b2['c4']) == false ? '' : $datos_mat_b2['c4']).'</td>
-                            <td align="center">'.(isset($datos_mat_b3['c4']) == false ? '' : $datos_mat_b3['c4']).'</td>
-                            <td align="center">'.(isset($datos_mat_b4['c4']) == false ? '' : $datos_mat_b4['c4']).'</td>
+                            <td align="center">' . (isset($datos_mat_b1['c4']) == false ? '' : $datos_mat_b1['c4']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b2['c4']) == false ? '' : $datos_mat_b2['c4']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b3['c4']) == false ? '' : $datos_mat_b3['c4']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b4['c4']) == false ? '' : $datos_mat_b4['c4']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_mat_b1['pb']) == false ? '' : $datos_mat_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_mat_b2['pb']) == false ? '' : $datos_mat_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_mat_b3['pb']) == false ? '' : $datos_mat_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_mat_b4['pb']) == false ? '' : $datos_mat_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_mat_b1['pb']) == false ? '' : $datos_mat_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b2['pb']) == false ? '' : $datos_mat_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b3['pb']) == false ? '' : $datos_mat_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_mat_b4['pb']) == false ? '' : $datos_mat_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td rowspan="4">Ciencia y tecnología</td>
                             <td>Indaga mediante métodos científicos para construir sus conocimientos</td>
-                            <td align="center">'.(isset($datos_cyt_b1['c1']) == false ? '' :$datos_cyt_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b2['c1']) == false ? '' :$datos_cyt_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b3['c1']) == false ? '' :$datos_cyt_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b4['c1']) == false ? '' :$datos_cyt_b4['c1']).'</td>
-                            <td rowspan="4" align="center">'.(isset($datos_cyt_b4['nf']) == false ? '' :$datos_cyt_b4['c1']).'</td>
+                            <td align="center">' . (isset($datos_cyt_b1['c1']) == false ? '' : $datos_cyt_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b2['c1']) == false ? '' : $datos_cyt_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b3['c1']) == false ? '' : $datos_cyt_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b4['c1']) == false ? '' : $datos_cyt_b4['c1']) . '</td>
+                            <td rowspan="4" align="center">' . (isset($datos_cyt_b4['nf']) == false ? '' : $datos_cyt_b4['c1']) . '</td>
                         </tr>
                         <tr>
                             <td>Explica el mundo físico basándose en conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo</td>
-                            <td align="center">'.(isset($datos_cyt_b1['c2'])== false ? '' : $datos_cyt_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b2['c2'])== false ? '' :$datos_cyt_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b3['c2'])== false ? '' :$datos_cyt_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b4['c2'])== false ? '' :$datos_cyt_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_cyt_b1['c2']) == false ? '' : $datos_cyt_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b2['c2']) == false ? '' : $datos_cyt_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b3['c2']) == false ? '' : $datos_cyt_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b4['c2']) == false ? '' : $datos_cyt_b4['c2']) . '</td>
                         </tr>
                         <tr>
                             <td>Diseña y construye soluciones tecnológicas para resolver problemas de su entorno</td>
-                            <td align="center">'.(isset($datos_cyt_b1['c3']) == false ? '' :$datos_cyt_b1['c3']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b2['c3']) == false ? '' :$datos_cyt_b2['c3']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b3['c3']) == false ? '' :$datos_cyt_b3['c3']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b4['c3']) == false ? '' :$datos_cyt_b4['c3']).'</td>
+                            <td align="center">' . (isset($datos_cyt_b1['c3']) == false ? '' : $datos_cyt_b1['c3']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b2['c3']) == false ? '' : $datos_cyt_b2['c3']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b3['c3']) == false ? '' : $datos_cyt_b3['c3']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b4['c3']) == false ? '' : $datos_cyt_b4['c3']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_cyt_b1['pb']) == false ? '' :$datos_cyt_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b2['pb']) == false ? '' :$datos_cyt_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b3['pb']) == false ? '' :$datos_cyt_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_cyt_b4['pb']) == false ? '' :$datos_cyt_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_cyt_b1['pb']) == false ? '' : $datos_cyt_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b2['pb']) == false ? '' : $datos_cyt_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b3['pb']) == false ? '' : $datos_cyt_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_cyt_b4['pb']) == false ? '' : $datos_cyt_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td rowspan="3">Educación religiosa</td>
                             <td>Construye su identidad como persona humana, amada por Dios, digna, libre y trascendente, comprendiendo la doctrina de su propia religión, abierto al diálogo con las que le son cercanas.</td>
-                            <td align="center">'.(isset($datos_rel_b1['c1']) == false ? '' :$datos_rel_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_rel_b2['c1']) == false ? '' :$datos_rel_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_rel_b3['c1']) == false ? '' :$datos_rel_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_rel_b4['c1']) == false ? '' :$datos_rel_b4['c1']).'</td>
-                            <td rowspan="3" align="center">'.(isset($datos_rel_b4['nf']) == false ? '' :$datos_rel_b4['nf']).'</td>
+                            <td align="center">' . (isset($datos_rel_b1['c1']) == false ? '' : $datos_rel_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_rel_b2['c1']) == false ? '' : $datos_rel_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_rel_b3['c1']) == false ? '' : $datos_rel_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_rel_b4['c1']) == false ? '' : $datos_rel_b4['c1']) . '</td>
+                            <td rowspan="3" align="center">' . (isset($datos_rel_b4['nf']) == false ? '' : $datos_rel_b4['nf']) . '</td>
                         </tr>
                         <tr>
                             <td>Asume la experiencia del encuentro personal y comunitario con Dios en su proyecto de vida en coherencia con su creencia religiosa.</td>
-                            <td align="center">'.(isset($datos_rel_b1['c2']) == false ? '' :$datos_rel_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_rel_b2['c2']) == false ? '' :$datos_rel_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_rel_b3['c2']) == false ? '' :$datos_rel_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_rel_b4['c2']) == false ? '' :$datos_rel_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_rel_b1['c2']) == false ? '' : $datos_rel_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_rel_b2['c2']) == false ? '' : $datos_rel_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_rel_b3['c2']) == false ? '' : $datos_rel_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_rel_b4['c2']) == false ? '' : $datos_rel_b4['c2']) . '</td>
                         </tr>
                         <tr>
                             <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">'.(isset($datos_rel_b1['pb']) == false ? '' :$datos_rel_b1['pb']).'</td>
-                            <td align="center">'.(isset($datos_rel_b2['pb']) == false ? '' :$datos_rel_b2['pb']).'</td>
-                            <td align="center">'.(isset($datos_rel_b3['pb']) == false ? '' :$datos_rel_b3['pb']).'</td>
-                            <td align="center">'.(isset($datos_rel_b4['pb']) == false ? '' :$datos_rel_b4['pb']).'</td>
+                            <td align="center">' . (isset($datos_rel_b1['pb']) == false ? '' : $datos_rel_b1['pb']) . '</td>
+                            <td align="center">' . (isset($datos_rel_b2['pb']) == false ? '' : $datos_rel_b2['pb']) . '</td>
+                            <td align="center">' . (isset($datos_rel_b3['pb']) == false ? '' : $datos_rel_b3['pb']) . '</td>
+                            <td align="center">' . (isset($datos_rel_b4['pb']) == false ? '' : $datos_rel_b4['pb']) . '</td>
                         </tr>
                         <tr>
                             <td>Competencia transversal 1</td>
                             <td>Se desenvuelve en entornos virtuales generados por las TIC</td>
-                            <td align="center">'.(isset($datos_trans_b1['c1']) == false ? '' :$datos_trans_b1['c1']).'</td>
-                            <td align="center">'.(isset($datos_trans_b2['c1']) == false ? '' :$datos_trans_b2['c1']).'</td>
-                            <td align="center">'.(isset($datos_trans_b3['c1']) == false ? '' :$datos_trans_b3['c1']).'</td>
-                            <td align="center">'.(isset($datos_trans_b4['c1']) == false ? '' :$datos_trans_b4['c1']).'</td>
+                            <td align="center">' . (isset($datos_trans_b1['c1']) == false ? '' : $datos_trans_b1['c1']) . '</td>
+                            <td align="center">' . (isset($datos_trans_b2['c1']) == false ? '' : $datos_trans_b2['c1']) . '</td>
+                            <td align="center">' . (isset($datos_trans_b3['c1']) == false ? '' : $datos_trans_b3['c1']) . '</td>
+                            <td align="center">' . (isset($datos_trans_b4['c1']) == false ? '' : $datos_trans_b4['c1']) . '</td>
                             <td align="center"></td>
                         </tr>
                         <tr>
                             <td >Competencia transversal 2</td>
                             <td>Gestiona su Aprendizaje de manera autónoma</td>
-                            <td align="center">'.(isset($datos_trans_b1['c2']) == false ? '' :$datos_trans_b1['c2']).'</td>
-                            <td align="center">'.(isset($datos_trans_b2['c2']) == false ? '' :$datos_trans_b2['c2']).'</td>
-                            <td align="center">'.(isset($datos_trans_b3['c2']) == false ? '' :$datos_trans_b3['c2']).'</td>
-                            <td align="center">'.(isset($datos_trans_b4['c2']) == false ? '' :$datos_trans_b4['c2']).'</td>
+                            <td align="center">' . (isset($datos_trans_b1['c2']) == false ? '' : $datos_trans_b1['c2']) . '</td>
+                            <td align="center">' . (isset($datos_trans_b2['c2']) == false ? '' : $datos_trans_b2['c2']) . '</td>
+                            <td align="center">' . (isset($datos_trans_b3['c2']) == false ? '' : $datos_trans_b3['c2']) . '</td>
+                            <td align="center">' . (isset($datos_trans_b4['c2']) == false ? '' : $datos_trans_b4['c2']) . '</td>
                             <td align="center"></td>
                         </tr>
                     </tbody>
@@ -3096,7 +3184,7 @@ class ReportController extends Controller
                     <tbody>
                         <tr>
                             <td align="center">
-                                <img src="data:image/jpg;base64,'.$imagenSello.'" alt="sello" class="sello" />
+                                <img src="data:image/jpg;base64,' . $imagenSello . '" alt="sello" class="sello" />
                             </td>
                         </tr>
                     </tbody>
@@ -3109,11 +3197,11 @@ class ReportController extends Controller
 
         $contenido = $dompdf->output();
 
-        $exists=Storage::disk('LibretasNotas')->exists($nombreDocumento);
+        $exists = Storage::disk('LibretasNotas')->exists($nombreDocumento);
         if (!$exists) {
             Storage::disk('LibretasNotas')->put($nombreDocumento, $contenido);
             /* Storage::disk('reportes')->delete($nombreDocumento); */
-        }else{
+        } else {
             Storage::disk('LibretasNotas')->delete($nombreDocumento);
             Storage::disk('LibretasNotas')->put($nombreDocumento, $contenido);
         }

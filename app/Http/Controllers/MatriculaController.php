@@ -78,51 +78,38 @@ class MatriculaController extends Controller
      */
     public function store(Request $request)
     {
-        return $request;
-
-        $datos_matricula = $request['params']['matricula'];
+      
 
         DB::beginTransaction();
         try {
             $gsa = Gsa::create([
-                'ala_id' => $datos_matricula['ala_id'], //!falta
-                'niv_id' => $datos_matricula['niv_id'],
-                'gra_id' => $datos_matricula['gra_id'],
-                'sec_id' => $datos_matricula['sec_id']
+                'ala_id' => $request->ala_id,
+                'niv_id' => $request->niv_id,
+                'gra_id' => $request->gra_id,
+                'sec_id' => $request->sec_id
             ]);
 
             Matricula::create([
-                'per_id' => $datos_matricula['per_id'],
-                'alu_id' => $datos_matricula['alu_id'], //!falta
+                'per_id' => $request->per_id,
+                'alu_id' => $request->alu_id,
                 'ags_id' => $gsa->ags_id,
-                'mat_fecha' => $datos_matricula['fecha'], 
-                'mat_situacion' => $datos_matricula['situacion'],
-                'mat_tipo_procedencia' => $datos_matricula['tipo_procedencia'],
-                'mat_colegio_procedencia' => $datos_matricula['colegio_procedencia'],
-                'mat_observacion' => $datos_matricula['observacion']
+                'mat_fecha' => $request->fechamatricula,
+                'mat_situacion' => $request->situacion,
+                'mat_tipo_procedencia' => $request->tipo_procedencia,
+                'mat_colegio_procedencia' => $request->colegio_procedencia,
+                'mat_observacion' => $request->observacion
             ]);
 
-            Seccion::where('sec_id',$datos_matricula['sec_id'])->decrement('sec_vacantes', 1);
+            Seccion::where('sec_id',$request->sec_id)->decrement('sec_vacantes', 1);
 
             DB::commit();
 
-            return response()->json([
-                'status' => 1
-            ]);
-
-            /* if ($request->ajax()) {
-                return response()->json([
-                    'status' => 1
-                ]);
-            }
-            return view('Error404'); */
+            return redirect()->route('matricula.inicio')->with('success', 'Matricula creado correctamente');
 
         } catch (\Exception $e) {
             DB::rollBack();
             dd($e);
-            return response()->json([
-                'status' => 0
-            ]);
+            return redirect()->route('matricula.inicio')->with('success', 'Tuvimos un problema, inténtelo nuevamente');
         }
     }
 

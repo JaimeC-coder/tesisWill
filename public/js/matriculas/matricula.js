@@ -9,6 +9,8 @@ let per_id = document.getElementById("per_id");
 let niv_id = document.getElementById("niv_id");
 let gra_id = document.getElementById("gra_id");
 let sec_id = document.getElementById("sec_id");
+let ala_id = document.getElementById("ala_id");
+let alu_id = document.getElementById("alu_id");
 let aula = document.getElementById("aula");
 let vacantes = document.getElementById("vacantes");
 let matricula_info1 = document.getElementById("matricula_info1");
@@ -41,6 +43,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+
+            alu_id.value = infouser.alu_id;
             nombre.value = infouser.per_nombre_completo;
             apoderado.value = infouser.apo_nombre_completo;
             parentesco.value = infouser.apo_parentesco;
@@ -80,6 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log(secciones);
         aula.value = secciones.aula;
         vacantes.value = secciones.sec_vacantes;
+        ala_id.value = secciones.ala_id;
     });
 
 });

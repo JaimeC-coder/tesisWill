@@ -16,6 +16,8 @@
                         <div class="row clearfix">
                             <div class="col-lg-6 col-md-6 col-sm-12">
                                 <div class="form-group">
+                                    <input type="hidden" id="ala_id" name="ala_id">
+                                    <input type="hidden" id="alu_id" name="alu_id">
                                     <label>DNI <span class="text-danger">*</span></label>
 
                                     <div class="input-group mb-3">

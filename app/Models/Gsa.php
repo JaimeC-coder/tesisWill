@@ -19,9 +19,9 @@ class Gsa extends Model
         'is_deleted'
     ];
 
-    public function alumno()
+    public function aula()
     {
-        return $this->belongsTo(Alumno::class, 'ala_id', 'alu_id');
+        return $this->belongsTo(Aula::class, 'ala_id', 'alu_id');
     }
 
     public function nivel()

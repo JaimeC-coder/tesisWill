@@ -31,14 +31,14 @@ class Persona extends Model
 
     public function alumno()
     {
-        return $this->hasOne(Alumno::class, 'alu_id', 'per_id');
+        return $this->hasOne(Alumno::class, 'per_id', 'per_id');
     }
 
     public function usuario()
     {
         return $this->hasOne(User::class, 'per_id', 'per_id');
     }
-   
+
 
 
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\PersonalAcademico;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,7 @@ class PersonalAcademicosSeeder extends Seeder
         ];
 
         foreach ($personal_academicos as $personal_academico) {
-            DB::table('personal_academicos')->insert([
+           $personal =  PersonalAcademico::create([
                 'pa_id' => $personal_academico[0],
                 'per_id' => $personal_academico[1],
                 'pa_turno' => $personal_academico[2],
@@ -43,6 +44,16 @@ class PersonalAcademicosSeeder extends Seeder
                 'updated_at' => now(),
                 'deleted_at' => NULL
             ]);
+            if ($personal->rol_id ==6 ) {
+                $personal->persona->usuario->assignRole('Secretaria');
+            }elseif ($personal->rol_id == 5) {
+                $personal->persona->usuario->assignRole('Auxiliar');
+            //  $user->assignRole('Docente');
+            }elseif ($personal->rol_id == 4) {
+                $personal->persona->usuario->assignRole('Docente');
+            }elseif ($personal->rol_id == 2) {
+                $personal->persona->usuario->assignRole('Director');
+            }
         }
     }
 }

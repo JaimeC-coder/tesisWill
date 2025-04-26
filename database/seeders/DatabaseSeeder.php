@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
             SeguimientosSeeder::class,
             TiposSeeder::class,
             CapacidadsSeeder::class,
-            SPSeeder::class,
+            // SPSeeder::class,
         ]);
     }
 }

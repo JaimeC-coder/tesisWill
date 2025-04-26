@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alumno;
 use App\Models\Anio;
 use App\Models\Curso;
 use App\Models\Gsa;
 use App\Models\Horario;
+use App\Models\Matricula;
 use App\Models\Periodo;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 use function Illuminate\Log\log;
 
@@ -77,7 +82,7 @@ class HorarioController extends Controller
         $seccion_id = $request->seccion_id;
 
         $anio = Anio::where('anio_id', $anio_id)
-            ->where('is_deleted', '!=', 1)
+        ->where('anio_estado', '!=', 1)
             ->first();
 
         $fecha_inicio = Carbon::parse($anio->anio_fechaInicio);
@@ -164,12 +169,17 @@ class HorarioController extends Controller
 
     public function inicio()
     {
-        $anios = Anio::where('is_deleted', '!=', 1)->get();
-        return view('view.horario.inicio', compact('anios'));
+        $user = Auth::user();
+        $user = $user->per_id;
+
+        $anios = Anio::where('anio_estado', '!=', 1)->get();
+        return view('view.horario.inicio', compact('anios', 'user'));
     }
 
     public function search(Request $request)
     {
+        Log::info('request');
+        Log::info($request->all());
 
 
         $anio_id = $request->anio_id;
@@ -177,7 +187,8 @@ class HorarioController extends Controller
         $grado_id = $request->grado_id;
         $seccion_id = $request->seccion_id;
         $dias = $this->dias;
-        $periodo = Periodo::where('anio_id', $anio_id)->first();
+        $periodo = Periodo::where('anio_id', $anio_id)->where('is_deleted', '!=', 1)->first();
+        Log::info($periodo);
         $ags = Gsa::where('niv_id', $nivel_id)->where('gra_id', $grado_id)->where('sec_id', $seccion_id)->first();
 
         $horarios = Horario::where('per_id', $periodo->per_id)->where('ags_id', $ags->ags_id)->where('is_deleted', '!=', 1)->get();
@@ -207,5 +218,44 @@ class HorarioController extends Controller
             'cursos' => $cursos,
             'dias' => $dias
         ]);
+    }
+
+    public function verifyAlumno(Request $request)
+    {
+        Log::info('request');
+        Log::info($request->all());
+
+        $user = User::Where('per_id', $request->user)
+            ->where('is_deleted', '!=', 1)
+            ->first();
+
+
+
+        if ($user->roles[0]->name == "Alumno") {
+            $matricula  = Matricula::where('alu_id', $user->persona->alumno->alu_id)
+                ->where('is_deleted', '!=', 1)
+                ->first();
+            $anio = $matricula->periodo->anio->anio_id;
+            $nivel = $matricula->gsa->nivel->niv_id;
+            $grado = $matricula->gsa->grado->gra_id;
+            $seccion = $matricula->gsa->seccion->sec_id;
+
+            return  response()->json([
+                'status' => 200,
+                'alumno' => 1,
+                'data' => [
+                    'anio' => $anio,
+                    'nivel' => $nivel,
+                    'grado' => $grado,
+                    'seccion' => $seccion
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'status' => 200,
+                'alumno' => 0,
+                'data' => null,
+            ]);
+        }
     }
 }

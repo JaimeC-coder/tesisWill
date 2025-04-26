@@ -72,7 +72,8 @@
                             <div class="col-lg-4 col-md-6 col-sm-12">
                                 <div class="form-group">
                                     <label>Nivel <span class="text-danger">*</span></label>
-                                    <select id="niv_id" name="niv_id" class="form-control show-tick" required disabled>
+                                    <select id="niv_id" name="niv_id" class="form-control show-tick" required
+                                        disabled>
                                         <option value="0" selected>-- Seleccione un nivel --</option>
                                         @foreach ($niveles as $nivel)
                                             <option value="{{ $nivel->niv_id }}">{{ $nivel->niv_descripcion }}</option>
@@ -83,7 +84,8 @@
                             <div class="col-lg-4 col-md-6 col-sm-12">
                                 <div class="form-group">
                                     <label>Grado <span class="text-danger">*</span></label>
-                                    <select name="gra_id" id="gra_id" disabled class="form-control show-tick" required>
+                                    <select name="gra_id" id="gra_id" disabled class="form-control show-tick"
+                                        required>
                                         <option value="0" selected>-- Seleccione un grado --</option>
 
                                     </select>
@@ -92,7 +94,8 @@
                             <div class="col-lg-4 col-md-6 col-sm-12">
                                 <div class="form-group">
                                     <label>Sección <span class="text-danger">*</span></label>
-                                    <select id="sec_id" name="sec_id" class="form-control show-tick" disabled required>
+                                    <select id="sec_id" name="sec_id" class="form-control show-tick" disabled
+                                        required>
                                         <option value="0" selected>-- Seleccione una sección --</option>
 
                                     </select>
@@ -107,13 +110,15 @@
                             <div class="col-lg-4 col-md-6 col-sm-12">
                                 <div class="form-group">
                                     <label>Nro Vacantes </label>
-                                    <input type="text" id="vacantes" name="vacantes" class="form-control" disabled>
+                                    <input type="text" id="vacantes" name="vacantes" class="form-control"
+                                        disabled>
                                 </div>
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-12">
                                 <div class="form-group">
                                     <label>Fecha de Matricula <span class="text-danger">*</span></label>
-                                    <input type="date" id="fechamatricula" name="fechamatricula" class="form-control" required>
+                                    <input type="date" id="fechamatricula" name="fechamatricula"
+                                        class="form-control" required>
                                 </div>
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-12">
@@ -152,14 +157,14 @@
                             <div class="col-lg-4 col-md-6 col-sm-12">
                                 <label>Parentesco <span class="text-danger">*</span></label>
                                 <input type="text" id="parentesco" name="parentesco" class="form-control"
-                                disabled>
+                                    disabled>
 
                             </div>
                             <div class="col-lg-4 col-md-6 col-sm-12">
                                 <div class="form-group">
                                     <label>Vive con el estudiante</label>
-                                    <input type="text" id="vive_con_estudiante" name="vive_con_estudiante" class="form-control"
-                                    disabled>
+                                    <input type="text" id="vive_con_estudiante" name="vive_con_estudiante"
+                                        class="form-control" disabled>
 
                                 </div>
                             </div>
@@ -196,10 +201,12 @@
                                 </div>
                             </div>
                             <div class="col-sm-12 text-right mt-4">
-                                <button v-if="!loading" type="submit" class="btn btn-primary">Registrar</button>
-                                <button v-else disabled type="button" class="btn btn-primary">Procesando...</button>
-                                <button type="button" class="btn btn-outline-secondary"
-                                    @click="cancelar()">Cancelar</button>
+
+                                <button type="submit" class="btn btn-primary">
+                                    Registrar
+                                </button>
+                                <a href="{{ route('matricula.inicio') }}"
+                                    class="btn btn-outline-secondary">Cancelar</a>
                             </div>
                         </div>
                     </div>

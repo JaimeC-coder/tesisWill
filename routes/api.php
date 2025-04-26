@@ -56,6 +56,7 @@ Route::group(['prefix' => 'nota'], function () {
 Route::group(['prefix' => 'horario'], function () {
     Route::post('search', [HorarioController::class, 'search']);
     Route::post('register', [HorarioController::class, 'store']);
+    Route::post('verifyAlumno', [HorarioController::class, 'verifyAlumno']);
 });
 Route::group(['prefix' => 'reporte'], function () {
     Route::post('matricula', [ReportController::class, 'matricula']);

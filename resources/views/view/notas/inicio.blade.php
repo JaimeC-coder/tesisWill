@@ -15,6 +15,7 @@
                 <div class="">
                     <form method="GET" action="{{ route('nota.inicio') }}">
                         <div class="card-body">
+                            <input type="hidden" name="xd" id="xd" value="{{ $user }}">
                             <div class="row mb-4" style="display: flex;justify-content: flex-end;">
                                 <label class="col-md-1 col-form-label">Año </label>
                                 <div class="col-md-3">

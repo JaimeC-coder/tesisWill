@@ -4,7 +4,7 @@ moment.locale('es');
 const anio = document.getElementById('anio');
 const nivel = document.getElementById('nivel');
 const grado = document.getElementById('grado');
-const seccion = document.getElementById('seccion');
+const seccionss = document.getElementById('seccion');
 const btnHorario = document.getElementById('btnHorario');
 const cur_id = document.getElementById('cur_id');
 const SelectDia = document.getElementById('SelectDia');
@@ -14,15 +14,19 @@ const hora_inicio = document.getElementById('hora_inicio');
 const hora_fin = document.getElementById('hora_fin');
 const calendarEl = document.getElementById('calendar');
 const mostrar_info = document.getElementById('mostrar-info');
+const user = document.getElementById('xd');
 
 
 document.addEventListener('DOMContentLoaded', function () {
+    verififyHorario();
     anio.addEventListener("change", handleAnioChange);
     nivel.addEventListener("change", handleNivelChange);
     grado.addEventListener("change", handleGradoChange);
-    seccion.addEventListener("change", function () { btnHorario.disabled = !seccion.value; });
-    btnHorario.addEventListener('click', loadHorarios);
-    btnregister.addEventListener('click', registerHorario);
+    seccionss.addEventListener("change", function () { btnHorario.disabled = !seccion.value; });
+    btnHorario.addEventListener('click', () => loadHorarios());
+    if (btnregister) {
+        btnregister.addEventListener('click', registerHorario);
+    }
 
 });
 
@@ -130,16 +134,17 @@ async function loadSecciones(gradoId) {
         console.error("Error al cargar secciones:", error);
     }
 }
-async function loadHorarios() {
+async function loadHorarios(seccionId =seccionss.value , anioId = anio.value, nivelId = nivel.value, gradoId = grado.value) {
+
     try {
-        const seccionId = seccion.value;
-        const horarios = await fetchData('/api/horario/search', { seccion_id: seccionId, anio_id: anio.value, nivel_id: nivel.value, grado_id: grado.value });
-        console.log(horarios.cursos);
-        console.log(horarios.dias);
-        console.log(horarios.horarios);
+        const horarios = await fetchData('/api/horario/search', { seccion_id: seccionId, anio_id: anioId, nivel_id: nivelId, grado_id: gradoId });
+
         mostrar_info.hidden = false;
-        updateSelectOptions(cur_id, horarios.cursos, "cur_abreviatura", "cur_id");
-        updateSelectOptions(SelectDia, horarios.dias, "name", "id");
+        if (btnregister) {
+            
+            updateSelectOptions(cur_id, horarios.cursos, "cur_abreviatura", "cur_id");
+            updateSelectOptions(SelectDia, horarios.dias, "name", "id");
+        }
         loadCalendar(horarios.horarios);
     } catch (error) {
         console.error("Error al cargar horarios:", error);
@@ -173,6 +178,44 @@ async function registerHorario() {
         console.error("Error al registrar horario:", error);
     }
 }
+
+async function verififyHorario() {
+    try {
+        const horarios = await fetchData('/api/horario/verifyAlumno', { user: user.value });
+        console.log(horarios);
+        if (horarios.alumno === 1) {
+
+            const anioId = horarios.data.anio;
+            const nivelId = horarios.data.nivel;
+            const gradoId = horarios.data.grado;
+            const seccionId = horarios.data.seccion;
+            anio.value = anioId;
+            await loadNiveles(anioId);  // Cargar niveles basado en anio
+            nivel.value = nivelId;
+            await loadGrados(nivelId);  // Cargar grados basado en nivel
+            grado.value = gradoId;
+            await loadSecciones(gradoId);  // Cargar secciones basado en grado
+            seccionss.value = seccionId;
+            anio.disabled = true;
+            nivel.disabled = true;
+            grado.disabled = true;
+            seccionss.disabled = true;
+            btnHorario.disabled = true;
+
+            if (btnregister) {
+                btnregister.disabled = true;
+            }
+            loadHorarios(seccionId, anioId, nivelId, gradoId);
+            return;
+        }
+        anio.disabled = false;
+        console.log(horarios.data);
+    } catch (error) {
+        console.error(error);
+        console.error("Error al verificar horarios:", error);
+    }
+}
+
 
 
 async function fetchData(url, data, method = 'POST') {

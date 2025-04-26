@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 use Dompdf\Dompdf;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
@@ -35,7 +35,7 @@ class ReportController extends Controller
     public function inicio()
     {
 
-        $anios = Anio::where('is_deleted', '!=', 1)->get();
+        $anios = Anio::where('anio_estado', '!=', 1)->get();
         $niveles = Nivel::all();
         return view('view.reporte.general', compact('anios', 'niveles'));
     }
@@ -161,7 +161,7 @@ class ReportController extends Controller
     public function gestion(Request $request)
     {
         // return $request;
-        $anios = Anio::where('is_deleted', '!=', 1)->get();
+        $anios = Anio::where('anio_estado', '!=', 1)->get();
 
         $anio = $request->anio;
         $nivel = $request->nivel;
@@ -254,7 +254,20 @@ class ReportController extends Controller
 
     public function alumno(Request $request)
     {
-        $dni = $request->buscar;
+
+        $user = Auth::user();
+        //dame el rol del usuario
+
+        Log::info('Usuario: ' . $user->roles[0]->name);
+        if( $user->roles[0]->name =="Alumno"){
+            $dni = $user->persona->per_dni;
+            Log::info('DNI: ' . $dni);
+            $request['buscar'] = $dni;
+        }else if( $user->roles[0]->name =="Alumno"){
+            $dni = $request->buscar;
+        }
+
+
         $persona = null;
         $alumno = null;
         $gsa = null;
@@ -266,7 +279,7 @@ class ReportController extends Controller
 
         if (is_null($request->buscar)) {
             Log::info('No se encontró matrícula para el DNI1: ' . $request->buscar);
-            return view('view.reporte.alumno', compact('persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
+            return view('view.reporte.alumno', compact('dni','persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
         }
 
         $alumno = Alumno::whereHas('persona', function ($query) use ($request) {
@@ -293,7 +306,7 @@ class ReportController extends Controller
 
 
 
-        return view('view.reporte.alumno', compact('persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
+        return view('view.reporte.alumno', compact('persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion','dni'));
     }
 
 
@@ -325,7 +338,7 @@ class ReportController extends Controller
     {
         $data = $request['params']['data'];
 
-        $año = Anio::where('año_estado', 1)->first();
+        $año = Anio::where('anio_estado', 1)->first();
 
         $Persona = Persona::where('per_id', $data["per_id"])->first();
         $departamento = Departamento::where('idDepa', $Persona->per_departamento)->first();

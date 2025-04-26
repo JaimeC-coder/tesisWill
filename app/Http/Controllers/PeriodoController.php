@@ -19,7 +19,7 @@ class PeriodoController extends Controller
 
     public function __construct()
     {
-        $this->anio = Anio::where('is_deleted', '!=', 1)->get();
+        $this->anio = Anio::where('anio_estado', '!=', 1)->get();
         $this->tipo = Tipo::where('is_deleted', '!=', 1)->get();
     }
     /**
@@ -94,7 +94,7 @@ class PeriodoController extends Controller
      */
     public function update(Request $request, Periodo $periodo)
     {
-    
+
 
         DB::beginTransaction();
         try {

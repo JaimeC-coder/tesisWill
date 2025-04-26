@@ -217,7 +217,7 @@ class PersonasSeeder extends Seeder
         ];
 
         foreach ($personas as $persona) {
-              $personafor = Persona::create([
+            $personafor = Persona::create([
                 'per_id' => $persona[0],
                 'per_dni' => $persona[1],
                 'per_nombres' => $persona[2],
@@ -252,22 +252,41 @@ class PersonasSeeder extends Seeder
                     'updated_at' => now(),
                     'deleted_at' => NULL
                 ]);
-                $user->assignRole('Alumno');
-            }
-            else{
-                $user = User::create([
-                    'name' => $persona[2] . ' ' . $persona[3],
-                    'per_id' => $persona[0],
-                    'email' => $persona[1] .'_falta_'. '@gmail.com',
-                    'estado' => $persona[15],
-                    'password' => Hash::make('12345678'),
-                    'rol_id' => 3,
-                    'is_deleted' => $persona[15],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                    'deleted_at' => NULL
-                ]);
-                $user->assignRole('Alumno');
+                //primer elimina los roles que tenga el usuario
+                $user->syncRoles(['Alumno']);
+            } else {
+                $correo  = strtolower(substr($persona[1], 0, 3) . substr($persona[2], 0, 1) . explode(' ', $persona[3])[0] . '@colegio.com');
+                $user = User::where('email', $correo)->first();
+                if ($user) {
+                    $user = User::create([
+                        'name' => $persona[2] . ' ' . $persona[3],
+                        'per_id' => $persona[0],
+                        'email' => strtolower(substr($persona[1], 0, 4) . substr($persona[2], 0, 2) . explode(' ', $persona[3])[0] . '@colegio.com'),
+                        'estado' => $persona[15],
+                        'password' => Hash::make('12345678'),
+                        'rol_id' => 3,
+                        'is_deleted' => $persona[15],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                        'deleted_at' => NULL
+                    ]);
+                } else {
+                    $user = User::create([
+                        'name' => $persona[2] . ' ' . $persona[3],
+                        'per_id' => $persona[0],
+                        'email' => strtolower(substr($persona[1], 0, 3) . substr($persona[2], 0, 1) . explode(' ', $persona[3])[0] . '@colegio.com'),
+                        'estado' => $persona[15],
+                        'password' => Hash::make('12345678'),
+                        'rol_id' => 3,
+                        'is_deleted' => $persona[15],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                        'deleted_at' => NULL
+                    ]);
+                }
+
+                //primer elimina los roles que tenga el usuario
+                $user->syncRoles(['Alumno']);
             }
         }
     }

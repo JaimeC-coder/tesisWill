@@ -98,6 +98,7 @@ function searchInformation(){
                 apellido.addEventListener("input", syncUser);
 
 
+
             }else{
                 per_id.value=data.per_id;
                 nombre.value =data.per_nombres || "";
@@ -141,6 +142,10 @@ function searchInformation(){
         }else{
             alert("No se encontraron datos con el DNI ingresado");
             blockInput(false);
+            nombre.addEventListener("input", syncUser);
+            apellido.addEventListener("input", syncUser);
+            email.addEventListener("input", syncEmail);
+           
             return;
         }
     })
@@ -216,6 +221,7 @@ function blockInput(status){
 function syncEmail() {
     emailcorreo.value = email.value;
     emailhidden.value = email.value;
+    emailcorreo.disabled = true;
 
     if (flexCheckDefault.checked && email.value.length > 5) {
         verificarEmailExistente(email.value);

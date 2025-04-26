@@ -20,6 +20,8 @@ use App\Models\Persona;
 use App\Models\PersonalAcademico;
 use App\Models\Seccion;
 use App\Models\Tipo;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 use function Illuminate\Log\log;
@@ -84,8 +86,9 @@ class NotaController extends Controller
     }
     public function inicio(Request $request, $nivels = null)
     {
-
-        $anios = Anio::where('is_deleted', '!=', 1)->get();
+        $user = Auth::user();
+        $user = $user->per_id;
+        $anios = Anio::where('anio_estado', '!=', 1)->get();
 
         $nivel = $request->nivel;
         $anio = $request->anio;
@@ -134,13 +137,13 @@ class NotaController extends Controller
             $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo);
 
 
-            return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidad'));
+            return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidad', 'user'));
         }
 
         $asignacionesCursos = null;
         $Gsas = null;
         $tipoPeriodo = null;
-        return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo'));
+        return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'user'));
     }
 
 
@@ -149,8 +152,21 @@ class NotaController extends Controller
 
     public function buscarDocente(Request $request)
     {
+
+        Log::info($request);
+
         $nivel = $request->nivel;
-        $docentes = PersonalAcademico::whereIn('rol_id', [4])->where('niv_id', $nivel)->where('is_deleted', '!=', 1)->get();
+        $user = User::Where('per_id', $request->user)
+        ->where('is_deleted', '!=', 1)
+        ->first();
+
+        if ($user->roles[0]->name == "Docente") {
+            $docentes = PersonalAcademico::where('per_id', $user->per_id)->where('is_deleted', '!=', 1)->get();
+
+        } else {
+            $docentes = PersonalAcademico::whereIn('rol_id', [4])->where('niv_id', $nivel)->where('is_deleted', '!=', 1)->get();
+        }
+
         foreach ($docentes as $d) {
             $persona = Persona::where('per_id', $d->per_id)->first();
             $d->dni = $persona->per_dni;
@@ -229,7 +245,7 @@ class NotaController extends Controller
     public function inicioaPI(Request $request, $nivels = null)
     {
 
-        $anios = Anio::where('is_deleted', '!=', 1)->get();
+        $anios = Anio::where('anio_estado', '!=', 1)->get();
         // log($request);
         $nivel = $request->nivel;
         $anio = $request->anio;
@@ -538,7 +554,6 @@ class NotaController extends Controller
 
                     $NotaPromoedio->estadoPromedio = 0;
                     $NotaPromoedio->save();
-
                 }
             }
 
@@ -552,12 +567,13 @@ class NotaController extends Controller
 
     //creame un metodo que va a actualizar todas las notas con el promedio de las capacidades
 
-    public function updateNota(){
-        $notas = Nota::where('estadoPromedio',0 )->select('nt_id','nt_nota','estadoPromedio')->get();
+    public function updateNota()
+    {
+        $notas = Nota::where('estadoPromedio', 0)->select('nt_id', 'nt_nota', 'estadoPromedio')->get();
 
-        foreach($notas as $nota){
-            $promedio = Nota::where('nt_id',$nota->nt_id)->first();
-            $capacidadNota = NotaCapacidad::where('nt_id',$nota->nt_id)->pluck('nc_nota');
+        foreach ($notas as $nota) {
+            $promedio = Nota::where('nt_id', $nota->nt_id)->first();
+            $capacidadNota = NotaCapacidad::where('nt_id', $nota->nt_id)->pluck('nc_nota');
             $nuevoPromedio = $this->calcularPromedio($capacidadNota->toArray());
 
             $promedio->nt_nota = $nuevoPromedio;
@@ -565,7 +581,6 @@ class NotaController extends Controller
             $promedio->save();
         }
         return  $notas;
-
     }
 
     //año ,grado ,nivel ,seccion

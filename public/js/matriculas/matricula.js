@@ -60,7 +60,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     );
     niv_id.addEventListener("change", async function () {
-        const grados = await fetchData("/api/showGrados", { niv_id: niv_id.value });
+        const grados = await fetchData("/api/showGrados", {
+            niv_id: niv_id.value,
+            alu_id:alu_id.value
+        });
         gra_id.disabled = false;
         gra_id.innerHTML = "";
 

@@ -19,7 +19,8 @@
                         <div class="row mb-4">
                             <label class="col-md-1 col-form-label">Año </label>
                             <div class="col-md-3">
-                                <select id="anio" name="anio" class="form-control show-tick">
+                                <input type="hidden" name="xd" id="xd" value="{{ $user }}">
+                                <select id="anio" name="anio" class="form-control show-tick" disabled>
                                     <option value="0" selected disabled>-- Selecciona --</option>
                                     @foreach ($anios as $anio)
                                         <option value="{{ $anio->anio_id }}">{{ $anio->anio_descripcion }}</option>
@@ -59,75 +60,90 @@
                         </div>
                     </div>
                 </div>
-                <div class="card " id="mostrar-info" hidden >
+                <div class="card " id="mostrar-info" hidden>
                     <div class="card-body">
                         <div class="row mb-4">
-                            <div class="col-md-3 p-4">
-                                <form class="card p-3">
-                                    <div class="row">
-                                        <div class="col-lg-12 col-md-6 col-sm-12">
-                                            <div class="form-group"><label>Curso</label>
-                                                <select id="cur_id" class="form-control show-tick">
-                                                    <option value="0" selected disabled>-- Selecciona --</option>
 
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-12 col-md-6 col-sm-12">
-                                            <div class="form-group"><label>Fecha</label>
-                                                <select id="SelectDia" class="form-control show-tick">
-                                                    <option value="0" selected disabled>-- Selecciona --</option>
 
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-12 col-md-6 col-sm-12">
-                                            <div class="form-group"><label>Hora Inicio</label>
-                                                <div class="input-group mb-3">
-                                                    <input type="text" class="form-control timepicker" id="hora_inicio" autofocus
-                                                        required >
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-12 col-md-6 col-sm-12">
-                                            <div class="form-group"><label>Hora Fin</label>
-                                                <div class="input-group mb-3">
-                                                    <input type="text" class="form-control timepicker" id="hora_fin" autofocus
-                                                        required>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-12 col-md-6 col-sm-12">
-                                            <div class="form-group"><label>Color</label>
-                                                <div class="input-group mb-3">
-                                                    <select id="color" class="form-control show-tick" required>
+                            @can('panel.horario.registro')
+                                <div class="col-md-3 p-4">
+
+
+                                    <form class="card p-3">
+                                        <div class="row">
+                                            <div class="col-lg-12 col-md-6 col-sm-12">
+                                                <div class="form-group"><label>Curso</label>
+                                                    <select id="cur_id" class="form-control show-tick">
                                                         <option value="0" selected disabled>-- Selecciona --</option>
-                                                        <option value="red">Rojo</option>
-                                                        <option value="blue">Azul</option>
-                                                        <option value="green">Verde</option>
-                                                        <option value="purple">Morado</option>
-                                                        <option value="orange">Naranja</option>
-                                                        <option value="turquiose">Turquesa</option>
-                                                        <option value="brown">Marrón</option>
-                                                        <option value="black">Negro</option>
+
                                                     </select>
                                                 </div>
                                             </div>
+                                            <div class="col-lg-12 col-md-6 col-sm-12">
+                                                <div class="form-group"><label>Fecha</label>
+                                                    <select id="SelectDia" class="form-control show-tick">
+                                                        <option value="0" selected disabled>-- Selecciona --</option>
+
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 col-md-6 col-sm-12">
+                                                <div class="form-group"><label>Hora Inicio</label>
+                                                    <div class="input-group mb-3">
+                                                        <input type="text" class="form-control timepicker" id="hora_inicio"
+                                                            autofocus required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 col-md-6 col-sm-12">
+                                                <div class="form-group"><label>Hora Fin</label>
+                                                    <div class="input-group mb-3">
+                                                        <input type="text" class="form-control timepicker" id="hora_fin"
+                                                            autofocus required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 col-md-6 col-sm-12">
+                                                <div class="form-group"><label>Color</label>
+                                                    <div class="input-group mb-3">
+                                                        <select id="color" class="form-control show-tick" required>
+                                                            <option value="0" selected disabled>-- Selecciona --</option>
+                                                            <option value="red">Rojo</option>
+                                                            <option value="blue">Azul</option>
+                                                            <option value="green">Verde</option>
+                                                            <option value="purple">Morado</option>
+                                                            <option value="orange">Naranja</option>
+                                                            <option value="turquiose">Turquesa</option>
+                                                            <option value="brown">Marrón</option>
+                                                            <option value="black">Negro</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 col-md-6 col-sm-12"
+                                                style="display: flex;align-items: center;justify-content: center;">
+                                                <button type="" class="btn btn-primary"
+                                                    id="btnregister">Registrar</button>
+
+                                            </div>
                                         </div>
-                                        <div class="col-lg-12 col-md-6 col-sm-12"
-                                            style="display: flex;align-items: center;justify-content: center;">
-                                            <button type="" class="btn btn-primary"
-                                                id="btnregister">Registrar</button>
+                                    </form>
+                                </div>
+                                <div class="col-md-9">
+                                    <div id='calendar'></div>
 
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+                                </div>
+                            @else
+                                <div class="col-md-12">
+                                    <div id='calendar'></div>
 
-                            <div class="col-md-9">
-                                <div id='calendar'></div>
+                                </div>
+                            @endcan
 
-                            </div>
+                            {{-- si no tiene el permiso que la cladse cambie  --}}
+
+
+
                         </div>
                     </div>
                 </div>
@@ -139,7 +155,7 @@
 
 
 @section('js')
-<script src="{{ asset('js/horario/horario.js') }}"></script>
+    <script src="{{ asset('js/horario/horario.js') }}"></script>
     <script>
         $(document).ready(function() {
 

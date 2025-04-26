@@ -7,16 +7,9 @@ const grado = document.getElementById('grado');
 const seccion = document.getElementById('seccion');
 const cursoId = document.getElementById('cursoId');
 const btnNota = document.getElementById('btnActualizar');
+const user = document.getElementById('xd');
 
-// const btnHorario = document.getElementById('btnHorario');
-// const cur_id = document.getElementById('cur_id');
-// const SelectDia = document.getElementById('SelectDia');
-// const btnregister = document.getElementById('btnregister');
-// const color = document.getElementById('color');
-// const hora_inicio = document.getElementById('hora_inicio');
-// const hora_fin = document.getElementById('hora_fin');
-// const calendarEl = document.getElementById('calendar');
-// const mostrar_info = document.getElementById('mostrar-info');
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -179,7 +172,7 @@ async function loadNiveles(anioId) {
 async function loadDocente(nivel) {
     console.log(nivel);
     try {
-        const docentes = await fetchData('/api/nota/docente', { nivel: nivel });
+        const docentes = await fetchData('/api/nota/docente', { nivel: nivel ,user: user.value});
         console.log(docentes);
         updateSelectOptions(
             docente,

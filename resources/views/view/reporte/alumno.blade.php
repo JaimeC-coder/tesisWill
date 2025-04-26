@@ -21,8 +21,8 @@
                                         <form action="{{ route('reporte.alumno') }}" method="GET">
 
                                             <div class="input-group">
-                                                <input type="text" name="buscar" class="form-control"
-                                                    placeholder="Ingresar DNI del alumno" required />
+                                                <input type="text" name="buscar" class="form-control" value=" {{$dni?? '' }}"
+                                                @isset($dni)   disabled @endisset placeholder="Ingresar DNI del alumno" required />
                                                 <div class="input-group-append">
                                                     <button class="btn btn-primary" type="submit">
 

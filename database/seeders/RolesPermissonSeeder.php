@@ -75,7 +75,7 @@ class RolesPermissonSeeder extends Seeder
                 'description' => 'Acceso al  modulo de reportes generales',
                 'tipo' => 'panel'
             ]
-        )->syncRoles([$role, $role1, $role2,  $role4]);
+        )->syncRoles([$role, $role1,  $role4]);
         //*     Gestión
         Permission::create(
             [
@@ -83,7 +83,7 @@ class RolesPermissonSeeder extends Seeder
                 'description' => 'Acceso al modulo de reportes de gestion',
                 'tipo' => 'panel'
             ]
-        )->syncRoles([$role, $role1, $role2,   $role4]);
+        )->syncRoles([$role, $role1, $role4]);
         //*     Por Alumno
         Permission::create(
             [
@@ -91,7 +91,7 @@ class RolesPermissonSeeder extends Seeder
                 'description' => 'Acceso al modulo de reportes por alumno',
                 'tipo' => 'panel'
             ]
-        )->syncRoles([$role, $role1, $role2, $role3, $role4, $role5, $role6]);
+        )->syncRoles([$role, $role1, $role3, $role4, $role5, $role6]);
         //    Admin
         //    Actividades Adminitrativas
         //     Ambientes

@@ -21,7 +21,7 @@ class Gsa extends Model
 
     public function aula()
     {
-        return $this->belongsTo(Aula::class, 'ala_id', 'alu_id');
+        return $this->belongsTo(Aula::class, 'ala_id', 'ala_id');
     }
 
     public function nivel()

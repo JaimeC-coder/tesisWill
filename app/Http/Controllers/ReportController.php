@@ -257,7 +257,7 @@ class ReportController extends Controller
 
         $user = Auth::user();
         //dame el rol del usuario
-
+        $dni = null;
         Log::info('Usuario: ' . $user->roles[0]->name);
         if( $user->roles[0]->name =="Alumno"){
             $dni = $user->persona->per_dni;

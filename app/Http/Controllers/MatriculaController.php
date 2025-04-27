@@ -189,10 +189,7 @@ class MatriculaController extends Controller
         $seccion->aula = $aula->ala_descripcion;
         $seccion->ala_id = $aula->ala_id;
         return response()->json($seccion);
-        /* if ($request->ajax()) {
-            return response()->json($seccion);
-        }
-        return view('Error404'); */
+       
     }
 
 

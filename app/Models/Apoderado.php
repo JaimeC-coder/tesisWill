@@ -23,4 +23,16 @@ class Apoderado extends Model
         return $this->belongsTo(Persona::class, 'per_id', 'per_id');
     }
 
+    public function alumno()
+    {
+        return $this->hasMany(Alumno::class, 'apo_id', 'apo_id');
+    }
+
+    
+
+    public function getApoViveConEstudianteAttribute($value)
+    {
+        return $value == 1 ? 'Si' : 'No';
+    }
+
 }

@@ -86,4 +86,9 @@ class HomeController extends Controller
 
         return view('home', compact('informacion'));
     }
+
+    public function profile()
+    {
+        return view('view.profile');
+    }
 }

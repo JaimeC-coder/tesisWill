@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 
 class Persona extends Model
 {
@@ -37,6 +38,55 @@ class Persona extends Model
     public function usuario()
     {
         return $this->hasOne(User::class, 'per_id', 'per_id');
+    }
+
+    //relacion con apoderado
+    public function apoderado()
+    {
+        return $this->hasOne(Apoderado::class, 'per_id', 'per_id');
+    }
+
+    //relacion con distrito
+    public function distrito()
+    {
+        return $this->belongsTo(Distrito::class, 'per_distrito', 'idDist');
+    }
+    //relacion con provincia
+    public function provincia()
+    {
+        return $this->belongsTo(Provincia::class, 'per_provincia', 'idProv');
+    }
+    //relacion con departamento
+    public function departamento()
+    {
+        return $this->belongsTo(Departamento::class, 'per_departamento', 'idDepa');
+    }
+
+    //metodo para sexo
+    public function getPerSexoAttribute($value)
+    {
+
+        return $value == 'M' ? 'Masculino' : 'Femenino';
+    }
+
+    //metodo para estado civil
+
+    public function getPerEstadoCivilAttribute($value)
+    {
+
+        if ($value == null) {
+            return 'No definido';
+        }elseif ($value == 'S') {
+            return 'Soltero';
+        } elseif ($value == 'C') {
+            return 'Casado';
+        } elseif ($value == 'D') {
+            return 'Divorciado';
+        } elseif ($value == 'V') {
+            return 'Viudo';
+        }
+
+
     }
 
 

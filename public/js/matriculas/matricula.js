@@ -36,19 +36,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     btnbuscar.addEventListener("click", async function () {
         if (dni.value.length == 8) {
-            const infouser = await fetchData("/api/alumnoMatricula",{ dni: dni.value });
-            if (infouser.error) {
+            const infouser1 = await fetchData("/api/alumnoMatricula",{ dni: dni.value });
+            console.log(infouser1);
+            if (infouser1.alumno == 1) {
                 mostrar(false);
-                alert("El alumno no se encuentra registrado , por favor registrelo primero");
+                alert(infouser1.data);
                 return;
             }
 
 
-            alu_id.value = infouser.alu_id;
-            nombre.value = infouser.per_nombre_completo;
-            apoderado.value = infouser.apo_nombre_completo;
-            parentesco.value = infouser.apo_parentesco;
-            vive_con_estudiante.value = infouser.apo_vive_con_estudiante =1 ? "Si" : "No";
+            alu_id.value = infouser1.data.alu_id;
+            nombre.value = infouser1.data.per_nombre_completo;
+            apoderado.value = infouser1.data.apo_nombre_completo;
+            parentesco.value = infouser1.data.apo_parentesco;
+            vive_con_estudiante.value = infouser1.data.apo_vive_con_estudiante =1 ? "Si" : "No";
             mostrar(true);
         } else {
             mostrar(false);

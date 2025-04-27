@@ -158,17 +158,16 @@ class MatriculaController extends Controller
 
         if ($alumno != null) {
             $matricula  = DB::table('matriculas as ma')
-            ->join('gsas as gsa', 'ma.ags_id', '=', 'gsa.ags_id')
-            ->join('grados as gr', 'gsa.gra_id', '=', 'gr.gra_id')
-            ->where('ma.alu_id',$alumno)
-            ->pluck('gr.gra_id');
+                ->join('gsas as gsa', 'ma.ags_id', '=', 'gsa.ags_id')
+                ->join('grados as gr', 'gsa.gra_id', '=', 'gr.gra_id')
+                ->where('ma.alu_id', $alumno)
+                ->pluck('gr.gra_id');
 
-           // $descripcion = $matricula?->gsa?->grado?->gra_id;
-           $gradosRestantes = Grado::where('niv_id', $nivel)
-           ->whereNotIn('gra_id', $matricula)
-           ->get();
-           return response()->json($gradosRestantes);
-           
+            // $descripcion = $matricula?->gsa?->grado?->gra_id;
+            $gradosRestantes = Grado::where('niv_id', $nivel)
+                ->whereNotIn('gra_id', $matricula)
+                ->get();
+            return response()->json($gradosRestantes);
         }
 
         $grados = Grado::where('niv_id', $nivel)->get();
@@ -201,39 +200,59 @@ class MatriculaController extends Controller
     {
 
         $nrodoc = $request->dni;
-        Log::info($nrodoc);
         $persona = Persona::where('per_dni', $nrodoc)->first();
+        $peridos = Periodo::where('per_estado', 1)->orderBy('per_id', 'desc')->first();
         if ($persona) {
             $alumno = Alumno::where('per_id', $persona->per_id)->first();
+
+            $matricula = Matricula::where('alu_id', $persona->alumno->alu_id)
+                ->where('per_id', $peridos->per_id)
+                ->first();
             if ($alumno) {
 
-                $apoderado = Apoderado::where('apo_id', $alumno->apo_id)->first();
-                $apo_persona = Persona::where('per_id', $apoderado->per_id)->first();
-                if ($apo_persona->per_nombres == "") {
-                    $persona->apo_nombre_completo = $apo_persona->per_nombre_completo;
+                if ($matricula) {
+                    return  response()->json([
+                        'status' => 200,
+                        'alumno' => 1,
+                        'data' => 'El alumno ya se encuentra matriculado'
+                    ]);
                 } else {
-                    $persona->apo_nombre_completo = $apo_persona->per_apellidos . ' ' . $apo_persona->per_nombres;
+                    $apoderado = Apoderado::where('apo_id', $alumno->apo_id)->first();
+                    $apo_persona = Persona::where('per_id', $apoderado->per_id)->first();
+                    if ($apo_persona->per_nombres == "") {
+                        $persona->apo_nombre_completo = $apo_persona->per_nombre_completo;
+                    } else {
+                        $persona->apo_nombre_completo = $apo_persona->per_apellidos . ' ' . $apo_persona->per_nombres;
+                    }
+                    /* $persona->apo_nombres = $apo_persona->per_nombres;
+                    $persona->apo_apellidos = $apo_persona->per_apellidos; */
+                    $persona->apo_parentesco = $apoderado->apo_parentesco;
+                    $persona->apo_vive_con_estudiante = $apoderado->apo_vive_con_estudiante;
+                    $persona->alu_id = $alumno->alu_id;
+                    $persona->alu_estado = $alumno->alu_estado;
+                    $persona->apo_id = $alumno->apo_id;
                 }
-                /* $persona->apo_nombres = $apo_persona->per_nombres;
-                $persona->apo_apellidos = $apo_persona->per_apellidos; */
-                $persona->apo_parentesco = $apoderado->apo_parentesco;
-                $persona->apo_vive_con_estudiante = $apoderado->apo_vive_con_estudiante;
-                $persona->alu_id = $alumno->alu_id;
-                $persona->alu_estado = $alumno->alu_estado;
-                $persona->apo_id = $alumno->apo_id;
-                $persona->evaluar = 2;
             } else {
-                return response()->json([
-                    'error' => 'El alumno no se encuentra registrado'
+
+                return  response()->json([
+                    'status' => 200,
+                    'alumno' => 1,
+                    'data' => 'El alumno no se encuentra registrado'
                 ]);
-                $persona->evaluar = 1;
             }
         } else {
-            $persona->evaluar = 0;
+
+            return  response()->json([
+                'status' => 200,
+                'alumno' => 1,
+                'data' => 'La persona no se encuentra registrado'
+            ]);
         }
-        return response()->json($persona);
-        /* if ($request->ajax()) {
-            return response()->json($persona);
-        } */
+
+        return  response()->json([
+            'status' => 200,
+            'alumno' => 0,
+            'data' => $persona
+        ]);
     }
 }

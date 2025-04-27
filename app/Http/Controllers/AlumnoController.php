@@ -100,6 +100,7 @@ class AlumnoController extends Controller
                     'per_distrito' => $newRequest['per_distrito_Alumno'],
                     'per_direccion' => $newRequest['per_direccion_Alumno'],
                 ]);
+                
                 $newRequest['per_id_Alumno'] = $per_id_alumno->per_id;
 
                 $Apoderado = Apoderado::create([
@@ -197,7 +198,7 @@ class AlumnoController extends Controller
     public function update(Request $request, Alumno $alumno)
     {
         $newRequest = $request->all();
-      
+
         DB::transaction(function () use ($newRequest, $alumno) {
             $alumno->persona->update([
                 'per_dni' => $newRequest['per_dni_Alumno'],

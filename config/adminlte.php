@@ -402,7 +402,7 @@ return [
             'text' => 'Asignar Grados',
             'icon'=>'fas fa-shapes',
             'route' => 'asignarGrado.inicio',
-            'can'  => 'actividades.asignarGrado',
+            'can'  => 'actividades.asignarGrados',
         ],
         [
             'text' => 'Alumnos',

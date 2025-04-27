@@ -35,17 +35,17 @@
                                 <tr>
                                     <th scope="row">{{ $value + 1 }}</th>
                                     <td>
-                                        {{ $info->persona->per_dni }}
+                                        {{ $info->persona->per_dni ?? 'Sin DNI' }}
                                     </td>
                                     <td>
-                                        {{ $info->name }}
+                                        {{ $info->name ?? $info->name : 'Sin Nombre' }}
 
                                     </td>
                                     <td>
-                                        {{ $info->email }}
+                                        {{ $info->email ?? 'Sin Email' }}
                                     </td>
                                     <td>
-                                        {{ $info->roles->pluck('name')->implode(', ') }}
+                                        {{ $info->roles->pluck('name')->implode(', ')  ?? 'Sin Rol' }}
                                     </td>
 
 

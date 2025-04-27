@@ -38,7 +38,7 @@
                                         {{ $info->persona->per_dni ?? 'Sin DNI' }}
                                     </td>
                                     <td>
-                                        {{ $info->name ?? $info->name : 'Sin Nombre' }}
+                                        {{ $info->name ?? 'Sin Nombre' }}
 
                                     </td>
                                     <td>

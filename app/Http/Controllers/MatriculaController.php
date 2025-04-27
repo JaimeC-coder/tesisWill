@@ -189,7 +189,7 @@ class MatriculaController extends Controller
         $seccion->aula = $aula->ala_descripcion;
         $seccion->ala_id = $aula->ala_id;
         return response()->json($seccion);
-       
+
     }
 
 
@@ -198,14 +198,17 @@ class MatriculaController extends Controller
 
         $nrodoc = $request->dni;
         $persona = Persona::where('per_dni', $nrodoc)->first();
+
         $peridos = Periodo::where('per_estado', 1)->orderBy('per_id', 'desc')->first();
+        Log::info($peridos);
         if ($persona) {
+
             $alumno = Alumno::where('per_id', $persona->per_id)->first();
 
-            $matricula = Matricula::where('alu_id', $persona->alumno->alu_id)
-                ->where('per_id', $peridos->per_id)
-                ->first();
             if ($alumno) {
+                $matricula = Matricula::where('alu_id', $persona->alumno->alu_id)
+                    ->where('per_id', $peridos->per_id)
+                    ->first();
 
                 if ($matricula) {
                     return  response()->json([

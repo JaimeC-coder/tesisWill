@@ -60,6 +60,7 @@ class UserController extends Controller
                     'per_dni' => $request->per_dni,
                     'per_nombres' => Str::ucfirst($request->nombreshidden),
                     'per_apellidos' => Str::ucfirst($request->apellidoshidden),
+                    'per_nombre_completo' => Str::ucfirst($request->nombreshidden) . ' ' . Str::ucfirst($request->apellidoshidden),
                     'per_email' => $request->emailhidden,
                     'per_sexo' => $request->per_sexo,
                     'per_fecha_nacimiento' => $request->per_fecha_nacimiento,
@@ -76,7 +77,7 @@ class UserController extends Controller
 
             $user = User::create([
                 'per_id' => $request->per_id,
-                'name' => Str::ucfirst($request->nameUserhidden),
+                'name' => Str::ucfirst($request->nameUserhidden) ,
                 'email' => $request->emailhidden,
                 'password' => Hash::make($request->password),
                 'rol_id' => 1,
@@ -128,9 +129,7 @@ class UserController extends Controller
         $persona->per_estado_civil = $request->per_estado_civil;
         $persona->per_celular = $request->per_celular;
         $persona->per_pais = $request->paishidden ?? 'PERU';
-        //  $persona->per_departamento = $request->departamento;
-        //  $persona->per_provincia = $request->provincia;
-        //$persona->per_distrito = $request->distrito;
+   
         $persona->per_direccion = $request->per_direccion;
         $persona->save();
 

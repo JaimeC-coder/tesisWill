@@ -18,8 +18,8 @@ class UserController extends Controller
      * Display a listing of the resource.
      *
      */
-    public $sexo = ['M' => 'Masculino', 'F' => 'Femenino'];
-    public $estadoCivil = ['S' => 'Soltero', 'C' => 'Casado', 'D' => 'Divorciado', 'V' => 'Viudo'];
+    public $sexo = ['Masculino' => 'Masculino', 'Femenino' => 'Femenino'];
+    public $estadoCivil = ['Soltero' => 'Soltero', 'Casado' => 'Casado', 'Divorciado' => 'Divorciado', 'Viudo' => 'Viudo'];
     public $vive = [1 => 'Si', 2 => 'No'];
     public $estados = ['0' => 'Activo', '1' => 'Inactivo'];
     public $parentesco = ['Madre' => 'Madre', 'Padre' => 'Padre', 'TUTOR' => 'Tutor'];

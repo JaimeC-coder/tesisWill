@@ -39,4 +39,9 @@ class Grado extends Model
         return $this->hasMany(Curso::class, 'gra_id', 'gra_id');
     }
 
+    public function asignarGrado()
+    {
+        return $this->hasMany(AsignarGrado::class, 'gra_id', 'gra_id');
+    }
+
 }

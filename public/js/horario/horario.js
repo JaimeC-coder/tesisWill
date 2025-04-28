@@ -108,16 +108,16 @@ function loadCalendar(horario) {
 async function loadNiveles(anioId) {
     try {
         const niveles = await fetchData('/api/anio/nivel', { anio_id: anioId });
-
+        console.log(niveles);
         updateSelectOptions(nivel, niveles, "niv_descripcion", "niv_id");
     } catch (error) {
         console.error("Error al cargar niveles:", error);
     }
 }
 
-async function loadGrados(nivelId) {
+async function loadGrados(nivelId, userId = user.value) {
     try {
-        const grados = await fetchData('/api/anio/grado', { nivel_id: nivelId });
+        const grados = await fetchData('/api/anio/grado', { nivel_id: nivelId , user_id: userId });
         console.log(grados);
         updateSelectOptions(grado, grados, "gra_descripcion", "gra_id");
     } catch (error) {
@@ -125,9 +125,9 @@ async function loadGrados(nivelId) {
     }
 }
 
-async function loadSecciones(gradoId) {
+async function loadSecciones(gradoId, userId = user.value ) {
     try {
-        const secciones = await fetchData('/api/anio/seccion', { grado_id: gradoId });
+        const secciones = await fetchData('/api/anio/seccion', { grado_id: gradoId , user_id: userId });
         console.log(secciones);
         updateSelectOptions(seccion, secciones, "sec_descripcion", "sec_id");
     } catch (error) {
@@ -141,7 +141,7 @@ async function loadHorarios(seccionId =seccionss.value , anioId = anio.value, ni
 
         mostrar_info.hidden = false;
         if (btnregister) {
-            
+
             updateSelectOptions(cur_id, horarios.cursos, "cur_abreviatura", "cur_id");
             updateSelectOptions(SelectDia, horarios.dias, "name", "id");
         }

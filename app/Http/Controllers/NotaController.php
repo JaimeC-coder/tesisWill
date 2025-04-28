@@ -88,7 +88,8 @@ class NotaController extends Controller
     {
         $user = Auth::user();
         $user = $user->per_id;
-        $anios = Anio::where('anio_estado', '!=', 1)->get();
+
+        $anios = Anio::where('anio_estado', '!=', 0)->get();
 
         $nivel = $request->nivel;
         $anio = $request->anio;
@@ -107,6 +108,7 @@ class NotaController extends Controller
 
             $capacidad = $this->returnCapacitaciones($capacidades);
             $estado = 1;
+
             $anio = Anio::where('anio_estado', $estado)->where('is_deleted', '!=', 1)->first();
             $periodo = Periodo::where('anio_id', $anio->anio_id)->where('per_estado', $estado)->where('is_deleted', '!=', 1)->first();
             $tipoPeriodo = Tipo::where('tp_id', $periodo->per_tp_notas)->first();
@@ -245,7 +247,7 @@ class NotaController extends Controller
     public function inicioaPI(Request $request, $nivels = null)
     {
 
-        $anios = Anio::where('anio_estado', '!=', 1)->get();
+        $anios = Anio::where('anio_estado', '!=', 0)->get();
         // log($request);
         $nivel = $request->nivel;
         $anio = $request->anio;

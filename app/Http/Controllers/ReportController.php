@@ -35,7 +35,7 @@ class ReportController extends Controller
     public function inicio()
     {
 
-        $anios = Anio::where('anio_estado', '!=', 1)->get();
+        $anios = Anio::where('anio_estado', '!=', 0)->get();
         $niveles = Nivel::all();
         return view('view.reporte.general', compact('anios', 'niveles'));
     }
@@ -161,7 +161,8 @@ class ReportController extends Controller
     public function gestion(Request $request)
     {
         // return $request;
-        $anios = Anio::where('anio_estado', '!=', 1)->get();
+
+        $anios = Anio::where('anio_estado', '!=', 0)->get();
 
         $anio = $request->anio;
         $nivel = $request->nivel;
@@ -337,8 +338,8 @@ class ReportController extends Controller
     public function generarFichaMatricula(Request $request)
     {
         $data = $request['params']['data'];
-
-        $año = Anio::where('anio_estado', 1)->first();
+   
+        $año = Anio::where('anio_estado', '!=', 0)->first();
 
         $Persona = Persona::where('per_id', $data["per_id"])->first();
         $departamento = Departamento::where('idDepa', $Persona->per_departamento)->first();

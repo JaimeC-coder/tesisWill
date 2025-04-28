@@ -82,7 +82,7 @@ class HorarioController extends Controller
         $seccion_id = $request->seccion_id;
 
         $anio = Anio::where('anio_id', $anio_id)
-        ->where('anio_estado', '!=', 1)
+            ->where('anio_estado', '!=', 0)
             ->first();
 
         $fecha_inicio = Carbon::parse($anio->anio_fechaInicio);
@@ -172,7 +172,12 @@ class HorarioController extends Controller
         $user = Auth::user();
         $user = $user->per_id;
 
-        $anios = Anio::where('anio_estado', '!=', 1)->get();
+        $anios =  Periodo::where('per_estado', '!=', 0)
+            ->join('anios', 'periodos.anio_id', '=', 'anios.anio_id')
+            ->select('anios.anio_id', 'anios.anio_descripcion')
+            ->get();
+        Log::info($anios);
+
         return view('view.horario.inicio', compact('anios', 'user'));
     }
 

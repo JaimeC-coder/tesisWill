@@ -53,7 +53,7 @@ function searchInformation(){
             per_id.value=data.per_id;
             nombre.value =data.per_nombres || "";
             apellido.value=data.per_apellidos || "";
-            telefono.value=data.per_telefono || "";
+            telefono.value=data.per_celular || "";
             pais.value=data.per_pais || "";
             email.value=data.per_email || "";
             direccion.value=data.per_direccion;

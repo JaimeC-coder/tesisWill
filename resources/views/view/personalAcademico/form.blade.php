@@ -38,6 +38,8 @@
                         </div>
                     </div>
                 </div>
+
+               
                 <div class="col-lg-4 col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Nombres <span class="text-danger">*</span></label>
@@ -118,7 +120,7 @@
                     <div class="form-group">
                         <label>Celular</label>
                         <input type="number" class="form-control"
-                            value="{{ $personal->persona->per_celular ?? '' }}" id="per_celular" name="per_celular"
+                            value="{{ $personal->persona->per_celular ?? 'No registrado' }}" id="per_celular" name="per_celular"
                             minlength="9" maxlength="9">
                     </div>
                 </div>

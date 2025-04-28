@@ -33,4 +33,8 @@ class AsignarGrado extends Model
     {
         return $this->belongsTo(Grado::class, 'gra_id', 'gra_id');
     }
+    public function seccion()
+    {
+        return $this->belongsTo(Seccion::class, 'seccion', 'sec_descripcion');
+    }
 }

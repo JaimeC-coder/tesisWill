@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             alu_id.value = infouser1.data.alu_id;
-            nombre.value = infouser1.data.per_nombre_completo;
+            nombre.value = infouser1.data.per_nombre_completo == null ? infouser1.data.per_nombres + "  "+infouser1.data.per_apellidos  : infouser1.data.per_nombre_completo;
             apoderado.value = infouser1.data.apo_nombre_completo;
             parentesco.value = infouser1.data.apo_parentesco;
             vive_con_estudiante.value = infouser1.data.apo_vive_con_estudiante =1 ? "Si" : "No";

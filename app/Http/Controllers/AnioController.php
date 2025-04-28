@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anio;
+use App\Models\AsignarGrado;
 use App\Models\Grado;
 use App\Models\Nivel;
 use App\Models\Seccion;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AnioController extends Controller
 {
@@ -29,8 +33,9 @@ class AnioController extends Controller
         $anio = new Anio();
         $estado = $this->estado;
         $taller = $this->taller;
+        $listAnio = $this->ListAnio();
 
-        return view('view.anioEscolar.create', compact('anio', 'estado', 'taller'));
+        return view('view.anioEscolar.create', compact('anio', 'estado', 'taller', 'listAnio'));
     }
 
     /**
@@ -78,7 +83,8 @@ class AnioController extends Controller
         //
         $estado = $this->estado;
         $taller = $this->taller;
-        return view('view.anioEscolar.edit', compact('anio', 'estado', 'taller'));
+        $listAnio = $this->ListAnio();
+        return view('view.anioEscolar.edit', compact('anio', 'estado', 'taller', 'listAnio'));
     }
 
     /**
@@ -150,7 +156,34 @@ class AnioController extends Controller
     {
 
         try {
-            $grado = Grado::where('niv_id', $request->nivel_id)->get();
+
+
+            $nivel = $request->nivel_id;
+            $user = $request->user_id ?? null;
+
+            $user = User::Where('per_id', $user)
+                ->where('is_deleted', '!=', 1)
+                ->first();
+
+            if ($user->roles[0]->name == "Docente") {
+                $grado = AsignarGrado::where('pa_id', $user->persona->personalAcademico->pa_id)
+                    ->where('asig_is_deleted', 0)
+                    ->with(['grado' => function ($query) use ($nivel) {
+                        $query->where('niv_id', $nivel);
+                    }])
+                    ->get()->map(function ($item) {
+                        $gradoData = $item->grado ? $item->grado->toArray() : [];
+                        unset($item->grado); // Quitamos el objeto 'grado'
+                        return array_merge($item->toArray(), $gradoData); // Combinamos en un solo nivel
+                    });
+            } else {
+                $grado = Grado::where('niv_id', $nivel)->get();
+            }
+
+            Log::info('grado');
+            Log::info($grado);
+
+
             return response()->json($grado);
         } catch (\Throwable $th) {
             return response()->json($th);
@@ -160,11 +193,51 @@ class AnioController extends Controller
     public function seccion(Request $request)
     {
         try {
-            $seccion = Seccion::where('gra_id', $request->grado_id)->get();
+
+
+            $grado = $request->grado_id;
+            $user = $request->user_id ?? null;
+
+            $user = User::Where('per_id', $user)
+                ->where('is_deleted', '!=', 1)
+                ->first();
+
+            if ($user->roles[0]->name == "Docente") {
+                $seccion = Seccion::where('sec_tutor', $user->persona->personalAcademico->pa_id)
+                    ->where('sec_is_delete', 0)
+                    ->get();
+                Log::info($seccion);
+            } else {
+                $seccion = Seccion::where('gra_id', $request->grado_id)->get();
+                Log::info('seccion');
+                Log::info($seccion);
+            }
+            Log::info('seccionsalida ');
             return response()->json($seccion);
         } catch (\Throwable $th) {
             return response()->json($th);
         }
+    }
 
+
+
+    public function ListAnio()
+    {
+
+        $anioActual = Carbon::now()->format('Y');
+        $anio = Anio::where('anio_estado', '!=', 0)
+            ->where('is_deleted', 0)
+            ->pluck('anio_descripcion');
+        $anioBase = $anioActual + 5;
+
+        $listAnio = [];
+        for ($i = $anioActual; $i <= $anioBase; $i++) {
+            //quiero que busques el varo del año que se esta recorriendo en mi lista
+            if (!$anio->contains($i)) {
+                $listAnio[] = $i;
+            }
+        }
+
+        return $listAnio;
     }
 }

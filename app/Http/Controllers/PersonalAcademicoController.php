@@ -14,8 +14,8 @@ use function Illuminate\Log\log;
 
 class PersonalAcademicoController extends Controller
 {
-    public $sexo = ['M' => 'Masculino', 'F' => 'Femenino'];
-    public $estadoCivil = ['S' => 'Soltero', 'C' => 'Casado', 'D' => 'Divorciado', 'V' => 'Viudo'];
+    public $sexo = ['Masculino' => 'Masculino', 'Femenino' => 'Femenino'];
+    public $estadoCivil = ['Soltero' => 'Soltero', 'Casado' => 'Casado', 'Divorciado' => 'Divorciado', 'Viudo' => 'Viudo'];
     public $tutor = [1 => 'Si', 2 => 'No'];
 
     /**
@@ -176,7 +176,7 @@ class PersonalAcademicoController extends Controller
      */
     public function destroy(PersonalAcademico $personal)
     {
-        
+
         DB::beginTransaction();
         try {
             $personal->update([

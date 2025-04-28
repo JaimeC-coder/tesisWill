@@ -61,6 +61,11 @@ class Persona extends Model
     {
         return $this->belongsTo(Departamento::class, 'per_departamento', 'idDepa');
     }
+    //relacion con personal academico
+    public function personalAcademico()
+    {
+        return $this->hasOne(PersonalAcademico::class, 'per_id', 'per_id');
+    }
 
     //metodo para sexo
     public function getPerSexoAttribute($value)

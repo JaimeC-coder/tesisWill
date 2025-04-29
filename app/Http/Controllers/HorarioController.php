@@ -240,6 +240,15 @@ class HorarioController extends Controller
             $matricula  = Matricula::where('alu_id', $user->persona->alumno->alu_id)
                 ->where('is_deleted', '!=', 1)
                 ->first();
+            if (!$matricula) {
+                return response()->json([
+                    'status' => 200,
+                    'alumno' => 2,
+                    'data' => "El alumno no se encuentra matriculado",
+                ]);
+            }
+
+            Log::info($matricula);
             $anio = $matricula->periodo->anio->anio_id;
             $nivel = $matricula->gsa->nivel->niv_id;
             $grado = $matricula->gsa->grado->gra_id;

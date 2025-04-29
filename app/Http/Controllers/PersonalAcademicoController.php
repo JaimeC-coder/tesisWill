@@ -9,6 +9,7 @@ use App\Models\PersonalAcademico;
 use App\Models\Rol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 use function Illuminate\Log\log;
 
@@ -41,8 +42,7 @@ class PersonalAcademicoController extends Controller
         $roles = Rol::where('is_deleted', '!=', 1)->get();
 
 
-        return view('view.personalAcademico.create', compact('personal', 'sexo', 'estadoCivil', 'tutor', 'niveles', 'roles','departamentos'));
-
+        return view('view.personalAcademico.create', compact('personal', 'sexo', 'estadoCivil', 'tutor', 'niveles', 'roles', 'departamentos'));
     }
 
     /**
@@ -53,7 +53,7 @@ class PersonalAcademicoController extends Controller
 
         DB::beginTransaction();
         try {
-            if($request->flexCheckDefault == 'on'){
+            if ($request->flexCheckDefault == 'on') {
                 $persona = Persona::create([
                     'per_dni' => $request->per_dni,
                     'per_nombres' => $request->per_nombres,
@@ -79,7 +79,7 @@ class PersonalAcademicoController extends Controller
                     'rol_id' => $request->rol_id,
                     'pa_is_tutor' => $request->pa_is_tutor,
                 ]);
-            }else{
+            } else {
 
                 PersonalAcademico::create([
                     'per_id' => $request->per_id,
@@ -123,51 +123,61 @@ class PersonalAcademicoController extends Controller
         $niveles = Nivel::all();
         $roles = Rol::where('is_deleted', '!=', 1)->get();
 
-        return view('view.personalAcademico.edit', compact('personal','departamentos', 'sexo', 'estadoCivil', 'tutor', 'niveles', 'roles'));
+        return view('view.personalAcademico.edit', compact('personal', 'departamentos', 'sexo', 'estadoCivil', 'tutor', 'niveles', 'roles'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PersonalAcademico $personal )
+    public function update(Request $request, PersonalAcademico $personal)
     {
+        Log::info($request->all());
         DB::beginTransaction();
         try {
-            if($request->per_id){
-                $personal->update([
-                    'per_id'=>$request->per_id,
-                    'pa_turno'=>$request->pa_turno,
-                    'pa_condicion_laboral' => $request->pa_condicion_laboral,
-                    'niv_id' => $request->niv_id,
-                    'pa_especialidad' => $request->pa_especialidad,
-                    'rol_id' => $request->rol_id,
-                    'pa_is_tutor' => $request->pa_is_tutor,
-                ]);
+            if ($request->per_id) {
 
-            }else{
-                $personal->persona->update([
-                    'per_nombres' => $request->per_nombres,
-                    'per_apellidos' => $request->per_apellidos,
-                    'per_sexo' => $request->per_sexo,
-                    'per_direccion' => $request->per_direccion,
-                    'per_telefono' => $request->per_telefono,
-                    'per_celular' => $request->per_celular,
-                    'per_email' => $request->per_email,
-                    'per_estado_civil' => $request->per_estado_civil,
-                    'per_tutor' => $request->per_tutor,
-                    'per_nivel_id' => $request->per_nivel_id,
-                    'per_rol_id' => $request->per_rol_id,
-                    'per_departamento_id' => $request->per_departamento_id,
-                ]);
+
+
+                $personal->update(array_filter([
+
+                    'per_id' => $request->per_id ?? null,
+                    'pa_turno' => $request->pa_turno ?? null,
+                    'pa_condicion_laboral' => $request->pa_condicion_laboral ?? null,
+                    'niv_id' => $request->niv_id ?? null,
+                    'pa_especialidad' => $request->pa_especialidad ?? null,
+                    'rol_id' => $request->rol_id ?? null,
+                    'pa_is_tutor' => $request->pa_is_tutor ?? null,
+                ], fn($value) => !is_null($value) && $value !== ''));
+                $personal->persona->update(array_filter([
+                    'per_dni' => $request->per_dni ?? null,
+                    'per_nombres' => $request->per_nombres ?? null,
+                    'per_apellidos' => $request->per_apellidos ?? null,
+                    'per_nombre_completo' => $request->per_nombres . ' ' . $request->per_apellidos,
+                    'per_email' => $request->per_email ?? null,
+                    'per_fecha_nacimiento' => $request->per_fecha_nacimiento ?? null,
+                    'per_direccion' => $request->per_direccion ?? null,
+                    'per_sexo' => $request->per_sexo ?? null,
+                    'per_estado_civil' => $request->per_estado_civil ?? null,
+                    'per_celular' => $request->per_celular ?? null,
+                    'per_pais' => $request->per_pais ?? null,
+                    'per_departamento' => $request->per_departamento ?? null,
+                    'per_provincia' => $request->per_provincia ?? null,
+                    'per_distrito' => $request->per_distrito ?? null,
+
+                ], fn($value) => !is_null($value) && $value !== ''));
+
+            } else {
+                return redirect()->route('personal.edit')->with('error', 'Error al actualizar el personal academico');
             }
+
 
             DB::commit();
 
-            return redirect()->route('personal.inicio')->with('success', 'Año escolar creado correctamente');
-
+            return redirect()->route('personal.inicio')->with('success', 'Personal academico actualizado correctamente');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('personal.edit')->with('error', 'Error al crear el aula');
+            Log::error('Error al actualizar el personal academico: ' . $e->getMessage());
+            return redirect()->route('personal.edit')->with('error', 'Error al actualizar el personal academico');
         }
     }
 
@@ -188,11 +198,10 @@ class PersonalAcademicoController extends Controller
             DB::rollBack();
             return redirect()->route('personal.inicio')->with('error', 'Error al eliminar el personal academico');
         }
-
     }
     public function inicio()
     {
-        $personal = PersonalAcademico::where('is_deleted','!=',1)->orderBy('pa_id', 'desc')->get();
+        $personal = PersonalAcademico::where('is_deleted', '!=', 1)->orderBy('pa_id', 'desc')->get();
 
         return view('view.personalAcademico.inicio', compact('personal'));
     }

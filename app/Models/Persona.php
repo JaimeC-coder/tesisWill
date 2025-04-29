@@ -81,7 +81,7 @@ class Persona extends Model
 
         if ($value == null) {
             return 'No definido';
-        }elseif ($value == 'S') {
+        } elseif ($value == 'S') {
             return 'Soltero';
         } elseif ($value == 'C') {
             return 'Casado';
@@ -90,10 +90,24 @@ class Persona extends Model
         } elseif ($value == 'V') {
             return 'Viudo';
         }
-
-
     }
 
-
-
+    public function setPerSexoAttribute($value)
+    {
+        $this->attributes['per_sexo'] = $value == 'Masculino' ? 'M' : 'F';
+    }
+    public function setPerEstadoCivilAttribute($value)
+    {
+        if ($value == 'Soltero') {
+            $this->attributes['per_estado_civil'] = 'S';
+        } elseif ($value == 'Casado') {
+            $this->attributes['per_estado_civil'] = 'C';
+        } elseif ($value == 'Divorciado') {
+            $this->attributes['per_estado_civil'] = 'D';
+        } elseif ($value == 'Viudo') {
+            $this->attributes['per_estado_civil'] = 'V';
+        }else {
+            $this->attributes['per_estado_civil'] = 'S';
+        }
+    }
 }

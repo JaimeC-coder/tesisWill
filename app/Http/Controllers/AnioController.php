@@ -154,41 +154,52 @@ class AnioController extends Controller
 
     public function grado(Request $request)
     {
-
         try {
+            Log::info('Solicitud recibida en grado', ['request' => $request->all()]);
 
+            $nivelId = $request->nivel_id;
+            $userId = $request->user_id ?? null;
 
-            $nivel = $request->nivel_id;
-            $user = $request->user_id ?? null;
+            // Si se especifica un usuario
+            if ($userId) {
+                $user = User::where('per_id', $userId)
+                    ->where('is_deleted', '!=', 1)
+                    ->first();
 
-            $user = User::Where('per_id', $user)
-                ->where('is_deleted', '!=', 1)
-                ->first();
+                if ($user && $user->roles->first()?->name === "Docente") {
+                    Log::info('Usuario identificado como Docente');
 
-            if ($user->roles[0]->name == "Docente") {
-                $grado = AsignarGrado::where('pa_id', $user->persona->personalAcademico->pa_id)
-                    ->where('asig_is_deleted', 0)
-                    ->with(['grado' => function ($query) use ($nivel) {
-                        $query->where('niv_id', $nivel);
-                    }])
-                    ->get()->map(function ($item) {
-                        $gradoData = $item->grado ? $item->grado->toArray() : [];
-                        unset($item->grado); // Quitamos el objeto 'grado'
-                        return array_merge($item->toArray(), $gradoData); // Combinamos en un solo nivel
-                    });
-            } else {
-                $grado = Grado::where('niv_id', $nivel)->get();
+                    // Buscar grados asignados a ese docente
+                    $grados = AsignarGrado::where('pa_id', $user->persona->personalAcademico->pa_id)
+                        ->where('asig_is_deleted', 0)
+                        ->with(['grado' => function ($query) use ($nivelId) {
+                            $query->where('niv_id', $nivelId);
+                        }])
+                        ->get()
+                        ->map(function ($item) {
+                            $gradoData = $item->grado ? $item->grado->toArray() : [];
+                            unset($item->grado);
+                            return array_merge($item->toArray(), $gradoData);
+                        });
+
+                    return response()->json($grados);
+                }
+
+                Log::info('Usuario no es Docente o no tiene el rol asignado');
             }
 
-            Log::info('grado');
-            Log::info($grado);
-
-
-            return response()->json($grado);
+            // En todos los otros casos, retornar los grados del nivel directamente
+            $grados = Grado::where('niv_id', $nivelId)->get();
+            return response()->json($grados);
         } catch (\Throwable $th) {
-            return response()->json($th);
+            Log::error('Error en grado', ['error' => $th->getMessage()]);
+            return response()->json([
+                'error' => 'Ocurrió un error al obtener los grados',
+                'message' => $th->getMessage(),
+            ], 500);
         }
     }
+
 
     public function seccion(Request $request)
     {
@@ -198,20 +209,31 @@ class AnioController extends Controller
             $grado = $request->grado_id;
             $user = $request->user_id ?? null;
 
-            $user = User::Where('per_id', $user)
+            $userId = User::Where('per_id', $user)
                 ->where('is_deleted', '!=', 1)
                 ->first();
 
-            if ($user->roles[0]->name == "Docente") {
-                $seccion = Seccion::where('sec_tutor', $user->persona->personalAcademico->pa_id)
-                    ->where('sec_is_delete', 0)
-                    ->get();
-                Log::info($seccion);
-            } else {
-                $seccion = Seccion::where('gra_id', $request->grado_id)->get();
-                Log::info('seccion');
-                Log::info($seccion);
+            if ($userId) {
+                $user = User::where('per_id', $userId)
+                    ->where('is_deleted', '!=', 1)
+                    ->first();
+
+                if ($user && $user->roles->first()?->name === "Docente") {
+                    Log::info('Usuario identificado como Docente');
+
+                    // Buscar grados asignados a ese docente
+                    $seccion = Seccion::where('sec_tutor', $user->persona->personalAcademico->pa_id)
+                        ->where('sec_is_delete', 0)
+                        ->get();
+
+                    return response()->json($seccion);
+                }
+
+                Log::info('Usuario no es Docente o no tiene el rol asignado');
             }
+            $seccion = Seccion::where('gra_id', $grado)->get();
+
+
             Log::info('seccionsalida ');
             return response()->json($seccion);
         } catch (\Throwable $th) {
@@ -224,11 +246,11 @@ class AnioController extends Controller
     public function ListAnio()
     {
 
-        $anioActual = Carbon::now()->format('Y');
+        $anioActual = 2022;
         $anio = Anio::where('anio_estado', '!=', 0)
             ->where('is_deleted', 0)
             ->pluck('anio_descripcion');
-        $anioBase = $anioActual + 5;
+        $anioBase = $anioActual + 10;
 
         $listAnio = [];
         for ($i = $anioActual; $i <= $anioBase; $i++) {

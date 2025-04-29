@@ -257,19 +257,12 @@ class ReportController extends Controller
 
     public function alumno(Request $request)
     {
+        $user1 = Auth::user();
+        Log::info('user1: ' . $user1);
+        $user1 = Persona::where('per_id', $user1->per_id)->first();
+        $dni = $request->buscar ?? $user1->per_dni;
 
-        $user = Auth::user();
-        //dame el rol del usuario
-        $dni = null;
-        Log::info('Usuario: ' . $user->roles[0]->name);
-        if( $user->roles[0]->name =="Alumno"){
-            $dni = $user->persona->per_dni;
-            Log::info('DNI: ' . $dni);
-            $request['buscar'] = $dni;
-        }else if( $user->roles[0]->name =="Alumno"){
-            $dni = $request->buscar;
-        }
-
+        Log::info('DNI: ' . $dni);
 
         $persona = null;
         $alumno = null;
@@ -280,14 +273,23 @@ class ReportController extends Controller
         $grado = null;
         $seccion = null;
 
-        if (is_null($request->buscar)) {
+
+        if(!Auth::user()->roles[0]->name == "Alumno"){
+            $dni = null;
             Log::info('No se encontró matrícula para el DNI1: ' . $request->buscar);
             return view('view.reporte.alumno', compact('dni','persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
         }
 
-        $alumno = Alumno::whereHas('persona', function ($query) use ($request) {
-            $query->where('per_dni', $request->buscar);
+        if (is_null($dni)) {
+            Log::info('No se encontró matrícula para el DNI1: ' . $request->buscar);
+            return view('view.reporte.alumno', compact('dni','persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
+        }
+
+        $alumno = Alumno::whereHas('persona', function ($query) use ($dni) {
+            $query->where('per_dni', $dni);
         })->with('persona')->first();
+
+        Log::info('Alumno: ' . $alumno);
 
         $matricula = Matricula::where('alu_id', $alumno->alu_id)->first();
 
@@ -295,7 +297,7 @@ class ReportController extends Controller
 
         if ($matricula == null) {
             Log::info('No se encontró matrícula para el DNI2: ' . $request->buscar);
-            return view('view.reporte.alumno', compact('persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))->with('error', 'No se encontró matrícula para el DNI: ' . $request->buscar);
+            return view('view.reporte.alumno', compact('dni','persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))->with('error', 'No se encontró matrícula para el DNI: ' . $request->buscar);
         }
         $gsa = Gsa::where('ags_id', $matricula->ags_id)->first();
 
@@ -309,7 +311,7 @@ class ReportController extends Controller
 
 
 
-        return view('view.reporte.alumno', compact('persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion','dni'));
+        return view('view.reporte.alumno', compact('dni','persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
     }
 
 
@@ -337,7 +339,7 @@ class ReportController extends Controller
     {
         return $request;
         $data = $request['params']['data'];
-   
+
         $año = Anio::where('anio_estado', '!=', 0)->first();
 
         $Persona = Persona::where('per_id', $data["per_id"])->first();

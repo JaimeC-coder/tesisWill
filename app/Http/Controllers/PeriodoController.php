@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\DB;
 class PeriodoController extends Controller
 {
     public $estado = [
-        '1' => 'Aperturado',
-        '0' => 'Finalizado'
+        '0' => 'Finalizado',
+        '1' => 'Aperturado'
     ];
     public $anio;
     public $tipo;

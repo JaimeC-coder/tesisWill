@@ -12,7 +12,7 @@
     <div class="container">
         <div class="container">
 
-            <form method="POST" action="{{ route('ambiente.store') }}"  role="form" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('ambiente.store') }}"  role="form" enctype="multipart/form-data" id="form-all-request">
                 @csrf
 
                 @include('view.ambiente.form')

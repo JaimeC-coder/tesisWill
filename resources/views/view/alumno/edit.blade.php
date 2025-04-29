@@ -12,7 +12,7 @@
     <div class="container">
         <div class="container">
 
-            <form method="POST" action="{{ route('alumno.update',$alumno) }}"  role="form" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('alumno.update',$alumno) }}"  role="form" enctype="multipart/form-data" id="form-all-request">
                 {{ method_field('PATCH') }}
                 @csrf
 
@@ -27,4 +27,8 @@
 
 @endsection
 
+@section('js')
+
+    <script src="{{ asset('js/validate.js') }}"></script>
+@endsection
 

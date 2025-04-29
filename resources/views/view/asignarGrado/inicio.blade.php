@@ -18,7 +18,7 @@
                             <label class="col-md-1 col-form-label">Nivel </label>
                             <div class="col-md-3">
                                 <select id="inputState" class="form-control" name="niv_id">
-                                    <option value="0" selected disabled>-- Selecciona --</option>
+                                  
                                     @foreach ($nivels as $item)
                                         <option value="{{ $item->niv_id }}">{{ $item->niv_descripcion }}</option>
                                     @endforeach

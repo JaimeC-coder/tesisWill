@@ -39,19 +39,28 @@
                     </div>
                 </div>
 
-               
+
                 <div class="col-lg-4 col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Nombres <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="per_nombres" required
-                            value="{{ $personal->persona->per_nombres ?? '' }}" disabled name="per_nombres">
+                            value="{{ $personal->persona->per_nombres ?? '' }}"  name="per_nombres"
+
+                            @if (isset($personal->persona->per_nombres))
+                            disabled
+                            @endif
+                            >
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Apellidos <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="per_apellidos" required
-                            value="{{ $personal->persona->per_apellidos ?? '' }}" disabled name="per_apellidos">
+                            value="{{ $personal->persona->per_apellidos ?? '' }}"
+                            @if (isset($personal->persona->per_apellidos))
+                            disabled
+                            @endif
+                             name="per_apellidos">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-sm-12">
@@ -74,8 +83,8 @@
                     <label>Estado Civil </label>
                     <select class="form-control show-tick" id="per_estado_civil" name="per_estado_civil">
                         <option value="0" disabled>-- Selecciona --</option>
-                        @foreach ($estadoCivil as $key => $tipo)
-                        <option value="{{ $key }}" @if (isset($personal->persona) && $personal->persona->per_sexo == $key) selected @endif>{{ $tipo }}</option>
+                        @foreach ($estadoCivil as  $tipo)
+                        <option value="{{ $tipo }}" @if (isset($personal->persona) && $personal->persona->per_sexo == $tipo) selected @endif>{{ $tipo }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -83,7 +92,8 @@
                     <div class="form-group">
                         <label>País <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" required
-                            value="{{ $personal->persona->per_pais ?? '' }}" disabled name="per_pais" id="per_pais">
+                            value="{{ $personal->persona->per_pais ?? '' }}"  name="per_pais" id="per_pais"
+                            >
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12">

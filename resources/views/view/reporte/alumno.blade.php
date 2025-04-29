@@ -193,5 +193,5 @@
 
 
 @section('js')
-    <script src="{{ asset('js/reportes/general.js') }}"></script>
+    {{-- <script src="{{ asset('js/reportes/general.js') }}"></script> --}}
 @endsection

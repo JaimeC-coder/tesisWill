@@ -207,7 +207,12 @@ async function verififyHorario() {
             }
             loadHorarios(seccionId, anioId, nivelId, gradoId);
             return;
+        }else if (horarios.alumno === 2) {
+            alert(horarios.data);
+            //redirigir a la pagina de home
+            window.location.href = '/home';
         }
+
         anio.disabled = false;
         console.log(horarios.data);
     } catch (error) {

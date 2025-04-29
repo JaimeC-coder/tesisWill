@@ -15,6 +15,7 @@ use App\Models\Matricula;
 use App\Models\Nivel;
 use App\Models\Nota;
 use App\Models\NotaCapacidad;
+use App\Models\Periodo;
 use App\Models\Persona;
 use App\Models\PersonalAcademico;
 use App\Models\Provincia;
@@ -241,17 +242,18 @@ class ReportController extends Controller
         $nivel = Nivel::where('niv_id', $nivel)->select('niv_descripcion')->first();
         $grado = Grado::where('gra_id', $grado)->select('gra_descripcion')->first();
         $seccion = Seccion::where('sec_id', $seccion)->select('sec_descripcion')->first();
+        $perido = Anio::where('anio_id', $anio)->select('anio_descripcion')->first();
+
 
         $headers = [
             'nivel' => $nivel->niv_descripcion,
             'grado' => $grado->gra_descripcion,
             'seccion' => $seccion->sec_descripcion,
+            'anio' => $perido->anio_descripcion,
         ];
         $pdf = Pdf::loadView('view.reporte.promediosCursos', compact('cursosList', 'headers'));
         return $pdf->stream();
     }
-
-
 
     public function alumno(Request $request)
     {
@@ -313,8 +315,6 @@ class ReportController extends Controller
 
     public function getCoursesWithAvgsAndNotes($year, $level, $grade, $section)
     {
-
-
         // Obtener todos los GSA que coincidan
         $GSANotas = Gsa::where('niv_id', $level)
             ->where('gra_id', $grade)
@@ -333,10 +333,9 @@ class ReportController extends Controller
         return $notas;
     }
 
-
-
     public function generarFichaMatricula(Request $request)
     {
+        return $request;
         $data = $request['params']['data'];
    
         $año = Anio::where('anio_estado', '!=', 0)->first();

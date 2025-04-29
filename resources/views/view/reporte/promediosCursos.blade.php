@@ -77,7 +77,7 @@
                             <td class="bg-gray">Nivel:</td>
                             <td>{{ $headers['nivel'] }}</td>
                             <td class="bg-gray">Año Escolar:</td>
-                            <td>{{ date('Y') }}</td>
+                            <td>{{ $headers['anio'] }}</td>
                         </tr>
                         <tr>
                             <td class="bg-gray">Institución Educativa:</td>

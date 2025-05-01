@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Notifications\PasswordResetNotificaction;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,7 +15,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes,CanResetPassword;
     use HasRoles;
 
     /**
@@ -83,5 +86,16 @@ class User extends Authenticatable
     {
         return 'profile/username';
     }
+
+    public function sendPasswordResetNotification($token): void
+{
+    $url = route('password.reset'
+        , [
+            'token' => $token,
+            // 'email' => $this->getEmailForPasswordReset(),
+        ]);
+
+    $this->notify(new PasswordResetNotificaction($url));
+}
 
 }

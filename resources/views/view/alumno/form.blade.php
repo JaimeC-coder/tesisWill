@@ -35,7 +35,7 @@
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" minlength="8" maxlength="8"
                                     value="{{ $alumno->persona->per_dni ?? '' }}"
-                                    @if (!$alumno->persona->per_dni) data-unic="true" @endif name="per_dni_Alumno"
+                                    @if (empty($alumno->persona?->per_dni))data-unic="true" @endif name="per_dni_Alumno"
                                     id="per_dni_Alumno" data-type="numbers" data-length="8" data-required="true">
                                 <div class="input-group-append">
                                     <button id="buscarDni" class="btn btn-primary" type="button" disabled>
@@ -162,7 +162,7 @@
                             <input type="email" class="form-control"
                                 value="{{ $alumno->persona->per_email ?? '' }}" id="per_email_Alumno"
                                 name="per_email_Alumno" data-required="true"
-                                @if (!$alumno->persona->per_email) data-validate-correo="true"  data-unic="true" @endif>
+                                @if (empty($alumno->persona?->per_email)) data-validate-correo="true"  data-unic="true" @endif>
                         </div>
                     </div>
                 </div>
@@ -199,7 +199,8 @@
                                 <input type="text" value="{{ $alumno->apoderado->persona->per_dni ?? '' }}"
                                     name="per_dni_Apoderado" id="per_dni_Apoderado" class="form-control"
                                     data-type="numbers" data-length="8" data-required="true"
-                                    @if (!$alumno->apoderado->persona->per_dni) data-unic="true" @endif>
+
+                                    @if (empty($alumno->apoderado->persona?->per_dni)) data-unic="true" @endif>
                                 <div class="input-group-append">
                                     <button id="buscarDniApoderda" class="btn btn-primary" type="button" disabled>
                                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -326,7 +327,7 @@
                             <input type="email"class="form-control"
                                 value="{{ $alumno->apoderado->persona->per_email ?? '' }}" id="per_email_Apoderado"
                                 name="per_email_Apoderado" data-required="true"
-                                @if (!$alumno->persona->per_email) data-validate-correo="true"  data-unic="true" @endif>
+                                @if (empty($alumno->apoderado->persona?->per_email)) data-validate-correo="true"  data-unic="true" @endif>
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12">

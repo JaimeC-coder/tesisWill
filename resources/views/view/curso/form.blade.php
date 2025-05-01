@@ -6,25 +6,26 @@
                     <div class="col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Curso <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" required name="curso" value="{{ $curso->cur_nombre }}">
+                            <input type="text" data-required="true" data-type="letters" class="form-control"  name="curso" value="{{ $curso->cur_nombre }}">
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Abreviatura <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" required name="abreviatura" value="{{ $curso->cur_abreviatura }}">
+                            <input type="text" data-required="true" data-type="letters" class="form-control"  name="abreviatura" value="{{ $curso->cur_abreviatura }}">
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Horas <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" required name="horas" value="{{ $curso->cur_horas }}">
+                            <input type="number" class="form-control"  name="horas" value="{{ $curso->cur_horas }}" data-type="numbers"
+                            data-required="true">
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Nivel <span class="text-danger">*</span></label>
-                            <select class="form-control show-tick" required name="nivel_id">
+                            <select class="form-control show-tick" data-required="true"  name="nivel_id">
                                 <option value="0" selected disabled>-- Selecciona --</option>
                                 @foreach ($niveles as $nivel)
                                         <option value="{{ $nivel->niv_id }}" @if ($curso->niv_id == $nivel->niv_id) selected @endif >{{ $nivel->niv_descripcion }}</option>
@@ -35,7 +36,7 @@
                     <div class="col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Grado <span class="text-danger">*</span></label>
-                            <select class="form-control show-tick" required name="grado_id">
+                            <select class="form-control show-tick" data-required="true"  name="grado_id">
                                 <option value="0" selected disabled>-- Selecciona --</option>
                                 <option value="-1">Todos los grados</option>
                                 @foreach ($grados as $grado)
@@ -50,7 +51,7 @@
                     <div class="col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Estado <span class="text-danger">*</span></label>
-                            <select class="form-control show-tick" required name="estado">
+                            <select class="form-control show-tick"  name="estado">
                                 <option value="0" selected disabled>-- Selecciona --</option>
                                 @foreach ($estados  as $key => $tipo)
                                     <option value="{{ $key }}" @if ($curso->cur_estado == $key) selected @endif
@@ -64,7 +65,7 @@
                     <div class="col-lg-11 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Capacidad</label>
-                            <input id="input-capacidad" type="text" class="form-control">
+                            <input id="input-capacidad" type="text"    class="form-control">
                             <input type="hidden" name="capacidades" id="capacidades" value="{{ isset($curso) ? $curso->capacidad : '[]' }}">
                         </div>
                     </div>
@@ -106,5 +107,6 @@
 
 @section('js')
     <script src="{{ asset('js/curso/curso.js') }}"></script>
+    <script src="{{ asset('js/validate.js') }}"></script>
 @endsection
 

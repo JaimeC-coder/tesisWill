@@ -84,6 +84,11 @@ class AnioController extends Controller
         $estado = $this->estado;
         $taller = $this->taller;
         $listAnio = $this->ListAnio();
+        array_push($listAnio, $anio->anio_descripcion);
+        sort($listAnio);
+
+
+
         return view('view.anioEscolar.edit', compact('anio', 'estado', 'taller', 'listAnio'));
     }
 

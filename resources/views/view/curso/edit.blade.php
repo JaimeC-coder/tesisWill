@@ -12,7 +12,7 @@
     <div class="container">
         <div class="container">
 
-            <form method="POST" action="{{ route('curso.update' ,$curso) }}"  role="form" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('curso.update' ,$curso) }}" id="form-all-request"  role="form" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 

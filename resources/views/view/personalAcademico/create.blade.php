@@ -12,7 +12,7 @@
     <div class="container">
         <div class="container">
 
-            <form method="POST" action="{{ route('personal.store') }}"  role="form" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('personal.store') }}"  role="form" id="form-all-request" enctype="multipart/form-data">
                 @csrf
 
                 @include('view.personalAcademico.form')

@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
 
@@ -117,8 +118,6 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
        // return $request->all();
-
-
         $persona = Persona::find($request->per_id);
         //$persona->per_dni = $request->dni;
         $persona->per_nombres = $request->nombreshidden;
@@ -129,7 +128,7 @@ class UserController extends Controller
         $persona->per_estado_civil = $request->per_estado_civil;
         $persona->per_celular = $request->per_celular;
         $persona->per_pais = $request->paishidden ?? 'PERU';
-   
+
         $persona->per_direccion = $request->per_direccion;
         $persona->save();
 
@@ -153,26 +152,28 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(User $usuario)
     {
+
         DB::beginTransaction();
         try {
-            $user->update([
+            $usuario->update([
                 'is_deleted' => 1
             ]);
 
             DB::commit();
 
-            return redirect()->route('usuario.inicio')->with('success', 'Año escolar eliminado correctamente');
+            return redirect()->route('usuarios.inicio')->with('success', 'Año escolar eliminado correctamente');
         } catch (\Exception $e) {
+            Log::error('Error al eliminar el año escolar: ' . $e->getMessage());
             DB::rollBack();
-            return redirect()->route('usuario.inicio')->with('error', 'Error al eliminar el año escolar');
+            return redirect()->route('usuarios.inicio')->with('error', 'Error al eliminar el año escolar');
         }
     }
 
     public function inicio()
     {
-        $usuarios = user::where('is_deleted', '!=', 1)->orderBy('created_at', 'desc')->get();
+        $usuarios = user::where('is_deleted', '!=',1 )->orderBy('created_at', 'desc')->get();
         // return $alumnos;
         return view('view.usuario.inicio', compact('usuarios'));
     }

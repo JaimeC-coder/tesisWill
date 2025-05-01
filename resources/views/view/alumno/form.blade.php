@@ -352,9 +352,9 @@
                                 name="per_vive_con_estudiante_Apoderado" data-required="true">
 
                                 <option value="0" readOnly>-- Selecciona --</option>
-                                @foreach ($vive as $tipo)
+                                @foreach ($vive as  $key =>$tip)
                                     <option value="{{ $key }}"
-                                        @if (isset($alumno->apoderado) && $alumno->apoderado->apo_vive_con_estudiante == $tipo) selected @endif>{{ $tipo }}
+                                        @if (isset($alumno->apoderado) && $alumno->apoderado->apo_vive_con_estudiante == $tip) selected @endif>{{ $tip }}
                                     </option>
                                 @endforeach
                             </select>

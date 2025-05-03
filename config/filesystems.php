@@ -44,6 +44,15 @@ return [
             'visibility' => 'public',
             'throw' => false,
         ],
+        'LibretasNotas' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/LibretasNotas'),
+        ],
+
+        'FichaMatricula' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/FichaMatricula'),
+        ],
 
         's3' => [
             'driver' => 's3',

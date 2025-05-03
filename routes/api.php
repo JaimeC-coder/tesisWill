@@ -65,6 +65,9 @@ Route::group(['prefix' => 'reporte'], function () {
     Route::post('countPersonal', [ReportController::class, 'countPersonal']);
     Route::post('vacante', [ReportController::class, 'vacante']);
     Route::get('gestion/pdf', [ReportController::class, 'getReportCoursePDF']);
+    ///api/reporte/alumno/matricula/pdf
+    Route::get('alumno/matricula/pdf', [ReportController::class, 'generarFichaMatricula']);
+
 });
 Route::group(['prefix' => 'asignacion'], function () {
     Route::post('listCurso', [AsignarGradoController::class, 'listCurso']);

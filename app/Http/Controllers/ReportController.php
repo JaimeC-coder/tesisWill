@@ -169,7 +169,7 @@ class ReportController extends Controller
         $nivel = $request->nivel;
         $grado = $request->grado;
         $seccion = $request->seccion;
-       if ($anio == null || $nivel == null || $grado == null || $seccion == null) {
+        if ($anio == null || $nivel == null || $grado == null || $seccion == null) {
             $resultados = [];
         } else {
             $result = $this->getCoursesWithAvgsAndNotes($anio, $nivel, $grado, $seccion);
@@ -179,7 +179,8 @@ class ReportController extends Controller
         return view('view.reporte.gestion', compact('resultados', 'anios'));
     }
 
-    public function dataREST($result){
+    public function dataREST($result)
+    {
         $agrupadoPorCurso = $result->groupBy('curso_id');
 
         $resultados = [];
@@ -221,7 +222,6 @@ class ReportController extends Controller
                 'porcentaje_C' => round($porcentajeC, 2),
                 'Total' => round($total, 1)
             ];
-
         }
         return $resultados;
     }
@@ -257,61 +257,57 @@ class ReportController extends Controller
 
     public function alumno(Request $request)
     {
-        $user1 = Auth::user();
-        Log::info('user1: ' . $user1);
-        $user1 = Persona::where('per_id', $user1->per_id)->first();
-        $dni = $request->buscar ?? $user1->per_dni;
+        $user = Auth::user();
 
-        Log::info('DNI: ' . $dni);
-
-        $persona = null;
-        $alumno = null;
-        $gsa = null;
-        $aula = null;
-        $matricula = null;
-        $nivel = null;
-        $grado = null;
-        $seccion = null;
-
-
-        if(!Auth::user()->roles[0]->name == "Alumno"){
-            $dni = null;
-            Log::info('No se encontró matrícula para el DNI1: ' . $request->buscar);
-            return view('view.reporte.alumno', compact('dni','persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
+        if (!$user || empty($user->roles)) {
+            Log::warning('Usuario no autenticado o sin roles');
+            return redirect()->back()->with('error', 'Usuario no válido.');
         }
 
+        $persona = Persona::where('per_id', $user->per_id)->first();
+
+        // Determinar si el usuario es un alumno
+        $isAlumno = $user->roles[0]->name === "Alumno";
+        $dni = $isAlumno ? $persona->per_dni : $request->buscar;
+
+        // Variables para la vista
+        $alumno = $gsa = $aula = $matricula = $nivel = $grado = $seccion = null;
+
+        // Validar si se recibió un DNI (caso: no es alumno y no envió nada)
         if (is_null($dni)) {
-            Log::info('No se encontró matrícula para el DNI1: ' . $request->buscar);
-            return view('view.reporte.alumno', compact('dni','persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
+            Log::info('DNI no proporcionado');
+            return view('view.reporte.alumno', compact('dni', 'persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))
+                ->with('error', 'Debe proporcionar un DNI.');
         }
 
+        // Buscar al alumno por DNI
         $alumno = Alumno::whereHas('persona', function ($query) use ($dni) {
             $query->where('per_dni', $dni);
         })->with('persona')->first();
 
-        Log::info('Alumno: ' . $alumno);
+        if (!$alumno) {
+            Log::info("No se encontró alumno con DNI: $dni");
+            return view('view.reporte.alumno', compact('dni', 'persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))
+                ->with('error', "No se encontró un alumno con el DNI: $dni.");
+        }
 
+        // Buscar matrícula
         $matricula = Matricula::where('alu_id', $alumno->alu_id)->first();
 
-        Log::info('Matricula: ' . $matricula);
-
-        if ($matricula == null) {
-            Log::info('No se encontró matrícula para el DNI2: ' . $request->buscar);
-            return view('view.reporte.alumno', compact('dni','persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))->with('error', 'No se encontró matrícula para el DNI: ' . $request->buscar);
+        if (!$matricula) {
+            Log::info("No se encontró matrícula para el DNI: $dni");
+            return view('view.reporte.alumno', compact('dni', 'persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))
+                ->with('error', "No se encontró matrícula para el DNI: $dni.");
         }
-        $gsa = Gsa::where('ags_id', $matricula->ags_id)->first();
 
-        $aula = Aula::where('ala_id', $gsa->ala_id)->first();
+        // Consultar datos asociados
+        $gsa = Gsa::find($matricula->ags_id);
+        $aula = Aula::find($gsa->ala_id ?? null);
+        $nivel = Nivel::find($gsa->niv_id ?? null);
+        $grado = Grado::find($gsa->gra_id ?? null);
+        $seccion = Seccion::find($gsa->sec_id ?? null);
 
-        $nivel = Nivel::where('niv_id', $gsa->niv_id)->first();
-
-        $grado = Grado::where('gra_id', $gsa->gra_id)->first();
-
-        $seccion = Seccion::where('sec_id', $gsa->sec_id)->first();
-
-
-
-        return view('view.reporte.alumno', compact('dni','persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
+        return view('view.reporte.alumno', compact('dni', 'persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'));
     }
 
 
@@ -337,51 +333,54 @@ class ReportController extends Controller
 
     public function generarFichaMatricula(Request $request)
     {
-        return $request;
-        $data = $request['params']['data'];
+        $data = $request->per_id;
+
 
         $año = Anio::where('anio_estado', '!=', 0)->first();
 
-        $Persona = Persona::where('per_id', $data["per_id"])->first();
+        $Persona = Persona::where('per_id', $data)->first();
         $departamento = Departamento::where('idDepa', $Persona->per_departamento)->first();
         $provincia = Provincia::where('idProv', $Persona->per_provincia)->first();
         $distrito = Distrito::where('idDist', $Persona->per_distrito)->first();
 
-        $alumno = $data["per_nombres"] . " " . $data["per_apellidos"];
+        $alumno = $Persona["per_nombres"] . " " . $Persona["per_apellidos"];
 
-        if (isset($data["per_nombre_completo"]) == false) {
-            $alumno = $data["per_nombres"] . " " . $data["per_apellidos"];
+        if (isset($Persona["per_nombre_completo"]) == false) {
+            $alumno = $Persona["per_nombres"] . " " . $Persona["per_apellidos"];
         } else {
-            $alumno = $data["per_nombre_completo"];
+            $alumno = $Persona["per_nombre_completo"];
         }
-        $idNivel = $data["idNivel"];
-        $nivel = $data["nivel"];
-        $idGrado = $data["idGrado"];
-        $grado = $data["grado"];
-        $idSeccion = $data["idSeccion"];
-        $seccion = $data["seccion"];
+        // $idNivel = $data["idNivel"] ?? $Persona->alumno->gsa->matricula->nivel->niv_id;
+       $nivel ="hola1";
+    //    $nivel = $Persona->alumno->matricula->gsa->nivel->niv_descripcion;//TODO
+        // $idGrado = $data["idGrado"];
+        $grado ="hola2";
+        // $grado = $data["grado"]; //TODO
+        // $idSeccion = $data["idSeccion"];
+        $seccion = "hola3";
+        // $seccion = $data["seccion"]; //TODO
 
-        $apoderado = $data["apo_nombre_completo"];
-        $parentesco = $data["apo_parentesco"];
-        $vive = $data["apo_vive_con_estudiante"];
-        $dni = $data["per_dni"];
-        $email = $data["per_email"];
-        $estadoCivil = $data["per_estado_civil"];
-        $fechaNacimiento = explode("-", $data["per_fecha_nacimiento"]);
-        $sexo = $data["per_sexo"];
-        $direccion = $data["per_direccion"];
-        $celular = $data["per_celular"];
-        $pais = $data["per_pais"];
+        $apoderado = $Persona["apo_nombre_completo"];
+        $parentesco = $Persona["apo_parentesco"];
+        $vive = $Persona["apo_vive_con_estudiante"];
+        $dni = $Persona["per_dni"];
+        $email = $Persona["per_email"];
+        $estadoCivil = $Persona["per_estado_civil"];
+        $fechaNacimiento = explode("-", $Persona["per_fecha_nacimiento"]);
+        $sexo = $Persona["per_sexo"];
+        $direccion = $Persona["per_direccion"];
+        $celular = $Persona["per_celular"];
+        $pais = $Persona["per_pais"];
         $departamento = ($Persona->per_departamento == 0 ? 'LA LIBERTAD' : $departamento->departamento);
         $provincia = ($Persona->per_provincia == 0 ? 'CHEPÉN' : $provincia->provincia);
         $distrito = ($Persona->per_distrito == 0 ? 'CHEPÉN' : $distrito->distrito);
 
         // Obteniendo imagen y convintiendolo a base64
-        $educacion = Storage::path('cao\escudoMinedu.png');
+        $educacion = public_path('escudoMinedu.png');
         $contenidoBinario1 = file_get_contents($educacion);
         $imagenEducacion = base64_encode($contenidoBinario1);
 
-        $nombreDocumento = "FICHA DE MATRICULA - " . $alumno . ".pdf";
+        $nombreDocumento = "FICHA_MATRICULA-" .str_replace(' ', '_', $alumno)  . ".pdf";
 
         // Creando Pdf
         include_once "../vendor/autoload.php";
@@ -2393,22 +2392,16 @@ class ReportController extends Controller
             Storage::disk('FichaMatricula')->delete($nombreDocumento);
             Storage::disk('FichaMatricula')->put($nombreDocumento, $contenido);
         }
-        $alumno = Alumno::find($data["alu_id"]);
+        $alumno = Alumno::find($Persona->alumno->alu_id);
         $alumno->name_ficha_matricula = $nombreDocumento;
         $alumno->save();
 
-        return response()->json([
-            "rpta" => 1,
-            "documento" => $nombreDocumento
-        ]);
+       
+        return redirect()->to(asset('storage/FichaMatricula/'.$nombreDocumento));
 
-        /*if ($request->ajax()) {
-            return response()->json([
-                "rpta" => 1,
-                "documento" => $nombreDocumento
-            ]);
-        }
-        return view('Error404'); */
+
+
+
     }
 
     public function generarLibretaNotas(Request $request)

@@ -35,10 +35,7 @@ class Alumno extends Model
         return $this->hasMany(Matricula::class, 'alu_id', 'alu_id');
     }
 
-    public function gsa()
-    {
-        return $this->hasMany(Gsa::class, 'alu_id', 'alu_id');
-    }
+
 
 
 }

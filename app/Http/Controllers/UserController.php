@@ -22,7 +22,7 @@ class UserController extends Controller
     public $sexo = ['Masculino' => 'Masculino', 'Femenino' => 'Femenino'];
     public $estadoCivil = ['Soltero' => 'Soltero', 'Casado' => 'Casado', 'Divorciado' => 'Divorciado', 'Viudo' => 'Viudo'];
     public $vive = [1 => 'Si', 2 => 'No'];
-    public $estados = ['0' => 'Activo', '1' => 'Inactivo'];
+    public $estados = [2 => 'Activo', 1=> 'Inactivo'];
     public $parentesco = ['Madre' => 'Madre', 'Padre' => 'Padre', 'TUTOR' => 'Tutor'];
 
     public function index()
@@ -82,7 +82,7 @@ class UserController extends Controller
                 'email' => $request->emailhidden,
                 'password' => Hash::make($request->password),
                 'rol_id' => 1,
-                'estado' => $request->estado
+                'estado' => $request->estado ==2 ? 0 : 1,
             ]);
             $user->assignRole($request->rolName);
 
@@ -140,7 +140,7 @@ class UserController extends Controller
         if (isset($request->password) == true) {
             $usuario->password = Hash::make($request->password);
         }
-        $usuario->estado = $request->estado;
+        $usuario->estado = $request->estado == 2 ? 0 : 1;
 
         $usuario->syncRoles($request->rolName);
 

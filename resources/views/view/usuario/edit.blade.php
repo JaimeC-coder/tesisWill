@@ -12,7 +12,7 @@
     <div class="container">
         <div class="container">
 
-            <form method="POST" action="{{ route('usuario.update',$usuario) }}"  role="form" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('usuario.update',$usuario) }}" id="form-all-request"   role="form" enctype="multipart/form-data">
                 @csrf
                 {{ method_field('PATCH') }}
                 @include('view.usuario.form')

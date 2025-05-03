@@ -52,7 +52,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     btnAgregarCapacidad.addEventListener("click", function () {
         const capacidadTexto = inputCapacidad.value.trim();
-        if (capacidadTexto === "") return;
+
+        //validamos que no este vacio
+        if (capacidadTexto === "") {
+            alert("Por favor, ingresa una capacidad.");
+            return;
+        }
+        // Verificamos si la capacidad ya existe
+        if (capacidades.includes(capacidadTexto)) {
+            alert("Esta capacidad ya ha sido agregada.");
+            return;
+        }
+
 
         capacidades.push(capacidadTexto);
         actualizarTabla();

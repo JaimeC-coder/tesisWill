@@ -17,8 +17,9 @@
                         <div class="row">
                             <label class="col-md-1 col-form-label">Nivel </label>
                             <div class="col-md-3">
+
                                 <select id="inputState" class="form-control" name="niv_id">
-                                  
+                                    <option value="0" selected >-- Selecciona --</option>
                                     @foreach ($nivels as $item)
                                         <option value="{{ $item->niv_id }}">{{ $item->niv_descripcion }}</option>
                                     @endforeach
@@ -29,8 +30,8 @@
                             <label class="col-md-1 col-form-label">Curso </label>
                             <div class="col-md-4">
                                 <select id="curso" name="cursoId" class="form-control show-tick">
-                                    <option value="0" selected disabled>-- Selecciona --</option>
-                                    <option value="-1" selected>Todos </option>
+                                    <option value="0" selected >-- Selecciona --</option>
+                                    <option value="-1" >Todos </option>
                                 </select>
                             </div>
                             <div class="col-lg col-md-4 col-sm-6" style="display: flex;align-items: center;">

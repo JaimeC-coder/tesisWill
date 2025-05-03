@@ -21,8 +21,10 @@
                                         <form action="{{ route('reporte.alumno') }}" method="GET">
 
                                             <div class="input-group">
-                                                <input type="text" name="buscar" class="form-control" value=" {{$dni?? '' }}"
-                                                @isset($dni)   disabled @endisset placeholder="Ingresar DNI del alumno" required />
+                                                <input type="text" name="buscar" class="form-control"
+                                                    value=" {{ $dni ?? '' }}"
+                                                    @isset($dni)   disabled @endisset
+                                                    placeholder="Ingresar DNI del alumno" required />
                                                 <div class="input-group-append">
                                                     <button class="btn btn-primary" type="submit">
 
@@ -50,13 +52,15 @@
 
                                             <div class="media card-body ">
                                                 <img class="mr-3 rounded-circle rounded-sm" width="64" height="64"
-                                                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                                                alt="Alumno">
+                                                    src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                                                    alt="Alumno">
                                                 <div class="media-body">
                                                     <h4>{{ $alumno->persona->per_nombre_completo }}</h4>
                                                     <p class="text-muted m-b-0">{{ $alumno->persona->per_dni }}</p>
+                                                    <input type="hidden" value="{{ $alumno->persona->per_id }}"
+                                                        id="per_id">
                                                 </div>
-                                              </div>
+                                            </div>
 
 
                                         </div>
@@ -104,7 +108,8 @@
                                                         </li>
                                                         <li class="list-group-item">
                                                             <b>Sexo </b>
-                                                            <div>{{ $alumno->persona->per_sexo == 'F' ? 'Femenino' : 'Masculino' }}
+                                                            <div>
+                                                                {{ $alumno->persona->per_sexo == 'F' ? 'Femenino' : 'Masculino' }}
                                                             </div>
                                                         </li>
                                                         <li class="list-group-item">
@@ -133,34 +138,33 @@
                                             </div>
                                             <div class="card-body">
                                                 <div class="timeline_item ">
-                                                    <img class="tl_avatar" src="{{ asset('assets/images/informe.png') }}" width="50" height="50"
-                                                        alt="" />
+                                                    <img class="tl_avatar" src="{{ asset('assets/images/informe.png') }}"
+                                                        width="50" height="50" alt="" />
                                                     <span><b>Ficha de Matricula </b></span>
-                                                    <div class="msg">
-                                                        <a href="javascript:void(0);" @click="generar_ficha_matricula()"
-                                                            class="mr-20 "><i class="fa fa-folder-plus"></i> Generar</a>
-                                                        <a v-if="data.ficha_matricula" target="_blank"
+                                                    <div class="msg p-2">
+                                                        <button id="generar_ficha_matricula"
+                                                            class="mr-20 btn btn-outline-primary "><i
+                                                                class="fa fa-folder-plus"></i> Generar</button>
+                                                        <a target="_blank"
                                                             :href="'storage/FichaMatricula/' + data.ficha_matricula"
-                                                            class="mr-20"><i class="fa-solid fa-eye"></i> Ver</a>
-                                                        <a v-else target="_blank"
-                                                            :href="'storage/FichaMatricula/' + data.ficha_matricula"
-                                                            class="mr-20 d-none"><i class="fa-solid fa-eye"></i> Ver</a>
+                                                            class="mr-20 btn btn-outline-primary "><i
+                                                                class="fa-solid fa-eye"></i> Ver</a>
+
+                                                        <br>
                                                     </div>
                                                 </div>
 
                                                 <div class="timeline_item ">
-                                                    <img class="tl_avatar" src="{{ asset('assets/images/informe.png') }}" width="50" height="50"
-                                                        alt="" />
+                                                    <img class="tl_avatar" src="{{ asset('assets/images/informe.png') }}"
+                                                        width="50" height="50" alt="" />
                                                     <span><b>Libreta de Notas </b></span>
-                                                    <div class="msg">
-                                                        <a href="javascript:void(0);" @click="generar_libreta_notas()"
-                                                            class="mr-20"><i class="fa fa-folder-plus"></i> Generar</a>
-                                                        <a v-if="data.libreta_notas" target="_blank"
+                                                    <div class="msg p-2">
+                                                        <button href="javascript:void(0);" @click="generar_libreta_notas()"
+                                                        class="mr-20 btn btn-outline-primary "><i class="fa fa-folder-plus"></i> Generar</button>
+                                                        <a  target="_blank"
                                                             :href="'storage/LibretasNotas/' + data.libreta_notas"
-                                                            class="mr-20"><i class="fa-solid fa-eye"></i> Ver</a>
-                                                        <a v-else target="_blank"
-                                                            :href="'storage/LibretasNotas/' + data.libreta_notas"
-                                                            class="mr-20 d-none"><i class="fa-solid fa-eye"></i> Ver</a>
+                                                            class="mr-20 btn btn-outline-primary "><i class="fa-solid fa-eye"></i> Ver</a>
+
                                                     </div>
                                                 </div>
 
@@ -194,4 +198,16 @@
 
 @section('js')
     {{-- <script src="{{ asset('js/reportes/general.js') }}"></script> --}}
+
+    <script>
+        let button = document.getElementById('generar_ficha_matricula');
+        button.addEventListener('click', function() {
+            alert('Generando PDF...');
+            let per_id = document.getElementById('per_id').value;
+
+            // Redirigir a la URL con los parámetros
+            window.open('/api/reporte/alumno/matricula/pdf?per_id=' + per_id, '_blank');
+        });
+        //obtener los datos de la url
+    </script>
 @endsection

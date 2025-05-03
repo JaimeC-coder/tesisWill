@@ -145,7 +145,7 @@ function searchInformation(){
             nombre.addEventListener("input", syncUser);
             apellido.addEventListener("input", syncUser);
             email.addEventListener("input", syncEmail);
-           
+
             return;
         }
     })
@@ -224,7 +224,7 @@ function syncEmail() {
     emailcorreo.disabled = true;
 
     if (flexCheckDefault.checked && email.value.length > 5) {
-        verificarEmailExistente(email.value);
+        //verificarEmailExistente(email.value);
     }
 }
 function syncUser() {
@@ -242,23 +242,23 @@ function dniValidation() {
 }
 
 
-function verificarEmailExistente(correo) {
-    fetch('/api/verificar-correo', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: correo })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        if (data.existe) {
-            alert("El correo ingresado ya está registrado en el sistema.");
-        }
-    })
-    .catch(error => {
-        console.error('Error al verificar el correo:', error);
-    });
-}
+// function verificarEmailExistente(correo) {
+//     fetch('/api/verificar-correo', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({ email: correo })
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         console.log(data);
+//         if (data.existe) {
+//             alert("El correo ingresado ya está registrado en el sistema.");
+//         }
+//     })
+//     .catch(error => {
+//         console.error('Error al verificar el correo:', error);
+//     });
+// }
 

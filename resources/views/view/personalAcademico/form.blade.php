@@ -186,7 +186,7 @@
                 <div class="col-lg-6 col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Turno <span class="text-danger">*</span></label>
-                        <input id="pa_turno" name="pa_turno" type="text" data-required="true"
+                        <input id="pa_turno" name="pa_turno" type="text" data-required="true" data-type="letters"
                             class="form-control" value="{{ $personal->pa_turno ?? '' }}" aria-invalid="true">
                     </div>
                 </div>

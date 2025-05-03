@@ -48,5 +48,4 @@ class Nota extends Model
     {
         return $this->belongsTo(Curso::class, 'curso_id', 'cur_id');
     }
-    
 }

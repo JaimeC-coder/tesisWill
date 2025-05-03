@@ -44,4 +44,8 @@ class Grado extends Model
         return $this->hasMany(AsignarGrado::class, 'gra_id', 'gra_id');
     }
 
+    public function setGraDescripcionAttribute($value)
+    {
+        $this->attributes['gra_descripcion'] = ucwords(strtolower($value));
+    }
 }

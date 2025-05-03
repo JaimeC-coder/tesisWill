@@ -79,5 +79,4 @@ class Nivel extends Model
     {
         return $this->hasMany(Gsa::class, 'niv_id', 'niv_id');
     }
-
 }

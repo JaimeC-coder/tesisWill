@@ -39,6 +39,4 @@ class Matricula extends Model
     {
         return $this->belongsTo(Gsa::class, 'ags_id', 'ags_id');
     }
-
-
 }

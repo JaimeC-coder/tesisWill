@@ -9,21 +9,6 @@ class AsignarCurso extends Model
 {
     use SoftDeletes;
 
-    /**
-     *  Schema::create('asignar_cursos', function (Blueprint $table) {
-
-            $table->bigIncrements('asig_id');
-            $table->unsignedBigInteger('pa_id')->nullable();
-            $table->unsignedBigInteger('niv_id')->nullable();
-            $table->string('curso', 255)->nullable();
-            $table->char('asig_is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
-            $table->foreign('pa_id')->references('pa_id')->on('personal_academicos');
-            $table->foreign('niv_id')->references('niv_id')->on('nivels');
-            $table->softDeletes();
-            $table->timestamps();
-        });
-     */
-
     protected $table = 'asignar_cursos';
     protected $primaryKey = 'asig_id';
     protected $fillable = [
@@ -42,5 +27,9 @@ class AsignarCurso extends Model
     {
         return $this->belongsTo(Nivel::class, 'niv_id', 'niv_id');
     }
-    
+
+    public function setCursoAttribute($value)
+    {
+        $this->attributes['curso'] = strtoupper($value);
+    }
 }

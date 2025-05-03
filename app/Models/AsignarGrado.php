@@ -37,4 +37,9 @@ class AsignarGrado extends Model
     {
         return $this->belongsTo(Seccion::class, 'seccion', 'sec_descripcion');
     }
+
+    public function setSeccionAttribute($value)
+    {
+        $this->attributes['seccion'] = strtoupper($value);
+    }
 }

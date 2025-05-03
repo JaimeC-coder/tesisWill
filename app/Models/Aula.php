@@ -31,4 +31,18 @@ class Aula extends Model
         return $this->hasMany(Seccion::class, 'sec_aula', 'ala_id');
     }
 
+    public function setAlaDescripcionAttribute($value)
+    {
+        $this->attributes['ala_descripcion'] = strtoupper($value);
+    }
+
+    public function setAlaTipoAttribute($value)
+    {
+        $this->attributes['ala_tipo'] = strtoupper($value);
+    }
+
+    public function setAlaUbicacionAttribute($value)
+    {
+        $this->attributes['ala_ubicacion'] = strtoupper($value);
+    }
 }

@@ -28,11 +28,15 @@ class Apoderado extends Model
         return $this->hasMany(Alumno::class, 'apo_id', 'apo_id');
     }
 
-    
+
 
     public function getApoViveConEstudianteAttribute($value)
     {
         return $value == 1 ? 'Si' : 'No';
     }
 
+    public function setApoViveConEstudianteAttribute($value)
+    {
+        $this->attributes['apo_vive_con_estudiante'] = strtoupper($value);
+    }
 }

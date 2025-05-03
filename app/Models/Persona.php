@@ -106,8 +106,27 @@ class Persona extends Model
             $this->attributes['per_estado_civil'] = 'D';
         } elseif ($value == 'Viudo') {
             $this->attributes['per_estado_civil'] = 'V';
-        }else {
+        } else {
             $this->attributes['per_estado_civil'] = 'S';
         }
+    }
+
+    public function setPerPaisAttribute($value)
+{
+    $this->attributes['per_pais'] = strtoupper($value);
+}
+
+public function setPerDireccionAttribute($value)
+{
+    $this->attributes['per_direccion'] = strtoupper($value);
+}
+    public function setPerNombresAttribute($value)
+    {
+        $this->attributes['per_nombres'] = strtoupper($value);
+    }
+
+    public function setPerApellidosAttribute($value)
+    {
+        $this->attributes['per_apellidos'] = strtoupper($value);
     }
 }

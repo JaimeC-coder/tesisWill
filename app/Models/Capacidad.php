@@ -29,4 +29,9 @@ class Capacidad extends Model
     {
         return $this->cap_descripcion;
     }
+
+    public function setCapDescripcionAttribute($value)
+    {
+        $this->attributes['cap_descripcion'] = strtoupper($value);
+    }
 }

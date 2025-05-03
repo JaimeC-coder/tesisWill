@@ -42,7 +42,6 @@ class AlumnoController extends Controller
         $departamentos = Departamento::all();
 
         return view('view.alumno.create', compact('alumno', 'sexo', 'estadoCivil', 'vive', 'parentesco', 'departamentos'));
-
     }
 
     /**
@@ -53,10 +52,10 @@ class AlumnoController extends Controller
         $newRequest = $request->all();
         Log::info($newRequest);
         DB::transaction(function () use ($newRequest) {
-            if(isset($newRequest['per_id_Alumno']) && $newRequest['per_id_Alumno'] != null && isset($newRequest['per_id_Apoderado']) && $newRequest['per_id_Apoderado'] != null ){
+            if (isset($newRequest['per_id_Alumno']) && $newRequest['per_id_Alumno'] != null && isset($newRequest['per_id_Apoderado']) && $newRequest['per_id_Apoderado'] != null) {
 
                 $Persona = Persona::find($newRequest['per_id_Alumno']);
-                       $Persona->update(array_filter([
+                $Persona->update(array_filter([
                     'per_dni' => $newRequest['per_dni_Alumno'] ?? null,
                     'per_nombres' => $newRequest['per_nombres_Alumno'] ?? null,
                     'per_apellidos' => $newRequest['per_apellidos_Alumno'] ?? null,
@@ -94,15 +93,15 @@ class AlumnoController extends Controller
                 $Apoderado = Apoderado::create([
                     'per_id' => $newRequest['per_id_Apoderado'],
                     'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-                    'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado' ],
+                    'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
                 ]);
-
-            }else if ($newRequest['per_id_Alumno'] && $newRequest['per_id_Alumno'] != null && !$newRequest['per_id_Apoderado'] && $newRequest['per_id_Apoderado'] == null ){ //apoderado
+            } else if ($newRequest['per_id_Alumno'] && $newRequest['per_id_Alumno'] != null && !$newRequest['per_id_Apoderado'] && $newRequest['per_id_Apoderado'] == null) { //apoderado
                 log('entro else if 2');
                 $per_id_Apoderado = Persona::create([
                     'per_dni' => $newRequest['per_dni_Apoderado'],
                     'per_nombres' => $newRequest['per_nombres_Apoderado'],
                     'per_apellidos' => $newRequest['per_apellidos_Apoderado'],
+                    'per_nombre_completo' => $newRequest['per_nombres_Apoderado'] . ' ' . $newRequest['per_apellidos_Apoderado'],
                     'per_email' => $newRequest['per_email_Apoderado'],
                     'per_sexo' => $newRequest['per_sexo_Apoderado'],
                     'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Apoderado'],
@@ -136,11 +135,11 @@ class AlumnoController extends Controller
 
 
                 $Apoderado = Apoderado::create([
-                    'per_id' =>$per_id_Apoderado->per_id,
+                    'per_id' => $per_id_Apoderado->per_id,
                     'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
                     'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
                 ]);
-
+                Log::info($per_id_Apoderado);
                 $perUser = User::create([
                     'per_id' => $per_id_Apoderado->per_id,
                     'email' => $newRequest['per_email_Apoderado'],
@@ -149,8 +148,7 @@ class AlumnoController extends Controller
                     'rol_id' => 1
                 ]);
                 $perUser->assignRole('Apoderado');
-
-            }else if (!isset($newRequest['per_id_Alumno']) && $newRequest['per_id_Alumno'] == null && isset($newRequest['per_id_Apoderado']) && $newRequest['per_id_Apoderado'] != null){ //alumno
+            } else if (!isset($newRequest['per_id_Alumno']) && $newRequest['per_id_Alumno'] == null && isset($newRequest['per_id_Apoderado']) && $newRequest['per_id_Apoderado'] != null) { //alumno
                 log('entro else if 3');
                 $per_id_alumno = Persona::create([
                     'per_dni' => $newRequest['per_dni_Alumno'],
@@ -185,9 +183,7 @@ class AlumnoController extends Controller
                     'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
                     'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
                 ]);
-
-
-            }else{
+            } else {
                 log('entro else');
                 $per_id_Apoderado = Persona::create([
                     'per_dni' => $newRequest['per_dni_Apoderado'],
@@ -246,7 +242,7 @@ class AlumnoController extends Controller
 
 
                 $Apoderado = Apoderado::create([
-                    'per_id' =>$per_id_Apoderado->per_id,
+                    'per_id' => $per_id_Apoderado->per_id,
                     'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
                     'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
                 ]);
@@ -258,7 +254,6 @@ class AlumnoController extends Controller
                 'apo_id' => $Apoderado ? $Apoderado->apo_id : null,
                 'alu_estado' => 1
             ]);
-
         });
         return redirect()->route('alumno.inicio')->with('success', 'Alumno registrado correctamente');
     }
@@ -282,10 +277,7 @@ class AlumnoController extends Controller
         $parentesco = $this->parentesco;
         $departamentos = Departamento::all();
 
-        return view('view.alumno.edit',compact('sexo','estadoCivil','vive','parentesco','departamentos','alumno'));
-
-
-
+        return view('view.alumno.edit', compact('sexo', 'estadoCivil', 'vive', 'parentesco', 'departamentos', 'alumno'));
     }
 
     /**
@@ -332,11 +324,9 @@ class AlumnoController extends Controller
                 'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
                 'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
             ]);
-
         });
 
         return redirect()->route('alumno.inicio')->with('success', 'Alumno actualizado correctamente');
-
     }
 
     /**
@@ -353,7 +343,6 @@ class AlumnoController extends Controller
             DB::commit();
 
             return redirect()->route('alumno.inicio')->with('success', 'Año escolar eliminado correctamente');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('alumno.inicio')->with('error', 'Error al eliminar el año escolar');
@@ -363,8 +352,7 @@ class AlumnoController extends Controller
     public function inicio()
     {
         $alumnos = Alumno::where('is_deleted', '!=', 1)->get();
-       // return $alumnos;
+        // return $alumnos;
         return view('view.alumno.inicio', compact('alumnos'));
-
     }
 }

@@ -9,7 +9,7 @@ class Distrito extends Model
 {
     use SoftDeletes;
 
- 
+
     protected $table = 'distritos';
     protected $primaryKey = 'idDist';
     protected $fillable = [
@@ -21,5 +21,4 @@ class Distrito extends Model
     {
         return $this->belongsTo(Provincia::class, 'idProv', 'idProv');
     }
-
 }

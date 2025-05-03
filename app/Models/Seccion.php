@@ -41,4 +41,8 @@ class Seccion extends Model
     {
         return $this->hasMany(Gsa::class, 'sec_id', 'sec_id');
     }
+    public function setSecDescripcionAttribute($value)
+    {
+        $this->attributes['sec_descripcion'] = strtoupper($value);
+    }
 }

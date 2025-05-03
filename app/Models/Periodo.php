@@ -9,7 +9,7 @@ class Periodo extends Model
 {
     use SoftDeletes;
 
-   
+
 
     protected $table = 'periodos';
     protected $primaryKey = 'per_id';

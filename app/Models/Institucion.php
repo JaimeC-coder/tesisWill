@@ -35,5 +35,4 @@ class Institucion extends Model
         'ie_web',
         'is_deleted'
     ];
-
 }

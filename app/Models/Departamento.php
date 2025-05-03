@@ -20,7 +20,4 @@ class Departamento extends Model
     {
         return $this->hasMany(Provincia::class, 'idDepa', 'idDepa');
     }
-
-
-
 }

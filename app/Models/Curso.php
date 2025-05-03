@@ -41,6 +41,16 @@ class Curso extends Model
     public function capacidad()
     {
         return $this->hasMany(Capacidad::class, 'cur_id', 'cur_id')->where('cap_is_deleted', '!=', 1) // Filtrar registros
-        ->select('cap_id', 'cap_descripcion', 'cur_id'); // Seleccionar solo los campos necesarios;
+            ->select('cap_id', 'cap_descripcion', 'cur_id'); // Seleccionar solo los campos necesarios;
+    }
+
+    public function setCurNombreAttribute($value)
+    {
+        $this->attributes['cur_nombre'] = strtoupper($value);
+    }
+
+    public function setCurAbreviaturaAttribute($value)
+    {
+        $this->attributes['cur_abreviatura'] = strtoupper($value);
     }
 }

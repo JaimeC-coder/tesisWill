@@ -38,19 +38,23 @@
                                     <td>{{ $info->gra_descripcion }}</td>
                                     <td>
                                         <button type="button" class="text-secondary btn btn-none" data-toggle="modal"
-                                            data-target="#dynamicModal" data-whatever='@json($info->seccion)'
+                                            data-target="#dynamicModal"
+                                            data-whatever='{!! json_encode($info->seccion->where('sec_is_delete', '!=', 1)->values()) !!}'
                                             data-title="Secciones de {{ $info->gra_descripcion }}"
                                             data-key="sec_descripcion">
                                             <i class="fa fa-eye"></i></button>
-                                        {{ $info->seccion->where('is_deleted', '!=', 1)->count() }}
+                                        {{ $info->seccion->where('sec_is_delete', '!=', 1)->count() }}
                                     </td>
                                     <td>
                                         <button type="button" class="text-secondary btn btn-none" data-toggle="modal"
-                                            data-target="#dynamicModal" data-whatever='@json($info->curso)'
+                                            data-target="#dynamicModal"data-whatever='{!! json_encode($info->curso->where('is_deleted', '!=', 1)->where('cur_estado', 1)->values()) !!}'
+
+
+
                                             data-title="Cursos asignados a {{ $info->gra_descripcion }}"
                                             data-key="cur_nombre">
                                             <i class="fa fa-eye"></i></button>
-                                        {{ $info->curso->where('is_deleted', '!=', 1)->count() }}
+                                        {{ $info->curso->where('is_deleted', '!=', 1)->where('cur_estado',1)->count() }}
                                     </td>
 
                                     <td>

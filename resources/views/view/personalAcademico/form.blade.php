@@ -132,7 +132,7 @@
                 <div class="col-lg-4 col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Dirección </label>
-                        <input type="text" data-required="true" data-type="letters" class="form-control"
+                        <input type="text" data-required="true" class="form-control"
                             value="{{ $personal->persona->per_direccion ?? '' }}" id="per_direccion"
                             name="per_direccion">
                     </div>

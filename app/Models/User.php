@@ -15,7 +15,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes,CanResetPassword;
+    use HasFactory, Notifiable, SoftDeletes, CanResetPassword;
     use HasRoles;
 
     /**
@@ -87,15 +87,22 @@ class User extends Authenticatable
         return 'profile/username';
     }
 
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = strtoupper($value);
+    }
+
+
     public function sendPasswordResetNotification($token): void
-{
-    $url = route('password.reset'
-        , [
-            'token' => $token,
-            // 'email' => $this->getEmailForPasswordReset(),
-        ]);
+    {
+        $url = route(
+            'password.reset',
+            [
+                'token' => $token,
+                // 'email' => $this->getEmailForPasswordReset(),
+            ]
+        );
 
-    $this->notify(new PasswordResetNotificaction($url));
-}
-
+        $this->notify(new PasswordResetNotificaction($url));
+    }
 }

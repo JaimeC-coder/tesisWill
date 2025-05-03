@@ -48,4 +48,19 @@ class PersonalAcademico extends Model
     {
         return $this->hasMany(AsignarCurso::class, 'pa_id', 'pa_id');
     }
+    public function setPaTurnoAttribute($value)
+    {
+        $this->attributes['pa_turno'] = strtoupper($value);
+    }
+
+    public function setPaCondicionLaboralAttribute($value)
+    {
+        $this->attributes['pa_condicion_laboral'] = strtoupper($value);
+    }
+
+    public function setPaEspecialidadAttribute($value)
+    {
+        $this->attributes['pa_especialidad'] = strtoupper($value);
+    }
+   
 }

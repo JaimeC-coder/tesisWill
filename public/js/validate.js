@@ -83,6 +83,26 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
             }
+
+            // Para campos de fecha, añadimos validación cruzada cuando cambian
+            if (element.type === 'date') {
+                element.addEventListener('change', function() {
+                    // Validamos este campo
+                    validarElemento(element);
+
+                    // Validamos todos los demás campos de fecha que podrían depender de este
+                    const otherDateFields = document.querySelectorAll('input[type="date"]');
+                    otherDateFields.forEach(dateField => {
+                        if (dateField !== element &&
+                            (dateField.dataset.dateCompare ||
+                             dateField.dataset.dateBefore ||
+                             dateField.dataset.dateAfter ||
+                             dateField.dataset.dateBetween)) {
+                            validarElemento(dateField);
+                        }
+                    });
+                });
+            }
         }
     });
 
@@ -113,10 +133,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 return false;
             }
 
-            // Validación para campos de fecha min y max
+            // Si es un campo de fecha y tiene valor
             if (element.type === 'date' && element.value !== '') {
                 const selectedDate = new Date(element.value);
 
+                // Validación para campos de fecha min y max del HTML
                 if (element.min && new Date(element.min) > selectedDate) {
                     mostrarError(element, fieldErrorContainer, `La fecha debe ser posterior a ${formatDate(new Date(element.min))}`);
                     return false;
@@ -125,6 +146,119 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (element.max && new Date(element.max) < selectedDate) {
                     mostrarError(element, fieldErrorContainer, `La fecha debe ser anterior a ${formatDate(new Date(element.max))}`);
                     return false;
+                }
+
+                // NUEVA VALIDACIÓN: Comparar con otro campo de fecha usando data-date-after
+                if (element.dataset.dateAfter) {
+                    const otherFieldId = element.dataset.dateAfter;
+                    const otherField = document.getElementById(otherFieldId);
+
+                    if (otherField && otherField.value) {
+                        const otherDate = new Date(otherField.value);
+
+                        if (selectedDate <= otherDate) {
+                            // Obtener etiqueta personalizada o usar el ID del campo
+                            const fieldLabel = otherField.dataset.label || otherFieldId;
+                            mostrarError(element, fieldErrorContainer, `La fecha debe ser posterior a (${formatDate(otherDate)})`);
+                            return false;
+                        }
+                    }
+                }
+
+                // NUEVA VALIDACIÓN: Comparar con otro campo de fecha usando data-date-before
+                if (element.dataset.dateBefore) {
+                    const otherFieldId = element.dataset.dateBefore;
+                    const otherField = document.getElementById(otherFieldId);
+
+                    if (otherField && otherField.value) {
+                        const otherDate = new Date(otherField.value);
+
+                        if (selectedDate >= otherDate) {
+                            // Obtener etiqueta personalizada o usar el ID del campo
+                            const fieldLabel = otherField.dataset.label || otherFieldId;
+                            mostrarError(element, fieldErrorContainer, `La fecha debe ser anterior a  (${formatDate(otherDate)})`);
+                            return false;
+                        }
+                    }
+                }
+
+                // NUEVA VALIDACIÓN: Comprobar que la fecha esté entre dos fechas
+                if (element.dataset.dateBetween) {
+                    const [startFieldId, endFieldId] = element.dataset.dateBetween.split(',').map(id => id.trim());
+                    const startField = document.getElementById(startFieldId);
+                    const endField = document.getElementById(endFieldId);
+
+                    if (startField && startField.value && endField && endField.value) {
+                        const startDate = new Date(startField.value);
+                        const endDate = new Date(endField.value);
+
+                        // Verificar que la fecha esté entre las dos fechas
+                        if (selectedDate < startDate || selectedDate > endDate) {
+                            const startLabel = startField.dataset.label || startFieldId;
+                            const endLabel = endField.dataset.label || endFieldId;
+                            mostrarError(element, fieldErrorContainer,
+                                `La fecha debe estar entre (${formatDate(startDate)}) y  (${formatDate(endDate)})`);
+                            return false;
+                        }
+                    }
+                }
+
+                // NUEVA VALIDACIÓN: Comparación genérica usando data-date-compare
+                if (element.dataset.dateCompare) {
+                    try {
+                        // Formato esperado: "fieldId:operator"
+                        // Por ejemplo: "fechaNacimiento:>", "fechaInicio:<="
+                        const comparisons = element.dataset.dateCompare.split('|');
+
+                        for (const comparison of comparisons) {
+                            const [fieldId, operator] = comparison.split(':');
+                            const compareField = document.getElementById(fieldId.trim());
+
+                            if (compareField && compareField.value) {
+                                const compareDate = new Date(compareField.value);
+                                const fieldLabel = compareField.dataset.label || fieldId;
+
+                                let isValid = true;
+                                let errorMessage = '';
+
+                                switch (operator.trim()) {
+                                    case '>':
+                                        isValid = selectedDate > compareDate;
+                                        errorMessage = `La fecha debe ser posterior a (${formatDate(compareDate)})`;
+                                        break;
+                                    case '>=':
+                                        isValid = selectedDate >= compareDate;
+                                        errorMessage = `La fecha debe ser igual o posterior a (${formatDate(compareDate)})`;
+                                        break;
+                                    case '<':
+                                        isValid = selectedDate < compareDate;
+                                        errorMessage = `La fecha debe ser anterior a (${formatDate(compareDate)})`;
+                                        break;
+                                    case '<=':
+                                        isValid = selectedDate <= compareDate;
+                                        errorMessage = `La fecha debe ser igual o anterior a (${formatDate(compareDate)})`;
+                                        break;
+                                    case '==':
+                                    case '===':
+                                        isValid = selectedDate.getTime() === compareDate.getTime();
+                                        errorMessage = `La fecha debe ser igual a (${formatDate(compareDate)})`;
+                                        break;
+                                    case '!=':
+                                    case '!==':
+                                        isValid = selectedDate.getTime() !== compareDate.getTime();
+                                        errorMessage = `La fecha no puede ser igual a (${formatDate(compareDate)})`;
+                                        break;
+                                }
+
+                                if (!isValid) {
+                                    mostrarError(element, fieldErrorContainer, errorMessage);
+                                    return false;
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error en la validación de fechas comparativas:', error);
+                    }
                 }
             }
 

@@ -41,8 +41,8 @@
             <div class="form-group col-md-6">
                 <div class="form-group">
                     <label for="per_inicio_matriculas">Fecha de Inicio de Matriculas *</label>
-                    <input type="date" class="form-control"  data-required="true"
-                    min="1777-01-01" max="2025-12-31"     id="per_inicio_matriculas" name="per_inicio_matriculas" value="{{$periodo->per_inicio_matriculas}}">
+                    <input type="date" class="form-control"  data-required="true" data-date-before="per_final_matricula"
+                    min="1777-01-01" max="2025-12-31"     id="per_inicio_matriculas" name="per_final_matricula" value="{{$periodo->per_inicio_matriculas}}">
                 </div>
 
 
@@ -51,7 +51,7 @@
                 <div class="form-group">
                     <label for="per_final_matricula">Fecha de Fin de Matriculas *</label>
                     <input type="date" class="form-control"  data-required="true"
-                    min="1777-01-01" max="2025-12-31" id="per_final_matricula" name="per_final_matricula" value="{{$periodo->per_final_matricula}}">
+                    min="1777-01-01" max="2025-12-31" id="per_final_matricula" name="per_final_matricula" data-date-after="per_inicio_matriculas"  value="{{$periodo->per_final_matricula}}">
                 </div>
 
 
@@ -62,7 +62,7 @@
             <div class="form-group col-md-6">
                 <div class="form-group">
                     <label for="per_limite_cierre">Fecha Limite para Cierre de Matriculas *</label>
-                    <input type="date" class="form-control"  data-required="true"
+                    <input type="date" class="form-control"  data-required="true" data-date-after="per_final_matricula" data-label="Fecha limite de cierre"
                     min="1777-01-01" max="2025-12-31" id="per_limite_cierre" name="per_limite_cierre" value="{{$periodo->per_limite_cierre}}">
                 </div>
             </div>

@@ -37,7 +37,7 @@
             <div class="form-group col-md-6">
                 <div class="form-group">
                     <label for="inputEmail4">Fecha de Inicio</label>
-                    <input type="date" class="form-control" id="anio_fechaInicio" name="anio_fechaInicio" value="{{$anio->anio_fechaInicio}}"data-required="true" min="2000-01-01" max="2060-12-31">
+                    <input type="date" class="form-control" id="anio_fechaInicio" name="anio_fechaInicio" data-date-before="anio_fechaFin" value="{{$anio->anio_fechaInicio}}"data-required="true" min="2000-01-01" max="2060-12-31">
                 </div>
 
 
@@ -45,7 +45,7 @@
             <div class="form-group col-md-6">
                 <div class="form-group">
                     <label for="anio_fechaFin">Fecha de Fin</label>
-                    <input type="date" class="form-control" data-required="true" min="2000-01-01" max="2060-12-31" id="anio_fechaFin" name="anio_fechaFin" value="{{$anio->anio_fechaFin}}">
+                    <input type="date" class="form-control" data-required="true" data-date-after="anio_fechaInicio" min="2000-01-01" max="2060-12-31" id="anio_fechaFin" name="anio_fechaFin" value="{{$anio->anio_fechaFin}}">
                 </div>
 
 

@@ -69,11 +69,11 @@
                                 <div class="col-md-3 p-4">
 
 
-                                    <form class="card p-3">
+                                    <form class="card p-3" id="form-all-request">
                                         <div class="row">
                                             <div class="col-lg-12 col-md-6 col-sm-12">
                                                 <div class="form-group"><label>Curso</label>
-                                                    <select id="cur_id" class="form-control show-tick">
+                                                    <select id="cur_id" class="form-control show-tick" data-required="true" >
                                                         <option value="0" selected disabled>-- Selecciona --</option>
 
                                                     </select>
@@ -81,7 +81,7 @@
                                             </div>
                                             <div class="col-lg-12 col-md-6 col-sm-12">
                                                 <div class="form-group"><label>Fecha</label>
-                                                    <select id="SelectDia" class="form-control show-tick">
+                                                    <select id="SelectDia" class="form-control show-tick" data-required="true" >
                                                         <option value="0" selected disabled>-- Selecciona --</option>
 
                                                     </select>

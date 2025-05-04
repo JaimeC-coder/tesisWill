@@ -2397,7 +2397,8 @@ class ReportController extends Controller
         $alumno->save();
 
 
-        return response()->file(storage_path('FichaMatricula/'.$nombreDocumento));
+        return redirect()->to(asset('storage/FichaMatricula/'.$nombreDocumento));
+      //  return response()->file(storage_path('app/public/miarchivo.pdf'));
 
 
 

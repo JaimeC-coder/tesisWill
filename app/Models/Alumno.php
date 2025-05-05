@@ -37,5 +37,9 @@ class Alumno extends Model
 
 
 
-
+    public function ultimaMatricula()
+    {
+        return $this->hasOne(Matricula::class, 'alu_id')->latest(); // Ordenado por created_at
+        // O usa ->latest('año') si quieres por año u otro campo
+    }
 }

@@ -21,7 +21,7 @@
 
                         <div class="card text-bg-dark ">
                             <div class="card-header d-flex justify-content-between">
-                                <h5 class="card-title">{{ $info->rol_descripcion }}</h5>
+                                <h5 class="card-title">{{ $info->name }}</h5>
 
                                 <form action="{{ route('roles.destroy', $info) }}" method="POST"
                                     style="display: inline-block" class=" btn-danger rounded-circle">
@@ -29,8 +29,16 @@
                                     @method('DELETE')
                                     <button class="text-light  btn btn-none" type="submit">
                                         <i class="fas fa-trash-alt"></i>
+
                                     </button>
                                 </form>
+                                <a href="{{ route('roles.edit', $info) }}"  style="display: inline-block" class=" btn-primary rounded-circle">
+                                    <button class="text-light  btn btn-none" type="submit">
+                                        
+
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </a>
 
                             </div>
                             <div class="card-body  d-flex justify-content-between">

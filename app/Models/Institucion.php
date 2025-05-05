@@ -35,4 +35,21 @@ class Institucion extends Model
         'ie_web',
         'is_deleted'
     ];
+
+    //relacion con departamento
+    public function departamento()
+    {
+        return $this->belongsTo(Departamento::class, 'ie_departamento', 'idDepa');
+    }
+    //relacion con provincia
+    public function provincia()
+    {
+        return $this->belongsTo(Provincia::class, 'ie_provincia', 'idProv');
+    }
+    //relacion con distrito
+    public function distrito()
+    {
+        return $this->belongsTo(Distrito::class, 'ie_distrito', 'idDist');
+    }
+    //relacion con dre
 }

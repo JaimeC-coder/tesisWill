@@ -129,4 +129,8 @@ public function setPerDireccionAttribute($value)
     {
         $this->attributes['per_apellidos'] = strtoupper($value);
     }
+    public function setPerNombreCompletoAttribute($value)
+    {
+        $this->attributes['per_nombre_completo'] = strtoupper($value);
+    }
 }

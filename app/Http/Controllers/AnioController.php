@@ -55,7 +55,7 @@ class AnioController extends Controller
                 'anio_duracionHoraLibre' => $request->anio_duracionHoraLibre,
                 'anio_cantidadPersonal' => $request->anio_cantidadPersonal,
                 'anio_tallerSeleccionable' => $request->anio_tallerSeleccionable,
-                'anio_estado' => $request->anio_estado
+                'anio_estado' => $request->anio_estado == 1 ? 1 : 0,
             ]);
 
             DB::commit();
@@ -137,13 +137,14 @@ class AnioController extends Controller
             return redirect()->route('anio.inicio')->with('success', 'Año escolar eliminado correctamente');
         } catch (\Exception $e) {
             DB::rollBack();
+            dd($e);
             return redirect()->route('anio.inicio')->with('error', 'Error al eliminar el año escolar');
         }
     }
 
     public function inicio()
     {
-        $anio = Anio::where('anio_estado', '!=', 0)->orderBy('anio_id', 'desc')->get();
+        $anio = Anio::where('is_deleted', '!=', 1)->orderBy('anio_id', 'desc')->get();
         return view('view.anioEscolar.inicio', compact('anio'));
     }
 

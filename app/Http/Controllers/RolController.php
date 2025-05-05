@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rol;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolController extends Controller
 {
@@ -25,10 +28,11 @@ class RolController extends Controller
      */
     public function create()
     {
-        $rol = new Rol();
+        $role = new Role();
+        $permissions = Permission::all();
         $estado = $this->estado;
 
-        return view('view.roles.create', compact('rol', 'estado'));
+        return view('view.roles.create', compact('role', 'estado', 'permissions'));
 
     }
 
@@ -45,6 +49,13 @@ class RolController extends Controller
                 'rol_estado' => $request->rol_estado,
             ]);
 
+            Role::create([
+                'name' => $request->rol_descripcion,
+                'guard_name' => 'web',
+                'tipo' => 'usuario',
+                'rol_estado' => $request->rol_estado,
+            ]);
+
             DB::commit();
 
             return redirect()->route('roles.inicio')->with('success', 'Año escolar eliminado correctamente');
@@ -57,7 +68,7 @@ class RolController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Rol $rol)
+    public function show(Role $rol)
     {
         //
     }
@@ -65,29 +76,53 @@ class RolController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Rol $rol)
+    public function edit(Role $role)
     {
-        //
+        $estado = $this->estado;
+        $permissions = Permission::all();
+
+        return view('view.roles.edit', compact('role','permissions','estado'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Rol $rol)
+    public function update(Request $request, Role $role)
     {
-        //
+
+
+
+        DB::beginTransaction();
+        try {
+
+            $role->update(array_filter([
+                'name' => $request->rol_descripcion,
+                'rol_estado' => $request->rol_estado,
+            ], fn($value) => !is_null($value) && $value !== ''));
+
+            $role->syncPermissions($request->permissions);
+
+            DB::commit();
+
+            return redirect()->route('roles.inicio')->with('success', 'Año escolar eliminado correctamente');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            dd($e);
+            return redirect()->route('roles.inicio')->with('error', 'Error al eliminar el año escolar');
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Rol $role)
+    public function destroy(Role $role)
     {
         DB::beginTransaction();
         try {
             $role->update([
-                'is_deleted' => 1
+                'rol_estado' => 0
             ]);
+
 
             DB::commit();
 
@@ -100,7 +135,7 @@ class RolController extends Controller
 
     public function inicio()
     {
-        $roles = Rol::where('rol_estado', 1)->where('is_deleted', '!=', 1)->get();
+        $roles = Role::all();
         //return $roles;
         return view('view.roles.inicio', compact('roles'));
     }

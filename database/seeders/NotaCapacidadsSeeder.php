@@ -1697,17 +1697,49 @@ class NotaCapacidadsSeeder extends Seeder
         ];
 
         foreach ($nota_capacidads as $nota_capacidad) {
+
+
+
+            // 1. Buscar el curso relacionado con la nota
+            $curso = DB::table('cursos')->where('cur_id', $nota_capacidad[3])->first();
+
+            if (!$curso) {
+                continue; // Si no hay curso, salta esta iteración
+            }
+
+            // 2. Obtener todas las capacidades del curso
+            $capacidades = DB::table('capacidads')->where('cur_id', $curso->cur_id)->get();
+
+            // 3. Filtrar capacidades que **no estén ya asignadas** en nota_capacidads
+            $capacidadUsadas = DB::table('nota_capacidads')->pluck('cap_id')->toArray();
+            $capacidadesDisponibles = $capacidades->filter(function ($cap) use ($capacidadUsadas) {
+                return !in_array($cap->cap_id, $capacidadUsadas);
+            });
+
+            // 4. Asignar capacidad aleatoria disponible, si existe
+            $capacidadAsignada = $capacidadesDisponibles->isNotEmpty()
+                ? $capacidadesDisponibles->random()
+                : null;
+
+            if (!$capacidadAsignada) {
+                continue; // Si no hay capacidad disponible, salta esta iteración
+            }
+
+            // 5. Calcular la nota literal
+            $notaLiteral = match (true) {
+                $nota_capacidad[2] <= 10.4 => 'C',
+                $nota_capacidad[2] <= 13.4 => 'B',
+                $nota_capacidad[2] <= 16.4 => 'A',
+                default => 'AD',
+            };
+
             DB::table('nota_capacidads')->insert([
                 'nc_id' => $nota_capacidad[0],
                 'nc_descripcion' => $nota_capacidad[1],
                 'descripcion' => NULL,
-                'nc_nota' => match (true) {
-                    $nota_capacidad[2] <= 10.4 => 'C',
-                    $nota_capacidad[2] <= 13.4 => 'B',
-                    $nota_capacidad[2] <= 16.4 => 'A',
-                    default => 'AD',
-                },
+                'nc_nota' => $notaLiteral,
                 'nt_id' => $nota_capacidad[3],
+                'cap_id' => $capacidadAsignada->cap_id,
                 'nc_is_deleted' => $nota_capacidad[4],
                 'created_at' => now(),
                 'updated_at' => now(),

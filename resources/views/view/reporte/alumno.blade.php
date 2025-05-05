@@ -146,7 +146,7 @@
                                                             class="mr-20 btn btn-outline-primary "><i
                                                                 class="fa fa-folder-plus"></i> Generar</button>
                                                         <a target="_blank"
-                                                            :href="'storage/FichaMatricula/' + data.ficha_matricula"
+                                                            href="{{ route('reporte.alumno.matricula.pdf', ['per_id' => $alumno->persona->per_id]) }}"
                                                             class="mr-20 btn btn-outline-primary "><i
                                                                 class="fa-solid fa-eye"></i> Ver</a>
 
@@ -159,10 +159,11 @@
                                                         width="50" height="50" alt="" />
                                                     <span><b>Libreta de Notas </b></span>
                                                     <div class="msg p-2">
-                                                        <button href="javascript:void(0);" @click="generar_libreta_notas()"
+                                                        <button id="generar_libreta_notas"
+
                                                         class="mr-20 btn btn-outline-primary "><i class="fa fa-folder-plus"></i> Generar</button>
                                                         <a  target="_blank"
-                                                            :href="'storage/LibretasNotas/' + data.libreta_notas"
+                                                            href="{{ route('reporte.alumno.libreta_notas.pdf', ['per_id' => $alumno->persona->per_id]) }}"
                                                             class="mr-20 btn btn-outline-primary "><i class="fa-solid fa-eye"></i> Ver</a>
 
                                                     </div>
@@ -207,6 +208,14 @@
 
             // Redirigir a la URL con los parámetros
             window.open('/api/reporte/alumno/matricula/pdf?per_id=' + per_id, '_blank');
+        });
+        let button2 = document.getElementById('generar_libreta_notas');
+        button2.addEventListener('click', function() {
+            alert('Generando PDF...');
+            let per_id = document.getElementById('per_id').value;
+
+            // Redirigir a la URL con los parámetros
+            window.open('/api/reporte/alumno/libreta_notas/pdf?per_id=' + per_id, '_blank');
         });
         //obtener los datos de la url
     </script>

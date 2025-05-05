@@ -44,11 +44,11 @@ class DatabaseSeeder extends Seeder
             HorariosSeeder::class,
             InstitucionsSeeder::class,
             MatriculasSeeder::class,
+            CapacidadsSeeder::class,
             NotasSeeder::class,
             NotaCapacidadsSeeder::class,
             SeguimientosSeeder::class,
             TiposSeeder::class,
-            CapacidadsSeeder::class,
             // SPSeeder::class,
         ]);
     }

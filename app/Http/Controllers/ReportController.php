@@ -342,7 +342,7 @@ class ReportController extends Controller
         $año = Anio::where('anio_estado', '!=', 0)->first();
 
         $Persona = Persona::where('per_id', $data)->first();
-                  $departamento = Departamento::where('idDepa', $Persona->per_departamento)->first();
+        $departamento = Departamento::where('idDepa', $Persona->per_departamento)->first();
         $provincia = Provincia::where('idProv', $Persona->per_provincia)->first();
         $distrito = Distrito::where('idDist', $Persona->per_distrito)->first();
 
@@ -354,19 +354,19 @@ class ReportController extends Controller
             $alumno = $Persona["per_nombre_completo"];
         }
         // $idNivel = $data["idNivel"] ?? $Persona->alumno->gsa->matricula->nivel->niv_id;
-      // $nivel ="hola1";
-      $nivel = $Persona->alumno->ultimaMatricula?->gsa?->nivel?->niv_descripcion;//TODO
+        // $nivel ="hola1";
+        $nivel = $Persona->alumno->ultimaMatricula?->gsa?->nivel?->niv_descripcion; //TODO
 
         // $idGrado = $data["idGrado"];
 
-         $grado = $Persona->alumno->ultimaMatricula?->gsa?->grado?->gra_descripcion; //TODO
+        $grado = $Persona->alumno->ultimaMatricula?->gsa?->grado?->gra_descripcion; //TODO
         // $idSeccion = $data["idSeccion"];
-         $seccion = $Persona->alumno->ultimaMatricula?->gsa?->seccion?->sec_descripcion; //TODO
+        $seccion = $Persona->alumno->ultimaMatricula?->gsa?->seccion?->sec_descripcion; //TODO
 
-        $apoderado = $Persona->alumno->apoderado->persona->per_apellidos . "," . $Persona->alumno->apoderado->persona->per_nombres ;
+        $apoderado = $Persona->alumno->apoderado->persona->per_apellidos . "," . $Persona->alumno->apoderado->persona->per_nombres;
         //$apoderado = $Persona["apo_nombre_completo"];
         $parentesco = $Persona->alumno->apoderado->apo_parentesco;
-        $vive =$Persona->alumno->apoderado->apo_vive_con_estudiante == 'No' ? 2 : 1;
+        $vive = $Persona->alumno->apoderado->apo_vive_con_estudiante == 'No' ? 2 : 1;
         $fechaNacimientoApo = explode("-", $Persona->alumno->apoderado->persona->per_fecha_nacimiento);
         // $parentesco = $Persona->alumno->apoderado->apo_id;
         //dd($Persona->alumno->apoderado->apo_vive_con_estudiante);
@@ -392,15 +392,13 @@ class ReportController extends Controller
         $contenidoBinario1 = file_get_contents($educacion);
         $imagenEducacion = base64_encode($contenidoBinario1);
 
-        $nombreDocumento = "FICHA_MATRICULA-" .str_replace(' ', '_', $alumno)  . ".pdf";
+        $nombreDocumento = "FICHA_MATRICULA-" . str_replace(' ', '_', $alumno)  . ".pdf";
 
         // Creando Pdf
         include_once "../vendor/autoload.php";
         $dompdf = new Dompdf();
         $dompdf->setPaper('A3', 'landscape');
 
-        // src="data:image/jpg;base64,'.$imagenEducacion.'"
-        // src="data:image/jpg;base64,'.$imagenCAO.'"
         $dompdf->loadHtml('
             <!DOCTYPE html>
             <html lang="en">
@@ -1085,12 +1083,12 @@ class ReportController extends Controller
                                             <td colspan="2" class="bg-gray">Año</td>
                                         </tr>
                                         <tr>
-                                            <td colspan="1" style="height: 0.7rem;">'.($parentesco == 'PADRE'?($fechaNacimientoApo[2]=='' ?'' :$fechaNacimientoApo[2]):'').'</td>
-                                            <td colspan="1" style="height: 0.7rem;">'.($parentesco == 'PADRE'?($fechaNacimientoApo[1]=='' ?'' :$fechaNacimientoApo[1]):'').'</td>
-                                            <td colspan="2" style="height: 0.7rem;">'.($parentesco == 'PADRE'?($fechaNacimientoApo[0]=='' ?'' :$fechaNacimientoApo[0]):'').'</td>
-                                            <td colspan="1" style="height: 0.7rem;">'.($parentesco == 'MADRE'?($fechaNacimientoApo[2]=='' ?'' :$fechaNacimientoApo[2]):'').'</td>
-                                            <td colspan="1" style="height: 0.7rem;">'.($parentesco == 'MADRE'?($fechaNacimientoApo[1]=='' ?'' :$fechaNacimientoApo[1]):'').'</td>
-                                            <td colspan="2" style="height: 0.7rem;">'.($parentesco == 'MADRE'?($fechaNacimientoApo[0]=='' ?'' :$fechaNacimientoApo[0]):'').'</td>
+                                            <td colspan="1" style="height: 0.7rem;">' . ($parentesco == 'PADRE' ? ($fechaNacimientoApo[2] == '' ? '' : $fechaNacimientoApo[2]) : '') . '</td>
+                                            <td colspan="1" style="height: 0.7rem;">' . ($parentesco == 'PADRE' ? ($fechaNacimientoApo[1] == '' ? '' : $fechaNacimientoApo[1]) : '') . '</td>
+                                            <td colspan="2" style="height: 0.7rem;">' . ($parentesco == 'PADRE' ? ($fechaNacimientoApo[0] == '' ? '' : $fechaNacimientoApo[0]) : '') . '</td>
+                                            <td colspan="1" style="height: 0.7rem;">' . ($parentesco == 'MADRE' ? ($fechaNacimientoApo[2] == '' ? '' : $fechaNacimientoApo[2]) : '') . '</td>
+                                            <td colspan="1" style="height: 0.7rem;">' . ($parentesco == 'MADRE' ? ($fechaNacimientoApo[1] == '' ? '' : $fechaNacimientoApo[1]) : '') . '</td>
+                                            <td colspan="2" style="height: 0.7rem;">' . ($parentesco == 'MADRE' ? ($fechaNacimientoApo[0] == '' ? '' : $fechaNacimientoApo[0]) : '') . '</td>
                                       </tr>
                                         <tr>
                                             <td colspan="1" class="bg-gray">Ocupación</td>
@@ -1509,7 +1507,7 @@ class ReportController extends Controller
                                             <td colspan="5" class="bg-gray">' . (intval($año->año_descripcion) + 7) . '</td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.$institucion->ie_nombre.'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . $institucion->ie_nombre . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1519,7 +1517,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.$institucion->ie_codigo_modular.'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . $institucion->ie_codigo_modular . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1529,7 +1527,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.$institucion->departamento->departamento.'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . $institucion->departamento->departamento . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1539,7 +1537,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.$institucion->provincia->provincia.'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . $institucion->provincia->provincia . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1549,7 +1547,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.$institucion->distrito->distrito.'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . $institucion->distrito->distrito . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1559,7 +1557,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.$institucion->ie_ugel.'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . $institucion->ie_ugel . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1569,7 +1567,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.$institucion->ie_nivel.'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . $institucion->ie_nivel . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -1639,7 +1637,7 @@ class ReportController extends Controller
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5" style="height: 0.7rem;">'.$institucion->ie_turno.'</td>
+                                            <td colspan="5" style="height: 0.7rem;">' . $institucion->ie_turno . '</td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
                                             <td colspan="5" style="height: 0.7rem;"></td>
@@ -2398,8 +2396,7 @@ class ReportController extends Controller
 
         $exists = Storage::disk('FichaMatricula')->exists($nombreDocumento);
         if (!$exists) {
-            Storage::disk('FichaMatricula')->put($nombreDocumento, $contenio);
-            /* Storage::disk('reportes')->delete($nombreDocumento); */
+            Storage::disk('FichaMatricula')->put($nombreDocumento, $contenido);
         } else {
             Storage::disk('FichaMatricula')->delete($nombreDocumento);
             Storage::disk('FichaMatricula')->put($nombreDocumento, $contenido);
@@ -2408,13 +2405,7 @@ class ReportController extends Controller
         $alumno->name_ficha_matricula = $nombreDocumento;
         $alumno->save();
 
-
-
-        return response()->file(storage_path('app/public/FichaMatricula/'.$nombreDocumento));
-
-
-
-
+        return response()->file(storage_path('app/public/FichaMatricula/' . $nombreDocumento));
     }
 
     public function generarLibretaNotas(Request $request)

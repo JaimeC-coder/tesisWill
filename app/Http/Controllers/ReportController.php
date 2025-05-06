@@ -364,14 +364,18 @@ class ReportController extends Controller
         $seccion = $Persona->alumno->ultimaMatricula?->gsa?->seccion?->sec_descripcion; //TODO
 
         $apoderado = $Persona->alumno->apoderado->persona->per_apellidos . "," . $Persona->alumno->apoderado->persona->per_nombres;
-        //$apoderado = $Persona["apo_nombre_completo"];
+
+
+        $apoderadoNombre = $Persona->alumno->apoderado->persona->per_nombres;
+        $apoderadoApellidos = explode(" ", $Persona->alumno->apoderado->persona->per_apellidos);
+
         $parentesco = $Persona->alumno->apoderado->apo_parentesco;
         $vive = $Persona->alumno->apoderado->apo_vive_con_estudiante == 'No' ? 2 : 1;
         $fechaNacimientoApo = explode("-", $Persona->alumno->apoderado->persona->per_fecha_nacimiento);
         // $parentesco = $Persona->alumno->apoderado->apo_id;
         //dd($Persona->alumno->apoderado->apo_vive_con_estudiante);
 
-        $dni = $Persona->alumno->apoderado->persona->per_dni;
+        $dni = $Persona->alumno->persona->per_dni;
         $email = $Persona["per_email"];
         $estadoCivil = $Persona["per_estado_civil"];
 
@@ -382,6 +386,8 @@ class ReportController extends Controller
         $direccion = $Persona["per_direccion"];
 
         $celular = $Persona["per_celular"];
+        $Apodireccion = $Persona->alumno->apoderado->persona->per_direccion;
+        $Apocelular = $Persona->alumno->apoderado->persona->per_celular;
         $pais = $Persona["per_pais"];
         $departamento = ($Persona->per_departamento == 0 ? 'LA LIBERTAD' : $departamento->departamento);
         $provincia = ($Persona->per_provincia == 0 ? 'CHEPÉN' : $provincia->provincia);
@@ -1059,8 +1065,8 @@ class ReportController extends Controller
                                         </tr>
                                         <tr>
                                             <td colspan="1" class="bg-gray">Apellidos y nombres</td>
-                                            <td colspan="4"></td>
-                                            <td colspan="4">' . $apoderado . '</td>
+                                            <td colspan="4">' . ($parentesco == 'PADRE' ? $apoderado : '') . '</td>
+                                            <td colspan="4">' . ($parentesco == 'MADRE' ? $apoderado : '') . '</td>
                                         </tr>
                                         <tr>
                                             <td colspan="1" class="bg-gray">Vive</td>
@@ -2111,17 +2117,7 @@ class ReportController extends Controller
                                             <td colspan="6" class="bg-gray">' . (intval($año->año_descripcion) + 7) . '</td>
                                         </tr>
                                         <tr>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;">' . ($parentesco == 'TUTOR' ? $apoderadoApellidos[0]  : '') . '</td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
@@ -2131,7 +2127,7 @@ class ReportController extends Controller
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;">' . ($parentesco == 'TUTOR' ? $apoderadoApellidos[1]  : '') . '</td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
@@ -2141,7 +2137,17 @@ class ReportController extends Controller
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
+                                            <td colspan="6" style="height: 0.7rem;">' . ($parentesco == 'TUTOR' ? $apoderadoNombre  : '') . '</td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="6" style="height: 0.7rem;">TUTOR</td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
@@ -2177,9 +2183,9 @@ class ReportController extends Controller
                                             <td colspan="2" class="box-1 bg-gray">Año</td>
                                         </tr>
                                         <tr>
-                                            <td colspan="2" class="box-1"></td>
-                                            <td colspan="2" class="box-1"></td>
-                                            <td colspan="2" class="box-1"></td>
+                                            <td colspan="2" class="box-1">' . ($parentesco == 'TUTOR' ? ($fechaNacimientoApo[2] == '' ? '' : $fechaNacimientoApo[2]) : '') . '</td>
+                                            <td colspan="2" class="box-1">' . ($parentesco == 'TUTOR' ? ($fechaNacimientoApo[1] == '' ? '' : $fechaNacimientoApo[1]) : '') . '</td>
+                                            <td colspan="2" class="box-1">' . ($parentesco == 'TUTOR' ? ($fechaNacimientoApo[0] == '' ? '' : $fechaNacimientoApo[0]) : '') . '</td>
                                             <td colspan="2" class="box-1"></td>
                                             <td colspan="2" class="box-1"></td>
                                             <td colspan="2" class="box-1"></td>
@@ -2223,7 +2229,7 @@ class ReportController extends Controller
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;">' . $Apodireccion . '</td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
@@ -2233,7 +2239,7 @@ class ReportController extends Controller
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="6" style="height: 0.7rem;"></td>
+                                            <td colspan="6" style="height: 0.7rem;">' . $Apocelular . '</td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>
                                             <td colspan="6" style="height: 0.7rem;"></td>

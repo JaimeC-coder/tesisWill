@@ -107,7 +107,7 @@ class RolController extends Controller
             return redirect()->route('roles.inicio')->with('success', 'Año escolar eliminado correctamente');
         } catch (\Exception $e) {
             DB::rollBack();
-            dd($e);
+            
             return redirect()->route('roles.inicio')->with('error', 'Error al eliminar el año escolar');
         }
     }
@@ -119,11 +119,11 @@ class RolController extends Controller
     {
         DB::beginTransaction();
         try {
-            $role->update([
-                'rol_estado' => 0
-            ]);
 
 
+            $role->permissions()->detach();
+            $role->users()->detach();
+            $role->delete();
             DB::commit();
 
             return redirect()->route('roles.inicio')->with('success', 'Año escolar eliminado correctamente');

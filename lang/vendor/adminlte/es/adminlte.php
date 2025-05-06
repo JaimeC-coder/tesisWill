@@ -13,6 +13,7 @@ return [
     'i_already_have_a_membership' => 'Ya tengo una cuenta',
     'sign_in' => 'Acceder',
     'log_out' => 'Salir',
+    'failed' => 'Correo o contraseña incorrectos.',
     'toggle_navigation' => 'Alternar barra de navegación',
     'login_message' => 'Autenticarse para iniciar sesión',
     'register_message' => 'Crear una nueva cuenta',

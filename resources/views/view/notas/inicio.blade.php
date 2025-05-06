@@ -79,12 +79,10 @@
             <div class="card-body">
                 <div class="row p-2">
                     <div class="table-responsive">
-                        <table class="display table  table-bordered" style="width:100%; text-align: center;">
+                        <table class="display table table-bordered" style="width:100%; text-align: center;">
                             @if ($tipoPeriodo != null)
-
                                 <thead class="thead-dark">
                                     <tr>
-
                                         <th>DNI</th>
                                         <th>Alumno</th>
                                         <th>Capacidades</th>
@@ -94,67 +92,48 @@
                                         <th>Promedio</th>
                                     </tr>
                                 </thead>
-
-                                @php
-                                $bloques = ['B1', 'B2', 'B3', 'B4', 'Promedio'];
-                                $capacidades = ['C1', 'C2', 'C3'];
-                            @endphp
-
-                            <tbody>
-                                @foreach ($Gsas as $index => $item)
-                                    <tr>
-                                        <td rowspan="4">{{ $item['dni'] }}</td>
-                                        <td rowspan="4">{{ $item['alumno'] }}</td>
-                                    </tr>
-
-                                    @foreach ($capacidades as $capacidadKey)
-                                        <tr>
-                                            <td>{{ $capacidad[$capacidadKey] ?? $capacidadKey }}</td>
-
-                                            @foreach ($bloques as $bloque)
-                                                @php
-                                                    $notaData = $item['notas'][$capacidadKey][$bloque] ?? null;
-                                                    $nota = $notaData['nota'] ?? null;
-                                                    $notaId = $notaData['idNotaPadre'] ?? $notaData['idNota'] ?? -1;
-                                                @endphp
-
-                                                @if ($bloque === 'Promedio')
-                                                    @if ($nota == "c" || $nota == "C")
-                                                        <td class="bg-danger">{{ $nota }}</td>
-                                                    @elseif (in_array(strtoupper($nota), ['A', 'AD']))
-                                                        <td class="bg-success">{{ $nota }}</td>
-                                                    @else
-                                                        <td class="bg-warning">{{ $nota }}</td>
-                                                    @endif
-                                                @else
+                                <tbody>
+                                    @foreach ($Gsas as $index => $item)
+                                        @foreach ($item['notas'] as $capacidadKey => $capacidadData)
+                                            <tr>
+                                                @if ($loop->first)
+                                                    <td rowspan="{{ count($item['notas']) }}">{{ $item['dni'] }}</td>
+                                                    <td rowspan="{{ count($item['notas']) }}">{{ $item['alumno'] }}</td>
+                                                @endif
+                                                <td>{{ $capacidades[$capacidadKey] ?? $capacidadData['descripcion'] }}  </td>
+                                                @foreach (range(1, $tipoPeriodo['cantidad']) as $periodoIndex)
+                                                    @php
+                                                        $periodoKeyName = "P" . $periodoIndex;
+                                                        $notaData = $capacidadData['periodos'][$periodoKeyName] ?? ['nota' => null, 'idNotaPadre' => -1];
+                                                        $nota = $notaData['nota'] ?? null;
+                                                        $notaId = $notaData['idNotaPadre'] ?? -1;
+                                                    @endphp
                                                     @if ($nota !== null)
                                                         <td>{{ $nota }}</td>
                                                     @else
                                                         <td>
                                                             <button type="button" class="btn btn-icon btn-sm"
-                                                                title="Registrar" data-toggle="modal"
-                                                                data-target="#myModal"
-                                                                data-alumno="{{ $item['idAlumno'] }}"
-                                                                data-capacidad="{{ $capacidadKey }}"
-                                                                data-sga="{{ $item['ags_id'] }}"
-                                                                data-periodo="{{ $item['periodoID'] }}"
-                                                                data-notaId="{{ $notaId }}"
-                                                                data-bimestre="{{ $bloque }}">
+                                                                    title="Registrar" data-toggle="modal"
+                                                                    data-target="#myModal"
+                                                                    data-alumno="{{ $item['idAlumno'] }}"
+                                                                    data-capacidad="{{ $capacidadKey }}"
+                                                                    data-sga="{{ $item['ags_id'] }}"
+                                                                    data-periodo="{{ $item['periodoID'] }}"
+                                                                    data-notaId="{{ $notaId }}"
+                                                                    data-bimestre="{{ $periodoIndex }}">
                                                                 <i class="fa fa-edit text-secondary"></i>
                                                             </button>
                                                         </td>
                                                     @endif
-                                                @endif
-                                            @endforeach
-                                        </tr>
+                                                @endforeach
+                                                <td>{{ $capacidadData['promedio'] }}</td>
+                                            </tr>
+                                        @endforeach
                                     @endforeach
-                                @endforeach
-                            </tbody>
-
-
-
+                                </tbody>
                             @endif
                         </table>
+
 
                     </div>
 

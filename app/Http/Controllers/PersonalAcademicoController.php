@@ -50,10 +50,10 @@ class PersonalAcademicoController extends Controller
      */
     public function store(Request $request)
     {
-
+      
         DB::beginTransaction();
         try {
-            if ($request->flexCheckDefault == 'on') {
+            if (isset($request->flexCheckDefault ) && $request->flexCheckDefault == 'on' || $request->per_id == null) {
                 $persona = Persona::create([
                     'per_dni' => $request->per_dni,
                     'per_nombres' => $request->per_nombres,

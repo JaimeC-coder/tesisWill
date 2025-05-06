@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 class LoginController extends Controller
 {
     /*
@@ -40,14 +43,51 @@ class LoginController extends Controller
     }
     protected function validateLogin(Request $request)
     {
-        $request->validate([
-            $this->username() => 'required|string',
-            'password' => 'required|string',
-        ],
-        [
-            $this->username() . '.required' => 'El campo :attribute es obligatorio.',
-            'password.required' => 'El campo :attribute es obligatorio.',
+       
+        $request->validate(
+            [
+                $this->username() => 'required|string',
+                'password' => 'required|string',
+            ],
+            [
+                 $this->username().'.required' => 'El campo :attribute es obligatorio.',
+                'password.required' => 'El campo :attribute es obligatorio.',
+            ]
+        );
+
+        // Buscar usuario por email
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'El correo no fue encontrado.'])->withInput();
+        }
+
+        // Verificar contraseña
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'La contraseña no coincide.'])->withInput();
+        }
+    }
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        $user = User::where($this->username(), $request->input($this->username()))->first();
+
+        $message = 'Correo o contraseña incorrectos.';
+
+        if (!$user) {
+
+            throw ValidationException::withMessages([
+                $this->username() => ['El correo no fue encontrado.'],
+            ]);
+
+
+        } else if (!Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'password' => ['La contraseña no coincide.'],
+            ]);
+        }
+
+        throw ValidationException::withMessages([
+            $this->username() => [$message],
         ]);
     }
-
 }

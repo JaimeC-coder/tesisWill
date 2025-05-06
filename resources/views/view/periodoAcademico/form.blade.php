@@ -41,8 +41,8 @@
             <div class="form-group col-md-6">
                 <div class="form-group">
                     <label for="per_inicio_matriculas">Fecha de Inicio de Matriculas *</label>
-                    <input type="date" class="form-control"  data-required="true" data-date-before="per_final_matricula"
-                    min="1777-01-01" max="2025-12-31"     id="per_inicio_matriculas" name="per_final_matricula" value="{{$periodo->per_inicio_matriculas}}">
+                    <input type="date" class="form-control"  data-required="true"
+                    min="1777-01-01" max="2025-12-31"     id="per_inicio_matriculas" name="per_inicio_matriculas" value="{{$periodo->per_inicio_matriculas}}">
                 </div>
 
 

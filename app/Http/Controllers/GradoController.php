@@ -10,6 +10,7 @@ use App\Models\PersonalAcademico;
 use App\Models\Seccion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GradoController extends Controller
 {
@@ -93,12 +94,20 @@ class GradoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Grado $grado)
+    public function destroy(Grado $gradoSeccion)
     {
         //
-        $grado->update([
+Log::info($gradoSeccion);
+        $gradoSeccion->update([
             'gra_is_delete' => 1
         ]);
+        $secciones = Seccion::where('gra_id',$gradoSeccion->gra_id)->get();
+        foreach ($secciones as $seccion){
+            $seccion->update([
+                'sec_is_delete' => 1
+            ]);
+        }
+        return redirect()->route('gradoSeccion.inicio');
     }
 
     public function inicio()

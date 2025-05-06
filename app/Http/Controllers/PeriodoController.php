@@ -123,6 +123,20 @@ class PeriodoController extends Controller
     public function destroy(Periodo $periodo)
     {
         //
+        DB::beginTransaction();
+        try {
+            $periodo->update([
+                'is_deleted' => 1,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('periodo.inicio')->with('success', 'Año escolar eliminado correctamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('periodo.inicio')->with('error', 'Error al eliminar');
+        }
     }
 
     public function inicio()

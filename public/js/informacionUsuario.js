@@ -108,9 +108,9 @@ function checked(){
         clearInput();
         blockInput(false);
         btnDni.hidden=true;
-
     }else{
-        blockInput(true);
+        
+        blockInput(false);
         btnDni.hidden=false;
     }
 

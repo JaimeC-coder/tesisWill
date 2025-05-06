@@ -13,6 +13,7 @@ class NotaCapacidad extends Model
     protected $table = 'nota_capacidads';
     protected $primaryKey = 'nc_id';
     protected $fillable = [
+        'cap_id',
         'nc_descripcion',
         'nc_nota',
         'nt_id',
@@ -22,5 +23,9 @@ class NotaCapacidad extends Model
     public function nota()
     {
         return $this->belongsTo(Nota::class, 'nt_id', 'nt_id');
+    }
+    public function capacidad()
+    {
+        return $this->belongsTo(Capacidad::class, 'cap_id', 'cap_id');
     }
 }

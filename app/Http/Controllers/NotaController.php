@@ -29,67 +29,33 @@ use function Illuminate\Log\log;
 class NotaController extends Controller
 {
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+
+
+
+    public function returnCapacitaciones($capacitacion)
     {
-        //
+
+        $capacidades = [];
+
+        for ($i = 0; $i < count($capacitacion); $i++) {
+            $capacidades["C" . $i + 1] = $capacitacion[$i]['cap_descripcion'];
+        }
+
+        return $capacidades;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Nota $nota)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Nota $nota)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Nota $nota)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Nota $nota)
-    {
-        //
-    }
     public function inicio(Request $request, $nivels = null)
     {
+
+
         $user = Auth::user();
         $user = $user->per_id;
 
         $anios = Anio::where('anio_estado', '!=', 0)->get();
+
 
         $nivel = $request->nivel;
         $anio = $request->anio;
@@ -98,55 +64,226 @@ class NotaController extends Controller
         $seccion = $request->seccion;
         $cursoId = $request->cursoId;
 
-        $curso = Curso::where('gra_id', $grado)->where('niv_id', $nivel)->where('cur_id', $cursoId)->where('is_deleted', '!=', 1)->first();
+        $curso = Curso::where('gra_id', $grado)
+            ->where('niv_id', $nivel)
+            ->where('cur_id', $cursoId)
+            ->where('is_deleted', '!=', 1)
+            ->first();
 
         if ($curso != null) {
-            $asignacionesCursos = AsignarCurso::where('pa_id', $docente)->where('curso', $curso->cur_nombre)->where('asig_is_deleted', '!=', 1)->first();
+            $asignacionesCursos = AsignarCurso::where('pa_id', $docente)
+                ->where('curso', $curso->cur_nombre)
+                ->where('asig_is_deleted', '!=', 1)
+                ->first();
 
-            $capacidades = Capacidad::where('cur_id', $curso->cur_id)->where('cap_is_deleted', '!=', 1)->get();
+            $capacidades = Capacidad::where('cur_id', $curso->cur_id)
+                ->where('cap_is_deleted', '!=', 1)
+                ->get();
 
-
-            $capacidad = $this->returnCapacitaciones($capacidades);
             $estado = 1;
-
             $anio = Anio::where('anio_estado', $estado)->where('is_deleted', '!=', 1)->first();
             $periodo = Periodo::where('anio_id', $anio->anio_id)->where('per_estado', $estado)->where('is_deleted', '!=', 1)->first();
             $tipoPeriodo = Tipo::where('tp_id', $periodo->per_tp_notas)->first();
 
             $asignacionesCursos->capacidades = count($capacidades);
 
+            $tipoPeriodo = $this->configurarTipoPeriodo($tipoPeriodo);
+            $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades);
 
 
-            switch ($tipoPeriodo->tp_tipo) {
-                case 'Registro de Notas Anuales':
-                    $tipoPeriodo->cantidad = 1;
-                    $tipoPeriodo->name = 'Anual';
-                    break;
-                case 'Registro de Notas Bimestrales':
-                    $tipoPeriodo->cantidad = 4;
-                    $tipoPeriodo->name = 'Bimestre';
-                    break;
-                case 'Registro de Notas Trimestrales':
-                    $tipoPeriodo->cantidad = 3;
-                    $tipoPeriodo->name = 'Trimestre';
-                    break;
-                case 'Registro de Notas Semestrales':
-                    $tipoPeriodo->cantidad = 2;
-                    $tipoPeriodo->name = 'Semestre';
-                    break;
-            }
-
-            $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo);
-
-
-            return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidad', 'user'));
+            return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidades', 'user'));
         }
 
         $asignacionesCursos = null;
         $Gsas = null;
         $tipoPeriodo = null;
+
+
+
         return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'user'));
     }
+
+    /**
+     * Configura el tipo de periodo según su tipo
+     */
+    private function configurarTipoPeriodo($tipoPeriodo)
+    {
+        switch ($tipoPeriodo->tp_tipo) {
+            case 'Registro de Notas Anuales':
+                $tipoPeriodo->cantidad = 1;
+                $tipoPeriodo->name = 'Anual';
+                break;
+            case 'Registro de Notas Bimestrales':
+                $tipoPeriodo->cantidad = 4;
+                $tipoPeriodo->name = 'Bimestre';
+                break;
+            case 'Registro de Notas Trimestrales':
+                $tipoPeriodo->cantidad = 3;
+                $tipoPeriodo->name = 'Trimestre';
+                break;
+            case 'Registro de Notas Semestrales':
+                $tipoPeriodo->cantidad = 2;
+                $tipoPeriodo->name = 'Semestre';
+                break;
+        }
+
+        return $tipoPeriodo;
+    }
+
+    public function getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades)
+    {
+        $Gsas = Gsa::select('ags_id')
+            ->where('niv_id', $nivel)
+            ->where('gra_id', $grado)
+            ->where('sec_id', $seccion)
+            ->where('is_deleted', '!=', 1)
+            ->get();
+
+        $numeroPeriodos = $tipoPeriodo->cantidad;
+
+        // Crear estructura de capacidades para usar como plantilla
+        $capacidadesPlantilla = [];
+        foreach ($capacidades as $capacidad) {
+            $capacidadesPlantilla[$capacidad->cap_id] = [
+                'descripcion' => $capacidad->cap_descripcion,
+                'orden' => $capacidad->cap_id, // Asumiendo que hay un campo de orden o usamos cap_id
+            ];
+        }
+
+        foreach ($Gsas as $g) {
+            $matricula = Matricula::where('ags_id', $g->ags_id)
+                ->where('is_deleted', '!=', 1)
+                ->first();
+
+            if (!$matricula) continue;
+
+            $alumno = Alumno::where('alu_id', $matricula->alu_id)
+                ->where('is_deleted', '!=', 1)
+                ->first();
+
+            if (!$alumno) continue;
+
+            $persona = Persona::where('per_id', $alumno->per_id)
+                ->where('is_deleted', '!=', 1)
+                ->first();
+
+            if (!$persona) continue;
+
+            $g->periodoID = $matricula->per_id;
+            $g->alumno = $persona->per_apellidos . ' ' . $persona->per_nombres;
+            $g->dni = $persona->per_dni;
+            $g->idAlumno = $alumno->alu_id;
+
+
+
+            // Obtener todas las notas del alumno para este curso y docente
+            $notas = Nota::select(['nt_bimestre', 'nt_nota', 'nt_id'])
+                ->where('alu_id', $alumno->alu_id)
+                ->where('curso_id', $curso->cur_id)
+                ->where('pa_id', $docente)
+                ->where('nt_is_deleted', 0)
+                ->get();
+
+
+            // Inicializar la estructura de notas por capacidad
+            $notasOrganizadas = [];
+            foreach ($capacidadesPlantilla as $capId => $capInfo) {
+                $notasOrganizadas[$capId] = [
+                    'descripcion' => $capInfo['descripcion'],
+
+                    'orden' => $capInfo['orden'],
+                    'periodos' => []
+                ];
+
+                // Inicializar periodos con valores vacíos
+                for ($i = 1; $i <= $numeroPeriodos; $i++) {
+                    $notasOrganizadas[$capId]['periodos']["P" . $i] = [
+                        "nota" => NULL,
+                        "idNotaPadre" => 0
+                    ];
+                }
+            }
+
+
+            // Rellenar con las notas existentes
+            foreach ($notas as $nota) {
+                // Buscar las capacidades asociadas a esta nota
+                $notasCapacidades = NotaCapacidad::where('nt_id', $nota->nt_id)
+                    ->get();
+                    Log::info($notasCapacidades);
+
+                foreach ($notasCapacidades as $notaCapacidad) {
+                    $capId = $notaCapacidad->cap_id;
+
+                    // Verificar si esta capacidad existe en nuestra plantilla
+                    if (isset($notasOrganizadas[$capId])) {
+                        $periodoKey = "P" . $nota->nt_bimestre;
+
+                        // Solo actualizar si el período es válido
+                        if ($nota->nt_bimestre <= $numeroPeriodos) {
+                            $notasOrganizadas[$capId]['periodos'][$periodoKey] = [
+                                "nota" => $notaCapacidad->nc_nota ?? '--',
+                                "idNotaPadre" => $nota->nt_id
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Calcular promedios por capacidad
+            foreach ($notasOrganizadas as $capId => &$capacidadData) {
+                $notasValues = array_column($capacidadData['periodos'], 'nota');
+                $notasFiltradas = array_filter($notasValues, function ($nota) {
+                    return $nota !== '0' && $nota !== '--' && $nota !== NULL;
+                });
+
+                $promedio = !empty($notasFiltradas) ? $this->calcularPromedio($notasFiltradas) : '';
+                $capacidadData['promedio'] = $promedio;
+            }
+
+            $g->notas = $notasOrganizadas;
+
+            // Calcular promedio general (opcional)
+            $promediosCapacidades = array_column($notasOrganizadas, 'promedio');
+            $promediosFiltrados = array_filter($promediosCapacidades, function ($prom) {
+                return $prom !== '' && $prom !== NULL;
+            });
+
+            $g->promedioGeneral = !empty($promediosFiltrados) ? $this->calcularPromedio($promediosFiltrados) : '';
+        }
+
+        return $Gsas;
+    }
+
+    public function calcularPromedio($notas)
+    {
+
+        if (empty($notas)) return ""; // Si el array está vacío, devolver vacío
+
+        // Jerarquía de notas
+        $jerarquia = ["AD" => 5, "A" => 4, "B" => 3, "C" => 2, "D" => 1];
+
+        // Contar frecuencia de cada nota
+        $conteo = array_count_values($notas);
+
+        // Encontrar la(s) nota(s) con mayor frecuencia
+        $maxFrecuencia = max($conteo);
+        $notasMasFrecuentes = array_keys($conteo, $maxFrecuencia);
+
+        if (count($notasMasFrecuentes) === 1) {
+            return $notasMasFrecuentes[0]; // Si hay una sola nota más frecuente, devolverla
+        }
+
+        // Si hay empate, elegir según la jerarquía
+        usort($notasMasFrecuentes, function ($a, $b) use ($jerarquia) {
+            return ($jerarquia[$b] ?? 0) <=> ($jerarquia[$a] ?? 0);
+        });
+
+        return $notasMasFrecuentes[0]; // Retornar la nota con mayor jerarquía
+
+
+    }
+
 
 
 
@@ -159,12 +296,11 @@ class NotaController extends Controller
 
         $nivel = $request->nivel;
         $user = User::Where('per_id', $request->user)
-        ->where('is_deleted', '!=', 1)
-        ->first();
+            ->where('is_deleted', '!=', 1)
+            ->first();
 
         if ($user->roles[0]->name == "Docente") {
             $docentes = PersonalAcademico::where('per_id', $user->per_id)->where('is_deleted', '!=', 1)->get();
-
         } else {
             $docentes = PersonalAcademico::whereIn('rol_id', [4])->where('niv_id', $nivel)->where('is_deleted', '!=', 1)->get();
         }
@@ -243,76 +379,6 @@ class NotaController extends Controller
     }
 
 
-    //PASAR A API :
-    public function inicioaPI(Request $request, $nivels = null)
-    {
-
-        $anios = Anio::where('anio_estado', '!=', 0)->get();
-        // log($request);
-        $nivel = $request->nivel;
-        $anio = $request->anio;
-        $docente = $request->docente;
-        $grado = $request->grado;
-        $seccion = $request->seccion;
-        $cursoId = $request->cursoId;
-
-        $curso = Curso::where('gra_id', $grado)->where('niv_id', $nivel)->where('cur_id', $cursoId)->where('is_deleted', '!=', 1)->first();
-
-        if ($curso != null) {
-            $asignacionesCursos = AsignarCurso::where('pa_id', $docente)->where('curso', $curso->cur_nombre)->where('asig_is_deleted', '!=', 1)->first();
-
-            $capacidades = Capacidad::where('cur_id', $curso->cur_id)->where('cap_is_deleted', '!=', 1)->get();
-            // $asignacionesCursos->capacidades = $capacidades;
-            $asignacionesCursos->capacidades = count($capacidades);
-            $capacidad = $this->returnCapacitaciones($capacidades);
-            $estado = 1;
-            $anio = Anio::where('anio_estado', $estado)->where('is_deleted', '!=', 1)->first();
-            $periodo = Periodo::where('anio_id', $anio->anio_id)->where('per_estado', $estado)->where('is_deleted', '!=', 1)->first();
-            $tipoPeriodo = Tipo::where('tp_id', $periodo->per_tp_notas)->first();
-            //Log::info($tipoPeriodo);
-
-            switch ($tipoPeriodo->tp_tipo) {
-                case 'Registro de Notas Anuales':
-                    $tipoPeriodo->cantidad = 1;
-                    $tipoPeriodo->name = 'Anual';
-                    break;
-                case 'Registro de Notas Bimestrales':
-                    $tipoPeriodo->cantidad = 4;
-                    $tipoPeriodo->name = 'Bimestre';
-                    break;
-                case 'Registro de Notas Trimestrales':
-                    $tipoPeriodo->cantidad = 3;
-                    $tipoPeriodo->name = 'Trimestre';
-                    break;
-                case 'Registro de Notas Semestrales':
-                    $tipoPeriodo->cantidad = 2;
-                    $tipoPeriodo->name = 'Semestre';
-                    break;
-            }
-
-            $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo);
-
-            //  Log::info($Gsas);
-
-            return response()->json([
-                // 'anios' => $anios,
-                // 'asignacionesCursos' => $asignacionesCursos,
-                'Gsas' => $Gsas,
-                // 'tipoPeriodo' => $tipoPeriodo,
-                // 'capacidades' => $capacidad
-            ]);
-        }
-
-        $asignacionesCursos = null;
-        $Gsas = null;
-        $tipoPeriodo = null;
-        return response()->json([
-            // 'anios' => $anios,
-            //  'asignacionesCursos' => $asignacionesCursos,
-            'Gsas' => $Gsas,
-            // 'tipoPeriodo' => $tipoPeriodo
-        ]);
-    }
 
     public function buscarInfoNotas($numero)
     {
@@ -333,142 +399,10 @@ class NotaController extends Controller
 
 
 
-    public function returnCapacitaciones($capacitacion)
-    {
-
-        $capacidades = [];
-
-        for ($i = 0; $i < count($capacitacion); $i++) {
-            $capacidades["C" . $i + 1] = $capacitacion[$i]['cap_descripcion'];
-        }
-
-        return $capacidades;
-    }
-
-
-    public function getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo)
-    {
-        $Gsas = Gsa::select('ags_id')
-            ->where('niv_id', $nivel)
-            ->where('gra_id', $grado)
-            ->where('sec_id', $seccion)
-            ->where('is_deleted', '!=', 1)
-            ->get();
-
-
-        $numeroPeriodos =  $tipoPeriodo->tp_id;
-
-        foreach ($Gsas as $g) {
-            $matricula = Matricula::where('ags_id', $g->ags_id)
-                ->where('is_deleted', '!=', 1)
-                ->first();
-
-            if (!$matricula) continue;
-
-            $alumno = Alumno::where('alu_id', $matricula->alu_id)
-                ->where('is_deleted', '!=', 1)
-                ->first();
-
-            if (!$alumno) continue;
-
-            $persona = Persona::where('per_id', $alumno->per_id)
-                ->where('is_deleted', '!=', 1)
-                ->first();
-
-            if (!$persona) continue;
-
-            $g->periodoID = $matricula->per_id;
-            $g->alumno = $persona->per_apellidos . ' ' . $persona->per_nombres;
-            $g->dni = $persona->per_dni;
-            $g->idAlumno = $alumno->alu_id;
-
-            $notas = Nota::select(['nt_bimestre', 'nt_nota', 'nt_id'])
-                ->where('alu_id', $alumno->alu_id)
-                ->where('curso_id', $curso->cur_id)
-                ->where('pa_id', $docente)
-                ->where('nt_is_deleted', '!=', 1)
-                ->get();
-
-            $notasOrganizadas = [];
-
-            foreach ($notas as $v) {
-                $capacidades = NotaCapacidad::select(['nc_descripcion', 'nc_nota', 'nt_id']) // Asegúrate de seleccionar la columna de orden
-                    ->where('nt_id', $v->nt_id)
-                    ->get();
-
-                foreach ($capacidades as $cap) {
-                    $capKey = $cap->nc_descripcion; // Usar el orden explícito
-
-                    if (!isset($notasOrganizadas[$capKey])) {
-                        $notasOrganizadas[$capKey] = [];
-                    }
-
-                    if ($v->nt_bimestre <= $numeroPeriodos) {
-                        $notasOrganizadas[$capKey]["B" . $v->nt_bimestre] = [
-                            "nota" => $cap->nc_nota ?? '--',
-                            "idNotaPadre" => $cap->nt_id ?? 0
-                        ];
-                    }
-                }
-            }
-
-            // Completar períodos faltantes con notas nulas
-            foreach ($notasOrganizadas as $capKey => &$bimestres) {
-                for ($i = 1; $i <= $numeroPeriodos; $i++) {
-                    if (!isset($bimestres["B" . $i])) {
-                        $bimestres["B" . $i] = ["nota" => NULL];
-                        $bimestres["B" . $i]["idNota"] = -1;
-                    }
-                }
-
-                // Calcular promedio solo con las notas existentes
-                $notasValores = array_column($bimestres, 'nota');
-                $notasFiltradas = array_filter($notasValores, function ($nota) {
-                    return $nota !== '0' && $nota !== '--' && $nota !== NULL;
-                });
-
-                $promedio = !empty($notasFiltradas) ? $this->calcularPromedio($notasFiltradas) : '';
-                $bimestres["Promedio"] = ["nota" => $promedio, "idNota" => -1];
-            }
-
-
-            $g->notas = $notasOrganizadas;
-            $g->promedioValor = $this->buscarInfoNotas($g->promedio);
-        }
-
-        return $Gsas;
-    }
 
 
 
-    public function calcularPromedio($notas)
-    {
 
-        if (empty($notas)) return ""; // Si el array está vacío, devolver vacío
-
-        // Jerarquía de notas
-        $jerarquia = ["AD" => 5, "A" => 4, "B" => 3, "C" => 2, "D" => 1];
-
-        // Contar frecuencia de cada nota
-        $conteo = array_count_values($notas);
-
-        // Encontrar la(s) nota(s) con mayor frecuencia
-        $maxFrecuencia = max($conteo);
-        $notasMasFrecuentes = array_keys($conteo, $maxFrecuencia);
-
-        if (count($notasMasFrecuentes) === 1) {
-            return $notasMasFrecuentes[0]; // Si hay una sola nota más frecuente, devolverla
-        }
-
-        // Si hay empate, elegir según la jerarquía
-        usort($notasMasFrecuentes, function ($a, $b) use ($jerarquia) {
-            return ($jerarquia[$b] ?? 0) <=> ($jerarquia[$a] ?? 0);
-        });
-
-        return $notasMasFrecuentes[0]; // Retornar la nota con mayor jerarquía
-
-
-    }
 
     public function updateCapacidad(Request $request)
     {
@@ -486,10 +420,11 @@ class NotaController extends Controller
             $idCapacidad = $request->idCapacidad;
             $idPeriodo = $request->idPeriodo;
             $notaSeleccionada = $request->notaSeleccionada;
-            if ($idNota != -1) {
+            if ($idNota != 0) {
+                Log::info("entro 1: " );
                 //$NotaPromoedio = Nota::where('nt_id', $idNota)->first();
                 $notaCapacidad  = NotaCapacidad::where('nt_id', $idNota)->where('cap_id', $idCapacidad)->first();
-
+                Log::info($notaCapacidad);
                 if ($notaCapacidad) {
                     $notaCapacidad->nc_nota = $notaSeleccionada;
                     $notaCapacidad->save();
@@ -508,8 +443,10 @@ class NotaController extends Controller
                     $NotaPromoedio->estadoPromedio = 0;
                     $NotaPromoedio->save();
                 } else {
+                    Log::info("entro 2: " );
                     $NotaCapacidadRegistro = NotaCapacidad::Create([
-                        'nc_descripcion' => $idCapacidad,
+                        'nc_descripcion' =>'C1',
+                        'cap_id' => $idCapacidad,
                         'nc_nota' => $notaSeleccionada,
                         'nt_id' => $idNota,
                         'nc_is_deleted' => 0
@@ -519,13 +456,14 @@ class NotaController extends Controller
                     $NotaPromoedio->save();
                 }
             } else {
+                Log::info("entro 3: " );
 
-                $NotaPromoedio = Nota::where('alu_id', $idAlumno)->where('curso_id', $cursoId)->where('pa_id', $personalAcademico)->where('per_id', $idPeriodo)->where('nt_bimestre', substr($bimestre, 1))->first();
+                $NotaPromoedio = Nota::where('alu_id', $idAlumno)->where('curso_id', $cursoId)->where('pa_id', $personalAcademico)->where('per_id', $idPeriodo)->where('nt_bimestre',$bimestre)->first();
                 if (!$NotaPromoedio) {
-
+                    Log::info("entro 5: " );
                     $NotaPromoedio = Nota::Create([
                         'per_id' => $idPeriodo,
-                        'nt_bimestre' => substr($bimestre, 1),
+                        'nt_bimestre' => $bimestre,
                         'nt_nota' => 0,
                         'ags_id' => $agsId,
                         'curso_id' => $cursoId,
@@ -535,6 +473,7 @@ class NotaController extends Controller
 
                     $NotaCapacidadRegistro = NotaCapacidad::Create([
                         'nc_descripcion' => $idCapacidad,
+                        'cap_id' => $idCapacidad,
                         'nc_nota' => $notaSeleccionada,
                         'nt_id' => $NotaPromoedio->nt_id,
                         'nc_is_deleted' => 0
@@ -544,7 +483,7 @@ class NotaController extends Controller
                     $NotaPromoedio->estadoPromedio = 0;
                     $NotaPromoedio->save();
                 } else {
-
+                    Log::info("entro4: " );
 
                     $NotaCapacidadRegistro = NotaCapacidad::Create([
                         'nc_descripcion' => $idCapacidad,
@@ -567,7 +506,6 @@ class NotaController extends Controller
     }
 
 
-    //creame un metodo que va a actualizar todas las notas con el promedio de las capacidades
 
     public function updateNota()
     {
@@ -584,10 +522,4 @@ class NotaController extends Controller
         }
         return  $notas;
     }
-
-    //año ,grado ,nivel ,seccion
-
-
-
-
 }

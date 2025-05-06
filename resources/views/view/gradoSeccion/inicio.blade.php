@@ -73,6 +73,16 @@
                                         <a href="{{ route('gradoSeccion.edit', $info) }}" class="text-warning btn btn-none">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        <form action="{{ route('gradoSeccion.destroy', $info) }}" method="POST"
+                                            class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-danger btn btn-none"
+                                                onclick="return confirm('¿Está seguro de eliminar este registro?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             @endforeach
 

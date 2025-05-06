@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Validación para campos de fecha min y max del HTML
                 if (element.min && new Date(element.min) > selectedDate) {
-                    mostrarError(element, fieldErrorContainer, `La fecha debe ser posterior a ${formatDate(new Date(element.min))}`);
+                    mostrarError(element, fieldErrorContainer, `La fecha debe ser posterior  a ${formatDate(new Date(element.min))}`);
                     return false;
                 }
 
@@ -154,12 +154,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     const otherField = document.getElementById(otherFieldId);
 
                     if (otherField && otherField.value) {
-                        const otherDate = new Date(otherField.value);
+                        const parts = otherField.value.split('-'); // Asume formato yyyy-mm-dd
+                        const otherDate = new Date(parts[0], parts[1]-1, parts[2]); // Año, Mes (0-indexed), Día
 
                         if (selectedDate <= otherDate) {
                             // Obtener etiqueta personalizada o usar el ID del campo
                             const fieldLabel = otherField.dataset.label || otherFieldId;
-                            mostrarError(element, fieldErrorContainer, `La fecha debe ser posterior a (${formatDate(otherDate)})`);
+                            mostrarError(element, fieldErrorContainer, `La fecha debe ser posterior (${formatDate(otherDate)})`);
                             return false;
                         }
                     }

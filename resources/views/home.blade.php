@@ -38,13 +38,13 @@
             </ol>
             <div class="carousel-inner">
               <div class="carousel-item active" data-interval="1000">
-                <img src="https://cdn.pixabay.com/photo/2024/11/03/22/57/dogs-9172481_1280.jpg" class="d-block w-100" alt="...">
+                <img src="{{ asset('assets/images/home/img1.jpg') }}" class="d-block w-100" alt="...">
               </div>
               <div class="carousel-item" data-interval="1000">
-                <img src="https://cdn.pixabay.com/photo/2023/01/23/16/45/flowers-7739155_1280.jpg" class="d-block w-100" alt="...">
+                <img src="{{ asset('assets/images/home/img2.jpg') }}" class="d-block w-100" alt="...">
               </div>
               <div class="carousel-item" data-interval="1000">
-                <img src="https://cdn.pixabay.com/photo/2024/11/03/22/57/dogs-9172481_1280.jpg" class="d-block w-100" alt="...">
+                <img src="{{ asset('assets/images/home/img3.jpg') }}" class="d-block w-100" alt="...">
               </div>
             </div>
             <button class="carousel-control-prev" type="button" data-target="#carouselExampleIndicators" data-slide="prev">

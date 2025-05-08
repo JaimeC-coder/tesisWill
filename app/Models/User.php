@@ -93,16 +93,10 @@ class User extends Authenticatable
     }
 
 
-    public function sendPasswordResetNotification($token): void
-    {
-        $url = route(
-            'password.reset',
-            [
-                'token' => $token,
-                // 'email' => $this->getEmailForPasswordReset(),
-            ]
-        );
+ 
 
-        $this->notify(new PasswordResetNotificaction($url));
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new PasswordResetNotificaction($token));
     }
 }

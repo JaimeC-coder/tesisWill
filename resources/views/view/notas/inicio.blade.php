@@ -93,43 +93,52 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($Gsas as $index => $item)
-                                        @foreach ($item['notas'] as $capacidadKey => $capacidadData)
-                                            <tr>
-                                                @if ($loop->first)
-                                                    <td rowspan="{{ count($item['notas']) }}">{{ $item['dni'] }}</td>
-                                                    <td rowspan="{{ count($item['notas']) }}">{{ $item['alumno'] }}</td>
-                                                @endif
-                                                <td>{{ $capacidades[$capacidadKey] ?? $capacidadData['descripcion'] }}  </td>
-                                                @foreach (range(1, $tipoPeriodo['cantidad']) as $periodoIndex)
-                                                    @php
-                                                        $periodoKeyName = "P" . $periodoIndex;
-                                                        $notaData = $capacidadData['periodos'][$periodoKeyName] ?? ['nota' => null, 'idNotaPadre' => -1];
-                                                        $nota = $notaData['nota'] ?? null;
-                                                        $notaId = $notaData['idNotaPadre'] ?? -1;
-                                                    @endphp
-                                                    @if ($nota !== null)
-                                                        <td>{{ $nota }}</td>
-                                                    @else
-                                                        <td>
-                                                            <button type="button" class="btn btn-icon btn-sm"
-                                                                    title="Registrar" data-toggle="modal"
-                                                                    data-target="#myModal"
+                                    @if($Gsas != null)
+                                        @foreach ($Gsas as $index => $item)
+                                            @foreach ($item['notas'] as $capacidadKey => $capacidadData)
+                                                <tr>
+                                                    @if ($loop->first)
+                                                        <td rowspan="{{ count($item['notas']) }}">{{ $item['dni'] }}</td>
+                                                        <td rowspan="{{ count($item['notas']) }}">{{ $item['alumno'] }}</td>
+                                                    @endif
+                                                    <td>{{ $capacidades[$capacidadKey] ?? $capacidadData['descripcion'] }}
+                                                    </td>
+                                                    @foreach (range(1, $tipoPeriodo['cantidad']) as $periodoIndex)
+                                                        @php
+                                                            $periodoKeyName = 'P' . $periodoIndex;
+                                                            $notaData = $capacidadData['periodos'][$periodoKeyName] ?? [
+                                                                'nota' => null,
+                                                                'idNotaPadre' => -1,
+                                                            ];
+                                                            $nota = $notaData['nota'] ?? null;
+                                                            $notaId = $notaData['idNotaPadre'] ?? -1;
+                                                        @endphp
+                                                        @if ($nota !== null)
+                                                            <td>{{ $nota }}</td>
+                                                        @else
+                                                            <td>
+                                                                <button type="button" class="btn btn-icon btn-sm"
+                                                                    title="Registrar" data-toggle="modal" data-target="#myModal"
                                                                     data-alumno="{{ $item['idAlumno'] }}"
                                                                     data-capacidad="{{ $capacidadKey }}"
                                                                     data-sga="{{ $item['ags_id'] }}"
                                                                     data-periodo="{{ $item['periodoID'] }}"
                                                                     data-notaId="{{ $notaId }}"
                                                                     data-bimestre="{{ $periodoIndex }}">
-                                                                <i class="fa fa-edit text-secondary"></i>
-                                                            </button>
-                                                        </td>
-                                                    @endif
-                                                @endforeach
-                                                <td>{{ $capacidadData['promedio'] }}</td>
-                                            </tr>
+                                                                    <i class="fa fa-edit text-secondary"></i>
+                                                                </button>
+                                                            </td>
+                                                        @endif
+                                                    @endforeach
+                                                    <td>{{ $capacidadData['promedio'] }}</td>
+                                                </tr>
+                                            @endforeach
                                         @endforeach
-                                    @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="{{$tipoPeriodo['cantidad']+4}}">No hay datos disponibles para este periodo</td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             @endif
                         </table>

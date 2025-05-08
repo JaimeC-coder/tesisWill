@@ -88,19 +88,29 @@ class AsignarGradoController extends Controller
             $asignacion_curso = AsignarCurso::where('curso', $curso)->where('niv_id', $nivel)->where('asig_is_deleted', '!=', 1)->get();
         }
         foreach ($asignacion_curso as $d) {
+            $d->asignaciones = [];
+            $d->totalAsignaciones = 0;
             $docentes = PersonalAcademico::where('pa_id', $d->pa_id)->where('is_deleted', '!=', 1)->first();
+            if (!$docentes) {
+                continue; // Si no se encuentra el docente, continúa con el siguiente
+            }
             $persona = Persona::where('per_id', $docentes->per_id)->first();
+            Log::info('Persona: ' . $persona);
             $asignaciones = AsignarGrado::where('pa_id', $d->pa_id)->where('asig_is_deleted', '!=', 1)->get();
+            $d->nombres = $persona->per_nombres;
+            $d->apellidos = $persona->per_apellidos;
+            $d->dni = $persona->per_dni;
+            if ($asignaciones->isEmpty()) {
+                continue; // Si no se encuentra el docente, continúa con el siguiente
+            }
             $array2 = [];
             foreach ($asignaciones as $value) {
                 array_push($array2, $value->gra_id . '>' . $value->seccion);
             }
             $d->totalAsignaciones = count($array2);
             $d->asignaciones = $array2;
-            $d->dni = $persona->per_dni;
-            $d->nombres = $persona->per_nombres;
-            $d->apellidos = $persona->per_apellidos;
         }
+
 
         $new_grados = [];
         $new_secciones = [];
@@ -208,13 +218,12 @@ class AsignarGradoController extends Controller
     {
         $datos_asignar = $request;
         $data = AsignarGrado::where('pa_id', $datos_asignar->persona_id)
-        ->where('niv_id', $datos_asignar->nivel)
-        ->update(['asig_is_deleted' => 1]);
+            ->where('niv_id', $datos_asignar->nivel)
+            ->update(['asig_is_deleted' => 1]);
 
         return response()->json([
             'status' => 200,
             'response' => 1
         ]);
     }
-
 }

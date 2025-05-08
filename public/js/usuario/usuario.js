@@ -125,6 +125,7 @@ function searchInformation(){
                 data.per_apellidos==null ? apellido.disabled=false : apellido.disabled=true;
                 nombre.addEventListener("input", syncUser);
                 apellido.addEventListener("input", syncUser);
+                email.addEventListener("input", syncEmail);
             }
 
             // Cargar provincias y seleccionar la correspondiente

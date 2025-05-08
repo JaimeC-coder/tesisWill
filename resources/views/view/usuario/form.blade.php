@@ -163,7 +163,7 @@
                             <input type="email" class="form-control"
                                 value="{{ $usuario->persona->per_email ?? '' }}" id="per_email" name="per_email"
                                 data-required="true"
-                                @if (empty($alumno->apoderado->persona?->per_email)) data-validate-correo="true"  data-unic="true" @endif>
+                                @if (!empty($alumno->apoderado->persona?->per_email))   data-validate-correo="true"  @endif>
                             <input type="hidden" id="emailhidden" name="emailhidden">
                             <input type="hidden" id="nameUserhidden" name="nameUserhidden">
 
@@ -237,7 +237,7 @@
                     </div>
 
                 </div>
-               
+
                 <div class="col-sm-12 text-right mt-4">
                     <button type="submit" class="btn btn-primary">
                         {{ $usuario->per_id ? 'Actualizar' : 'Registrar' }}

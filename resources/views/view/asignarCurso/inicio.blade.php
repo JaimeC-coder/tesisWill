@@ -7,7 +7,11 @@
 
 
 @section('content')
-
+@php
+    function normalizar($texto) {
+        return strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $texto));
+    }
+@endphp
 
     <div class="col-lg-12 col-md-12 col-sm-12">
         <div class="card">
@@ -54,6 +58,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($docentes as $item)
+
                                     <tr data-docente-id="{{ $item['pa_id'] }}" data-docente-id-aux="{{ $item['pa_id'] }}">
                                         <td class="d-none">{{ $item['pa_id'] }} </td>
                                         <td>
@@ -71,10 +76,10 @@
                                         @foreach ($cursos as $curso)
                                             <td>
                                                 <input type="checkbox"
-                                                  value="{{ $curso['cur_nombre'] }}"
+                                                value="{{ $curso['cur_nombre'] }}"
                                                 onchange="handleCheckboxChange({{ $item['pa_id'] }})"
-                                                @if (in_array($curso['cur_nombre'], $item['checked'])) checked
-                                                 @endif >
+                                                @if (in_array(normalizar($curso['cur_nombre']), array_map('normalizar', $item['checked']))) checked @endif
+                                            >
                                             </td>
                                         @endforeach
                                     </tr>

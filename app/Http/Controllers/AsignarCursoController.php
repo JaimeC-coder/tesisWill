@@ -9,6 +9,7 @@ use App\Models\Persona;
 use App\Models\PersonalAcademico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 use function Illuminate\Log\log;
 
@@ -84,11 +85,11 @@ class AsignarCursoController extends Controller
                     ->where('asig_is_deleted', '!=', 1)
                     ->pluck('curso')
                     ->toArray();
-                if ($asignaciones) {
-                    $d->checked = $asignaciones;
-                } else {
-                    $d->checked = [];
-                }
+                    if ($asignaciones) {
+                        $d->checked = $asignaciones;
+                    } else {
+                        $d->checked = [];
+                    }
 
                 $d->dni = $d->persona->per_dni;
                 $d->nombres = $d->persona->per_nombres;
@@ -118,6 +119,7 @@ class AsignarCursoController extends Controller
             foreach ($datos_asignar as $value) {
                 $data = AsignarCurso::where('curso', $value)
                 ->where('pa_id', $docente)
+                ->where('asig_is_deleted', '!=', 1)
                 ->first();
                 if (!$data) {
                     AsignarCurso::create([

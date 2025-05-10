@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\NotaCapacidad;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -1733,7 +1734,7 @@ class NotaCapacidadsSeeder extends Seeder
                 default => 'AD',
             };
 
-            DB::table('nota_capacidads')->insert([
+            NotaCapacidad::create([
                 'nc_id' => $nota_capacidad[0],
                 'nc_descripcion' => $nota_capacidad[1],
                 'descripcion' => NULL,

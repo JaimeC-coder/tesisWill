@@ -6,6 +6,7 @@ use App\Models\Alumno;
 use App\Models\Anio;
 use App\Models\AsignarCurso;
 use App\Models\Aula;
+use App\Models\Capacidad;
 use App\Models\Curso;
 use App\Models\Departamento;
 use App\Models\Distrito;
@@ -2416,273 +2417,166 @@ class ReportController extends Controller
 
     public function generarLibretaNotas(Request $request)
     {
-        $data = $request['params']['data'];
+        // $data = $request->per_id;
+        $data = 93;
 
-        $alumno = $data["per_nombres"] . " " . $data["per_apellidos"];
-        $idNivel = $data["idNivel"];
-        $nivel = $data["nivel"];
-        $idGrado = $data["idGrado"];
-        $grado = $data["grado"];
-        $idSeccion = $data["idSeccion"];
-        $seccion = $data["seccion"];
+        $institucion = Institucion::where('ie_id', 1)->first();
+        $Persona = Persona::where('per_id', $data)->first();
+        $alumno = $Persona["per_nombres"] . " " . $Persona["per_apellidos"];
+        $idNivel  = $Persona->alumno->ultimaMatricula?->gsa?->niv_id; //TODO $data["idNivel"];
+        $idGrado  = $Persona->alumno->ultimaMatricula?->gsa?->gra_id; //TODO $data["idGrado"];
 
-        $notas = Nota::where('alu_id', $data["alu_id"])->get();
-        foreach ($notas as $value) {
-            $asignacion = AsignarCurso::where('pa_id', $value->pa_id)->where('niv_id', $idNivel)->first();
-            $curso = Curso::where('cur_nombre', $asignacion->curso)->where('gra_id', $idGrado)->where('niv_id', $idNivel)->first();
+        $grado = $Persona->alumno->ultimaMatricula?->gsa?->grado?->gra_descripcion; //TODO
+        $personalAcademicoId = PersonalAcademico::where('niv_id', $idNivel)->first();
 
-            switch ($curso->cur_nombre) {
-                case "Desarrollo personal, ciudadanía y cívica":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_dpcc_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_dpcc_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_dpcc_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_dpcc_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
-                case "Ciencias sociales":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_ccss_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_ccss_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_ccss_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_ccss_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
-                case "Educación para el trabajo":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_ept_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_ept_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_ept_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_ept_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
-                case "Educación física":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_ef_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_ef_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_ef_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_ef_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
-                case "Comunicación":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_com_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_com_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_com_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_com_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
-                case "Arte y cultura":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_arte_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_arte_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_arte_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_arte_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
-                case "Inglés":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_ing_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_ing_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_ing_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_ing_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
-                case "Matemática":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_mat_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "c4" => $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_mat_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "c4" => $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_mat_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "c4" => $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_mat_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "c4" => $notasCapacidades[3]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
-                case "Ciencia y tecnología":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_cyt_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_cyt_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_cyt_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_cyt_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "c3" => $notasCapacidades[2]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
-                case "Educación religiosa":
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
-                    switch ($value->nt_bimestre) {
-                        case 1:
-                            $datos_rel_b1 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 2:
-                            $datos_rel_b2 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 3:
-                            $datos_rel_b3 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota];
-                            break;
-                        case 4:
-                            $notasfinales = Nota::where('alu_id', $data["alu_id"])->where('pa_id', $value->pa_id)->get();
-                            $suma = 0;
-                            $total = 4;
-                            foreach ($notasfinales as $v) {
-                                $suma += $v->nt_nota;
-                            }
-                            $promedio = $suma / $total;
-                            $datos_rel_b4 = ["c1" => $notasCapacidades[0]["nc_nota"], "c2" => $notasCapacidades[1]["nc_nota"], "pb" => $value->nt_nota, "nf" => $promedio];
-                            break;
-                    }
-                    break;
+        $seccion = $Persona->alumno->ultimaMatricula?->gsa?->seccion?->sec_descripcion; //TODO
+
+        // IMPORTANTE: Obtener TODOS los cursos del grado primero
+        $todosCursos = Curso::where('gra_id', $idGrado)
+            ->where('niv_id', $idNivel)
+            ->get();
+
+        // Crear un array para almacenar los datos de cada curso
+        $cursos = [];
+
+        // Inicializar todos los cursos con estructura básica vacía y obtener capacidades para cada uno
+        foreach ($todosCursos as $curso) {
+            $cursoNombre = $curso->cur_nombre;
+            $cursos[$cursoNombre] = [
+                'capacidades' => [],
+                'bimestres' => [],
+                'promedio_final' => ''
+            ];
+
+            // NUEVO: Obtener capacidades para este curso desde la base de datos
+            $capacidadesCurso = Capacidad::where('cur_id', $curso->cur_id)->get();
+            foreach ($capacidadesCurso as $index => $cursoCapacidad) {
+                $capacidad = Capacidad::where('cap_id', $cursoCapacidad->cap_id)->first();
+                if ($capacidad) {
+                    $cursos[$cursoNombre]['capacidades'][$index] = [
+                        'id' => $capacidad->cap_id,
+                        'nombre' => $capacidad->cap_descripcion
+                    ];
+                }
             }
-            $datos_trans_b1 = ["c1" => "", "c2" => ""];
-            $datos_trans_b2 = ["c1" => "", "c2" => ""];
-            $datos_trans_b3 = ["c1" => "", "c2" => ""];
-            $datos_trans_b4 = ["c1" => "", "c2" => ""];
+
+            // Si no se encontraron capacidades, intentar obtener capacidades estándar o genéricas
+            if (count($cursos[$cursoNombre]['capacidades']) == 0) {
+                // Podemos configurar capacidades genéricas basadas en el área curricular
+                // Esta parte dependerá de la estructura de tu base de datos
+                // Ejemplo:
+                $capacidadesGenericas = Capacidad::where('niv_id', $idNivel)
+                    ->where('tipo', 'generica')
+                    ->take(3)  // Tomar las primeras 3 capacidades genéricas
+                    ->get();
+
+                foreach ($capacidadesGenericas as $index => $capacidad) {
+                    $cursos[$cursoNombre]['capacidades'][$index] = [
+                        'id' => $capacidad->cap_id,
+                        'nombre' => $capacidad->cap_descripcion
+                    ];
+                }
+
+                // Si aún no hay capacidades, crear algunas predeterminadas
+                if (count($cursos[$cursoNombre]['capacidades']) == 0) {
+                    $cursos[$cursoNombre]['capacidades'] = [
+                        [
+                            'id' => 'c1',
+                            'nombre' => 'Construye interpretaciones históricas'
+                        ],
+                        [
+                            'id' => 'c2',
+                            'nombre' => 'Gestiona responsablemente el espacio y el ambiente'
+                        ],
+                        [
+                            'id' => 'c3',
+                            'nombre' => 'Gestiona responsablemente los recursos económicos'
+                        ]
+                    ];
+                }
+            }
+        }
+
+        // Obtener todas las notas del alumno
+        $notas = Nota::where('alu_id', $Persona->alumno->alu_id)->get();
+
+        // Procesar cada nota para llenar los cursos que sí tienen datos
+        foreach ($notas as $value) {
+            $asignacion = AsignarCurso::where('pa_id', $personalAcademicoId->pa_id)->where('niv_id', $idNivel)->first();
+            // $asignacion = AsignarCurso::where('pa_id', $value->pa_id)->where('niv_id', $idNivel)->first();
+            if ($asignacion) {
+                $curso = Curso::where('cur_nombre', $asignacion->curso)->where('gra_id', $idGrado)->where('niv_id', $idNivel)->first();
+
+                if ($curso) {
+                    $cursoNombre = $curso->cur_nombre;
+
+                    // Obtener las notas de capacidades
+                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
+
+                    // No sobreescribimos las capacidades aquí, ya las hemos obtenido antes
+                    // Solo asignamos las notas a las capacidades correspondientes
+
+                    // Guardar las notas según el bimestre
+                    $bimestre = $value->nt_bimestre;
+
+                    // Inicializar array de notas para este bimestre si no existe
+                    if (!isset($cursos[$cursoNombre]['bimestres'][$bimestre])) {
+                        $cursos[$cursoNombre]['bimestres'][$bimestre] = [
+                            'capacidades' => [],
+                            'promedio' => ''
+                        ];
+                    }
+
+                    // Guardar notas de capacidades
+                    foreach ($notasCapacidades as $index => $capacidad) {
+                        // Asegurar que el índice existe en el array de capacidades
+                        if (isset($cursos[$cursoNombre]['capacidades'][$index])) {
+                            $cursos[$cursoNombre]['bimestres'][$bimestre]['capacidades'][$index] =
+                                !empty($capacidad->nc_nota) ? $capacidad->nc_nota : '';
+                        }
+                    }
+
+                    // Guardar promedio bimestral
+                    $cursos[$cursoNombre]['bimestres'][$bimestre]['promedio'] =
+                        !empty($value->nt_nota) ? $value->nt_nota : '';
+
+                    // Si es el último bimestre, calcular el promedio final
+                    if ($bimestre == 4) {
+                        $notasFinales = Nota::where('alu_id', $Persona->alumno->alu_id)
+                            ->where('pa_id', $value->pa_id)
+                            ->get();
+
+                        $suma = 0;
+                        $total = $notasFinales->count();
+
+                        if ($total > 0) {
+                            foreach ($notasFinales as $notaFinal) {
+                                $suma += $notaFinal->nt_nota;
+                            }
+                            $promedio = $suma / $total;
+                            $cursos[$cursoNombre]['promedio_final'] = $promedio;
+                        } else {
+                            $cursos[$cursoNombre]['promedio_final'] = '';
+                        }
+                    }
+                }
+            }
+        }
+
+        // Preparar datos para la vista
+        $datosCursos = [];
+        foreach ($cursos as $nombreCurso => $curso) {
+            $datosCursos[$nombreCurso] = [
+                'capacidades' => $curso['capacidades'],
+                'bimestres' => isset($curso['bimestres']) ? $curso['bimestres'] : [],
+                'promedio_final' => isset($curso['promedio_final']) ? $curso['promedio_final'] : ''
+            ];
         }
 
         // Obteniendo imagen y convintiendolo a base64
-        $cao = Storage::path('cao\insig.png');
-        $educacion = Storage::path('cao\escudo.png');
-        $sello = Storage::path('cao\sello.png');
+        $cao = public_path('insig.png');
+        $educacion = public_path('escudoMinedu.png');
+        $sello = public_path('sello.png');
         $contenidoBinario1 = file_get_contents($educacion);
         $contenidoBinario2 = file_get_contents($cao);
         $contenidoBinario3 = file_get_contents($sello);
@@ -2690,553 +2584,294 @@ class ReportController extends Controller
         $imagenCAO = base64_encode($contenidoBinario2);
         $imagenSello = base64_encode($contenidoBinario3);
 
-        $nombreDocumento = "LIBRETA DE NOTAS - " . $alumno . ".pdf";
+        $nombreDocumento = "LIBRETA_NOTAS_" . str_replace(' ', '_', $alumno) . ".pdf";
+
+        // Generando HTML del documento
+        $html = $this->generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion);
 
         // Creando Pdf
         include_once "../vendor/autoload.php";
         $dompdf = new Dompdf();
-
-        // src="data:image/jpg;base64,'.$imagenEducacion.'"
-        // src="data:image/jpg;base64,'.$imagenCAO.'"
-        $dompdf->loadHtml('
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>' . $nombreDocumento . '</title>
-            </head>
-            <style>
-                body {
-                    font-family: sans-serif;
-                    font-size: 0.875rem;
-                }
-
-                .logo {
-                    width: 5rem;
-                    height: 7rem;
-                    object-fit: contain;
-                }
-
-                .sello {
-                    width: 10rem;
-                    object-fit: contain;
-                }
-
-                .table {
-                    border-collapse: collapse;
-                }
-
-                .title {
-                    font-weight: 600;
-                    font-weight: bold;
-                }
-
-                .bg-gray {
-                    background-color: #C0C0C0;
-                    font-weight: 600;
-                }
-
-                .table tr th,
-                .table tr td {
-                    padding: 2px;
-                    border: 1px solid black;
-                }
-
-                table {
-                    font-size: 12px;
-                }
-            </style>
-            <body>
-                <table width="100%" style="margin-bottom: 1.5rem;">
-                    <tbody>
-                        <tr>
-                            <td align="center" colspan="3" class="title">INFORME DE PROGRESO DEL APRENDIZAJE DEL ESTUDIANTE - 2022
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table width="100%" style="margin-bottom: 1.5rem;">
-                    <tbody>
-                        <tr>
-                            <td align="center">
-                                <img src="data:image/jpg;base64,' . $imagenEducacion . '" alt="escudo" class="logo" />
-                            </td>
-                            <td>
-                                <table width="100%" border="1" class="table">
-                                    <tr>
-                                        <td class="bg-gray">DRE:</td>
-                                        <td>DRE LA LIBERTAD</td>
-                                        <td class="bg-gray">UGEL:</td>
-                                        <td>UGEL CHEPÉN</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="bg-gray">Nivel:</td>
-                                        <td>SECUNDARIA</td>
-                                        <td class="bg-gray">Código Modular:</td>
-                                        <td>1156207-0</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="bg-gray">Institución Educativa:</td>
-                                        <td colspan="3">80382 CARLOS A. OLIVARES</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="bg-gray">Grado:</td>
-                                        <td>' . $grado . '</td>
-                                        <td class="bg-gray">Sección:</td>
-                                        <td>' . $seccion . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="bg-gray">Apellidos y nombres del estudiante:</td>
-                                        <td colspan="3">' . $alumno . '</td>
-                                    </tr>
-                                    <tr style="display:none">
-                                        <td class="bg-gray">Código del estudiante:</td>
-                                        <td>-</td>
-                                        <td class="bg-gray">DNI:</td>
-                                        <td>-</td>
-                                    </tr>
-                                </table>
-                            </td>
-                            <td align="center">
-                                <img src="data:image/jpg;base64,' . $imagenCAO . '" alt="cao" class="logo" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table width="100%" border="1" class="table" style="margin-bottom: 2rem;">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" class="bg-gray">Área Curricular</th>
-                            <th rowspan="2" class="bg-gray">Competencias</th>
-                            <th colspan="4" class="bg-gray">Calificativo por periodo</th>
-                            <th rowspan="2" class="bg-gray">Calif. final del área</th>
-                        </tr>
-                        <tr>
-                            <th class="bg-gray">1</th>
-                            <th class="bg-gray">2</th>
-                            <th class="bg-gray">3</th>
-                            <th class="bg-gray">4</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td rowspan="3">Desarrollo personal, ciudadanía y cívica</td>
-                            <td>Construye su identidad</td>
-                            <td align="center">' . (isset($datos_dpcc_b1['c1']) == false ? '' : $datos_dpcc_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_dpcc_b2['c1']) == false ? '' : $datos_dpcc_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_dpcc_b3['c1']) == false ? '' : $datos_dpcc_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_dpcc_b4['c1']) == false ? '' : $datos_dpcc_b1['c1']) . '</td>
-                            <td rowspan="3" align="center">' . (isset($datos_dpcc_b4['nf']) == false ? '' : $datos_dpcc_b4['nf']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Convive y participa democráticamente en la búsqueda del bien común</td>
-                            <td align="center">' . (isset($datos_dpcc_b1['c2']) == false ? '' : $datos_dpcc_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_dpcc_b2['c2']) == false ? '' : $datos_dpcc_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_dpcc_b3['c2']) == false ? '' : $datos_dpcc_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_dpcc_b4['c2']) == false ? '' : $datos_dpcc_b4['c2']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_dpcc_b1['pb']) == false ? '' : $datos_dpcc_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_dpcc_b2['pb']) == false ? '' : $datos_dpcc_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_dpcc_b3['pb']) == false ? '' : $datos_dpcc_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_dpcc_b4['pb']) == false ? '' : $datos_dpcc_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="4">Ciencias sociales
-                            </td>
-                            <td>Construye interpretaciones históricas</td>
-                            <td align="center">' . (isset($datos_ccss_b1['c1']) == false ? '' : $datos_ccss_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b2['c1']) == false ? '' : $datos_ccss_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b3['c1']) == false ? '' : $datos_ccss_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b4['c1']) == false ? '' : $datos_ccss_b4['c1']) . '</td>
-                            <td rowspan="4" align="center">' . (isset($datos_ccss_b4['nf']) == false ? '' : $datos_ccss_b4['nf']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Gestiona responsablemente el espacio y el ambiente </td>
-                            <td align="center">' . (isset($datos_ccss_b1['c2']) == false ? '' : $datos_ccss_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b2['c2']) == false ? '' : $datos_ccss_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b3['c2']) == false ? '' : $datos_ccss_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b4['c2']) == false ? '' : $datos_ccss_b4['c2']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Gestiona responsablemente los recursos económicos</td>
-                            <td align="center">' . (isset($datos_ccss_b1['c3']) == false ? '' : $datos_ccss_b1['c3']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b2['c3']) == false ? '' : $datos_ccss_b2['c3']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b3['c3']) == false ? '' : $datos_ccss_b3['c3']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b4['c3']) == false ? '' : $datos_ccss_b4['c3']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_ccss_b1['pb']) == false ? '' : $datos_ccss_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b2['pb']) == false ? '' : $datos_ccss_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b3['pb']) == false ? '' : $datos_ccss_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ccss_b4['pb']) == false ? '' : $datos_ccss_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="2">Educación para el trabajo</td>
-                            <td>Gestiona proyectos de emprendimiento económico o social</td>
-                            <td align="center">' . (isset($datos_ept_b1['c1']) == false ? '' : $datos_ept_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ept_b2['c1']) == false ? '' : $datos_ept_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ept_b3['c1']) == false ? '' : $datos_ept_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ept_b4['c1']) == false ? '' : $datos_ept_b4['c1']) . '</td>
-                            <td rowspan="2" align="center">' . (isset($datos_ept_b4['nf']) == false ? '' : $datos_ept_b4['nf']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_ept_b1['pb']) == false ? '' : $datos_ept_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ept_b2['pb']) == false ? '' : $datos_ept_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ept_b3['pb']) == false ? '' : $datos_ept_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ept_b4['pb']) == false ? '' : $datos_ept_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="4">Educación física</td>
-                            <td>Se desenvuelve de manera autónoma a través de su motricidad</td>
-                            <td align="center">' . (isset($datos_ef_b1['c1']) == false ? '' : $datos_ef_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b2['c1']) == false ? '' : $datos_ef_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b3['c1']) == false ? '' : $datos_ef_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b4['c1']) == false ? '' : $datos_ef_b4['c1']) . '</td>
-                            <td rowspan="4" align="center">' . (isset($datos_ef_b4['nf']) == false ? '' : $datos_ef_b4['nf']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Asume una vida saludable</td>
-                            <td align="center">' . (isset($datos_ef_b1['c2']) == false ? '' : $datos_ef_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b2['c2']) == false ? '' : $datos_ef_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b3['c2']) == false ? '' : $datos_ef_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b4['c2']) == false ? '' : $datos_ef_b4['c2']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Interactúa a través de sus habilidades sociomotrices</td>
-                            <td align="center">' . (isset($datos_ef_b1['c3']) == false ? '' : $datos_ef_b1['c3']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b2['c3']) == false ? '' : $datos_ef_b2['c3']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b3['c3']) == false ? '' : $datos_ef_b3['c3']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b4['c3']) == false ? '' : $datos_ef_b4['c3']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_ef_b1['pb']) == false ? '' : $datos_ef_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b2['pb']) == false ? '' : $datos_ef_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b3['pb']) == false ? '' : $datos_ef_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ef_b4['pb']) == false ? '' : $datos_ef_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="4">Comunicación</td>
-                            <td>Se comunica oralmente en su lengua materna </td>
-                            <td align="center">' . (isset($datos_com_b1['c1']) == false ? '' : $datos_com_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_com_b2['c1']) == false ? '' : $datos_com_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_com_b3['c1']) == false ? '' : $datos_com_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_com_b4['c1']) == false ? '' : $datos_com_b4['c1']) . '</td>
-                            <td rowspan="4" align="center">' . (isset($datos_com_b4['nf']) == false ? '' : $datos_com_b4['nf']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Lee diversos tipos de textos escritos en su lengua materna</td>
-                            <td align="center">' . (isset($datos_com_b1['c2']) == false ? '' : $datos_com_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_com_b2['c2']) == false ? '' : $datos_com_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_com_b3['c2']) == false ? '' : $datos_com_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_com_b4['c2']) == false ? '' : $datos_com_b4['c2']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Escribe diversos tipos de textos en su lengua materna</td>
-                            <td align="center">' . (isset($datos_com_b1['c3']) == false ? '' : $datos_com_b1['c3']) . '</td>
-                            <td align="center">' . (isset($datos_com_b2['c3']) == false ? '' : $datos_com_b2['c3']) . '</td>
-                            <td align="center">' . (isset($datos_com_b3['c3']) == false ? '' : $datos_com_b3['c3']) . '</td>
-                            <td align="center">' . (isset($datos_com_b4['c3']) == false ? '' : $datos_com_b4['c3']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_com_b1['pb']) == false ? '' : $datos_com_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_com_b2['pb']) == false ? '' : $datos_com_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_com_b3['pb']) == false ? '' : $datos_com_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_com_b4['pb']) == false ? '' : $datos_com_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="3">Arte y cultura</td>
-                            <td>Aprecia de manera crítica manifestaciones artísticoculturales</td>
-                            <td align="center">' . (isset($datos_arte_b1['c1']) == false ? '' : $datos_arte_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_arte_b2['c1']) == false ? '' : $datos_arte_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_arte_b3['c1']) == false ? '' : $datos_arte_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_arte_b4['c1']) == false ? '' : $datos_arte_b4['c1']) . '</td>
-                            <td rowspan="3" align="center">' . (isset($datos_arte_b4['nf']) == false ? '' : $datos_arte_b4['nf']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Crea proyectos desde los lenguajes artísticos </td>
-                            <td align="center">' . (isset($datos_arte_b1['c2']) == false ? '' : $datos_arte_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_arte_b2['c2']) == false ? '' : $datos_arte_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_arte_b3['c2']) == false ? '' : $datos_arte_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_arte_b4['c2']) == false ? '' : $datos_arte_b4['c2']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_arte_b1['pb']) == false ? '' : $datos_arte_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_arte_b2['pb']) == false ? '' : $datos_arte_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_arte_b3['pb']) == false ? '' : $datos_arte_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_arte_b4['pb']) == false ? '' : $datos_arte_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="4">Inglés</td>
-                            <td>Se comunica oralmente en inglés como lengua extranjera</td>
-                            <td align="center">' . (isset($datos_ing_b1['c1']) == false ? '' : $datos_ing_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b2['c1']) == false ? '' : $datos_ing_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b3['c1']) == false ? '' : $datos_ing_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b4['c1']) == false ? '' : $datos_ing_b4['c1']) . '</td>
-                            <td rowspan="4" align="center">' . (isset($datos_ing_b4['nf']) == false ? '' : $datos_ing_b4['nf']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Lee diversos tipos de textos escritos en inglés como lengua extranjera</td>
-                            <td align="center">' . (isset($datos_ing_b1['c2']) == false ? '' : $datos_ing_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b2['c2']) == false ? '' : $datos_ing_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b3['c2']) == false ? '' : $datos_ing_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b4['c2']) == false ? '' : $datos_ing_b4['c2']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Escribe diversos tipos de textos en inglés como lengua extranjera</td>
-                            <td align="center">' . (isset($datos_ing_b1['c3']) == false ? '' : $datos_ing_b1['c3']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b2['c3']) == false ? '' : $datos_ing_b2['c3']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b3['c3']) == false ? '' : $datos_ing_b3['c3']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b4['c3']) == false ? '' : $datos_ing_b4['c3']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_ing_b1['pb']) == false ? '' : $datos_ing_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b2['pb']) == false ? '' : $datos_ing_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b3['pb']) == false ? '' : $datos_ing_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_ing_b4['pb']) == false ? '' : $datos_ing_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="5">Matemática</td>
-                            <td>Resuelve problemas de cantidad</td>
-                            <td align="center">' . (isset($datos_mat_b1['c1']) == false ? '' : $datos_mat_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b2['c1']) == false ? '' : $datos_mat_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b3['c1']) == false ? '' : $datos_mat_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b4['c1']) == false ? '' : $datos_mat_b4['c1']) . '</td>
-                            <td rowspan="5" align="center">' . (isset($datos_mat_b4['nf']) == false ? '' : $datos_mat_b4['nf']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Resuelve problemas de regularidad, equivalencia y cambio</td>
-                            <td align="center">' . (isset($datos_mat_b1['c2']) == false ? '' : $datos_mat_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b2['c2']) == false ? '' : $datos_mat_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b3['c2']) == false ? '' : $datos_mat_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b4['c2']) == false ? '' : $datos_mat_b4['c2']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Resuelve problemas de forma, movimiento y localización</td>
-                            <td align="center">' . (isset($datos_mat_b1['c3']) == false ? '' : $datos_mat_b1['c3']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b2['c3']) == false ? '' : $datos_mat_b2['c3']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b3['c3']) == false ? '' : $datos_mat_b3['c3']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b4['c3']) == false ? '' : $datos_mat_b4['c3']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Resuelve problemas de gestión de datos e incertidumbre</td>
-                            <td align="center">' . (isset($datos_mat_b1['c4']) == false ? '' : $datos_mat_b1['c4']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b2['c4']) == false ? '' : $datos_mat_b2['c4']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b3['c4']) == false ? '' : $datos_mat_b3['c4']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b4['c4']) == false ? '' : $datos_mat_b4['c4']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_mat_b1['pb']) == false ? '' : $datos_mat_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b2['pb']) == false ? '' : $datos_mat_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b3['pb']) == false ? '' : $datos_mat_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_mat_b4['pb']) == false ? '' : $datos_mat_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="4">Ciencia y tecnología</td>
-                            <td>Indaga mediante métodos científicos para construir sus conocimientos</td>
-                            <td align="center">' . (isset($datos_cyt_b1['c1']) == false ? '' : $datos_cyt_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b2['c1']) == false ? '' : $datos_cyt_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b3['c1']) == false ? '' : $datos_cyt_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b4['c1']) == false ? '' : $datos_cyt_b4['c1']) . '</td>
-                            <td rowspan="4" align="center">' . (isset($datos_cyt_b4['nf']) == false ? '' : $datos_cyt_b4['c1']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Explica el mundo físico basándose en conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo</td>
-                            <td align="center">' . (isset($datos_cyt_b1['c2']) == false ? '' : $datos_cyt_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b2['c2']) == false ? '' : $datos_cyt_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b3['c2']) == false ? '' : $datos_cyt_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b4['c2']) == false ? '' : $datos_cyt_b4['c2']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Diseña y construye soluciones tecnológicas para resolver problemas de su entorno</td>
-                            <td align="center">' . (isset($datos_cyt_b1['c3']) == false ? '' : $datos_cyt_b1['c3']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b2['c3']) == false ? '' : $datos_cyt_b2['c3']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b3['c3']) == false ? '' : $datos_cyt_b3['c3']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b4['c3']) == false ? '' : $datos_cyt_b4['c3']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_cyt_b1['pb']) == false ? '' : $datos_cyt_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b2['pb']) == false ? '' : $datos_cyt_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b3['pb']) == false ? '' : $datos_cyt_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_cyt_b4['pb']) == false ? '' : $datos_cyt_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="3">Educación religiosa</td>
-                            <td>Construye su identidad como persona humana, amada por Dios, digna, libre y trascendente, comprendiendo la doctrina de su propia religión, abierto al diálogo con las que le son cercanas.</td>
-                            <td align="center">' . (isset($datos_rel_b1['c1']) == false ? '' : $datos_rel_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_rel_b2['c1']) == false ? '' : $datos_rel_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_rel_b3['c1']) == false ? '' : $datos_rel_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_rel_b4['c1']) == false ? '' : $datos_rel_b4['c1']) . '</td>
-                            <td rowspan="3" align="center">' . (isset($datos_rel_b4['nf']) == false ? '' : $datos_rel_b4['nf']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Asume la experiencia del encuentro personal y comunitario con Dios en su proyecto de vida en coherencia con su creencia religiosa.</td>
-                            <td align="center">' . (isset($datos_rel_b1['c2']) == false ? '' : $datos_rel_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_rel_b2['c2']) == false ? '' : $datos_rel_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_rel_b3['c2']) == false ? '' : $datos_rel_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_rel_b4['c2']) == false ? '' : $datos_rel_b4['c2']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>CALIFICATIVO DE AREA</td>
-                            <td align="center">' . (isset($datos_rel_b1['pb']) == false ? '' : $datos_rel_b1['pb']) . '</td>
-                            <td align="center">' . (isset($datos_rel_b2['pb']) == false ? '' : $datos_rel_b2['pb']) . '</td>
-                            <td align="center">' . (isset($datos_rel_b3['pb']) == false ? '' : $datos_rel_b3['pb']) . '</td>
-                            <td align="center">' . (isset($datos_rel_b4['pb']) == false ? '' : $datos_rel_b4['pb']) . '</td>
-                        </tr>
-                        <tr>
-                            <td>Competencia transversal 1</td>
-                            <td>Se desenvuelve en entornos virtuales generados por las TIC</td>
-                            <td align="center">' . (isset($datos_trans_b1['c1']) == false ? '' : $datos_trans_b1['c1']) . '</td>
-                            <td align="center">' . (isset($datos_trans_b2['c1']) == false ? '' : $datos_trans_b2['c1']) . '</td>
-                            <td align="center">' . (isset($datos_trans_b3['c1']) == false ? '' : $datos_trans_b3['c1']) . '</td>
-                            <td align="center">' . (isset($datos_trans_b4['c1']) == false ? '' : $datos_trans_b4['c1']) . '</td>
-                            <td align="center"></td>
-                        </tr>
-                        <tr>
-                            <td >Competencia transversal 2</td>
-                            <td>Gestiona su Aprendizaje de manera autónoma</td>
-                            <td align="center">' . (isset($datos_trans_b1['c2']) == false ? '' : $datos_trans_b1['c2']) . '</td>
-                            <td align="center">' . (isset($datos_trans_b2['c2']) == false ? '' : $datos_trans_b2['c2']) . '</td>
-                            <td align="center">' . (isset($datos_trans_b3['c2']) == false ? '' : $datos_trans_b3['c2']) . '</td>
-                            <td align="center">' . (isset($datos_trans_b4['c2']) == false ? '' : $datos_trans_b4['c2']) . '</td>
-                            <td align="center"></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table width="100%" style="margin-bottom: 1rem;display: none;">
-                    <tbody>
-                        <tr>
-                            <td align="center" colspan="3" class="title">Resumen de asistencia del estudiante
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table width="100%" border="1" class="table" style="margin-bottom: 1rem;display: none;">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" class="bg-gray">Periodo</th>
-                            <th colspan="2" class="bg-gray">Inasistencias</th>
-                            <th colspan="2" class="bg-gray">Tardanzas</th>
-                        </tr>
-                        <tr>
-                            <th class="bg-gray">Justificadas</th>
-                            <th class="bg-gray">Injustificadas</th>
-                            <th class="bg-gray">Injustificadas</th>
-                            <th class="bg-gray">Injustificadas</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td align="center">1</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                        </tr>
-                        <tr>
-                            <td align="center">2</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                        </tr>
-                        <tr>
-                            <td align="center">3</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                        </tr>
-                        <tr>
-                            <td align="center">4</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                            <td align="center">0</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
-                    <thead>
-                        <tr>
-                            <th colspan="3" class="bg-gray">Situación final del estudiante al término del periodo lectivo</th>
-                        </tr>
-                        <tr>
-                            <th><b>Promovido de grado</b></th>
-                            <th><b>Requiere recuperación pedagógica</b></th>
-                            <th><b>Permanece en el grado</b></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td align="center" style="color: #fff;">X</td>
-                            <td align="center"></td>
-                            <td align="center"></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table width="100%" border="1" class="table" style="margin-bottom: 5rem;">
-                    <thead>
-                        <tr>
-                            <th colspan="3" class="bg-gray">Área(a) y/o taller(es) que pasan a recuperación pedagógica</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="3"align="center" style="color: #fff;">-</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table width="100%">
-                    <tbody>
-                        <tr>
-                            <td align="center">
-                                <img src="data:image/jpg;base64,' . $imagenSello . '" alt="sello" class="sello" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </body>
-            </html>
-        ');
-
+        $dompdf->setPaper('A3', 'landscape');
+        $dompdf->loadHtml($html);
         $dompdf->render();
-
         $contenido = $dompdf->output();
 
-        $exists = Storage::disk('LibretasNotas')->exists($nombreDocumento);
-        if (!$exists) {
-            Storage::disk('LibretasNotas')->put($nombreDocumento, $contenido);
-            /* Storage::disk('reportes')->delete($nombreDocumento); */
-        } else {
-            Storage::disk('LibretasNotas')->delete($nombreDocumento);
-            Storage::disk('LibretasNotas')->put($nombreDocumento, $contenido);
-        }
-        $alumno = Alumno::find($data["alu_id"]);
-        $alumno->name_libreta_notas = $nombreDocumento;
-        $alumno->save();
+        // Aquí puedes devolver el PDF o guardarlo
+        return response($contenido)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="' . $nombreDocumento . '"');
+    }
+    /**
+     * Genera el HTML para la libreta de notas
+     */
+    private function generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion)
+    {
+        // Iniciar construcción del HTML
+        $html = '<!DOCTYPE html>
+                        <html lang="es">
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>Libreta de Notas</title>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    font-size: 12px;
+                                    margin: 0;
+                                    padding: 0;
+                                }
+                                .title {
+                                    font-size: 14px;
+                                    font-weight: bold;
+                                    margin-bottom: 10px;
+                                    text-align: center;
+                                }
+                                .table {
+                                    border-collapse: collapse;
+                                    width: 100%;
+                                    margin-bottom: 15px;
+                                }
+                                .table th, .table td {
+                                    border: 1px solid #000;
+                                    padding: 5px;
+                                    vertical-align: middle;
+                                }
+                                .bg-gray {
+                                    background-color: #f0f0f0;
+                                    font-weight: bold;
+                                }
+                                .logo {
+                                    width: 80px;
+                                    height: auto;
+                                    max-height: 80px;
+                                }
+                                .sello {
+                                    width: 100px;
+                                    height: auto;
+                                    max-height: 100px;
+                                }
+                                .text-center {
+                                    text-align: center;
+                                }
+                                .container {
+                                    max-width: 100%;
+                                    margin: 0 auto;
+                                }
+                                .no-wrap {
+                                    white-space: nowrap;
+                                }
+                                .wrap-text {
+                                    word-wrap: break-word;
+                                    word-break: break-all;
+                                }
+                                td, th {
+                                    line-height: 1.2;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <table width="100%" style="margin-bottom: 1.5rem;">
+                                    <tbody>
+                                        <tr>
+                                            <td align="center" colspan="3" class="title">INFORME DE PROGRESO DEL APRENDIZAJE DEL ESTUDIANTE - ' . date('Y') . '</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table width="100%" style="margin-bottom: 1.5rem;">
+                                    <tbody>
+                                        <tr>
+                                            <td align="center" width="15%">
+                                                <img src="data:image/jpg;base64,' . $imagenEducacion . '" alt="escudo" class="logo" />
+                                            </td>
+                                            <td width="70%">
+                                                <table width="100%" border="1" class="table">
+                                                    <tr>
+                                                        <td class="bg-gray" width="25%">DRE:</td>
+                                                        <td width="25%">' . $institucion->ie_dre . '</td>
+                                                        <td class="bg-gray" width="25%">UGEL:</td>
+                                                        <td width="25%">' . $institucion->ie_ugel . '</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">Nivel:</td>
+                                                        <td>SECUNDARIA</td>
+                                                        <td class="bg-gray">Código Modular:</td>
+                                                        <td>' . $institucion->ie_codigo_modular . '</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">Institución Educativa:</td>
+                                                        <td colspan="3">' . $institucion->ie_nombre . '</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">Grado:</td>
+                                                        <td>' . $grado . '</td>
+                                                        <td class="bg-gray">Sección:</td>
+                                                        <td>' . $seccion . '</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">Apellidos y nombres del estudiante:</td>
+                                                        <td colspan="3">' . $alumno . '</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <td align="center" width="15%">
+                                                <img src="data:image/jpg;base64,' . $imagenCAO . '" alt="cao" class="logo" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>';
 
-        return response()->json([
-            "rpta" => 1,
-            "documento" => $nombreDocumento
-        ]);
-        /*if ($request->ajax()) {
-            return response()->json([
-                "rpta" => 1,
-                "documento" => $nombreDocumento
-            ]);
-        }
-        return view('Error404'); */
+                            $contadorCursos = 0;
+                            $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 2rem;">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" class="bg-gray" width="15%">Área Curricular</th>
+                                            <th rowspan="2" class="bg-gray" width="35%">Competencias</th>
+                                            <th colspan="4" class="bg-gray" width="40%">Calificativo por periodo</th>
+                                            <th rowspan="2" class="bg-gray" width="10%">Calif. final del área</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-gray" width="10%">1</th>
+                                            <th class="bg-gray" width="10%">2</th>
+                                            <th class="bg-gray" width="10%">3</th>
+                                            <th class="bg-gray" width="10%">4</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>';
+
+                            foreach ($datosCursos as $nombreCurso => $curso) {
+                                $contadorCursos++;
+                                $numCapacidades = max(1, count($curso['capacidades']));
+                                $rowspan = $numCapacidades + 2;
+
+                                $html .= '<tr>
+                                <td rowspan="' . $rowspan . '" style="vertical-align: middle;">' . $nombreCurso . '</td>';
+
+                                for ($i = 0; $i < $numCapacidades; $i++) {
+                                    if ($i > 0) $html .= '<tr>';
+
+                                    $capacidad = isset($curso['capacidades'][$i]) ? $curso['capacidades'][$i]['nombre'] : '';
+                                    $html .= '<td>' . $capacidad . '</td>';
+
+                                    for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
+                                        $nota = $curso['bimestres'][$bimestre]['capacidades'][$i] ?? '';
+                                        $html .= '<td align="center">' . $nota . '</td>';
+                                    }
+
+                                    if ($i == 0) {
+                                        $promedioFinal = $curso['promedio_final'] ?? '';
+                                        $html .= '<td rowspan="' . $rowspan . '" align="center" style="vertical-align: middle;">' . $promedioFinal . '</td>';
+                                    }
+
+                                    $html .= '</tr>';
+                                }
+
+                                $html .= '<tr>
+                                <td class="bg-gray">CALIFICATIVO DE CAPACIDADES</td>';
+                                for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
+                                    $promedioCap = $curso['bimestres'][$bimestre]['promedio_capacidades'] ?? $curso['bimestres'][$bimestre]['promedio'] ?? '';
+                                    $html .= '<td align="center">' . $promedioCap . '</td>';
+                                }
+                                $html .= '</tr>';
+
+                                $html .= '<tr>
+                                <td class="bg-gray">CALIFICATIVO DE AREA</td>';
+                                for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
+                                    $promedio = $curso['bimestres'][$bimestre]['promedio'] ?? '';
+                                    $html .= '<td align="center">' . $promedio . '</td>';
+                                }
+                                $html .= '</tr>';
+
+                                // 👇 Insertar salto de página cada 3 cursos
+                                if ($contadorCursos % 3 == 0 && $contadorCursos < count($datosCursos)) {
+                                    $html .= '</tbody></table>';
+                                    $html .= '<div style="page-break-after: always;"></div>';
+                                    $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 2rem;">
+                                            <thead>
+                                                <tr>
+                                                    <th rowspan="2" class="bg-gray" width="15%">Área Curricular</th>
+                                                    <th rowspan="2" class="bg-gray" width="35%">Competencias</th>
+                                                    <th colspan="4" class="bg-gray" width="40%">Calificativo por periodo</th>
+                                                    <th rowspan="2" class="bg-gray" width="10%">Calif. final del área</th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="bg-gray" width="10%">1</th>
+                                                    <th class="bg-gray" width="10%">2</th>
+                                                    <th class="bg-gray" width="10%">3</th>
+                                                    <th class="bg-gray" width="10%">4</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>';
+                                }
+                            }
+
+                            // Competencias transversales
+                            $html .= '<tr>
+                            <td rowspan="2">Competencias transversales</td>
+                            <td>Se desenvuelve en entornos virtuales generados por las TIC</td>
+                            <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td>Gestiona su Aprendizaje de manera autónoma</td>
+                            <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
+                        </tr>';
+
+                            $html .= '</tbody></table>';
+
+                            // Situación final
+                            $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th colspan="3" class="bg-gray">Situación final del estudiante al término del periodo lectivo</th>
+                                </tr>
+                                <tr>
+                                    <th width="33%">Promovido de grado</th>
+                                    <th width="33%">Requiere recuperación pedagógica</th>
+                                    <th width="34%">Permanece en el grado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td height="30" align="center"></td>
+                                    <td align="center"></td>
+                                    <td align="center"></td>
+                                </tr>
+                            </tbody>
+                        </table>';
+
+                            $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 3rem;">
+                            <thead>
+                                <tr><th colspan="3" class="bg-gray">Área(a) y/o taller(es) que pasan a recuperación pedagógica</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td height="30" colspan="3" align="center"></td></tr>
+                            </tbody>
+                        </table>';
+
+                            $html .= '<table width="100%" style="margin-top: 2rem;">
+                            <tbody>
+                                <tr>
+                                    <td width="33%" align="center">
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; width: 80%; margin: 0 auto;">
+                                            DIRECTOR
+                                        </div>
+                                    </td>
+                                    <td width="33%" align="center">
+                                        <img src="data:image/jpg;base64,' . $imagenSello . '" alt="sello" class="sello" />
+                                    </td>
+                                    <td width="33%" align="center">
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; width: 80%; margin: 0 auto;">
+                                            DOCENTE DE AULA
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                        </body>
+            </html>';
+
+
+        return $html;
     }
 }

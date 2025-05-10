@@ -38,8 +38,7 @@
                                     <td>{{ $info->gra_descripcion }}</td>
                                     <td>
                                         <button type="button" class="text-secondary btn btn-none" data-toggle="modal"
-                                            data-target="#dynamicModal"
-                                            data-whatever='{!! json_encode($info->seccion->where('sec_is_delete', '!=', 1)->values()) !!}'
+                                            data-target="#dynamicModal" data-whatever='{!! json_encode($info->seccion->where('sec_is_delete', '!=', 1)->values()) !!}'
                                             data-title="Secciones de {{ $info->gra_descripcion }}"
                                             data-key="sec_descripcion">
                                             <i class="fa fa-eye"></i></button>
@@ -48,13 +47,10 @@
                                     <td>
                                         <button type="button" class="text-secondary btn btn-none" data-toggle="modal"
                                             data-target="#dynamicModal"data-whatever='{!! json_encode($info->curso->where('is_deleted', '!=', 1)->where('cur_estado', 1)->values()) !!}'
-
-
-
                                             data-title="Cursos asignados a {{ $info->gra_descripcion }}"
                                             data-key="cur_nombre">
                                             <i class="fa fa-eye"></i></button>
-                                        {{ $info->curso->where('is_deleted', '!=', 1)->where('cur_estado',1)->count() }}
+                                        {{ $info->curso->where('is_deleted', '!=', 1)->where('cur_estado', 1)->count() }}
                                     </td>
 
                                     <td>
@@ -74,12 +70,11 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('gradoSeccion.destroy', $info) }}" method="POST"
-                                            class="d-inline"  class="form-eliminar">
+                                            class="d-inline form-eliminar">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-danger btn btn-none"
-                                                onclick="return confirm('¿Está seguro de eliminar este registro?')">
-                                                <i class="fas fa-trash"></i>
+                                            <button class="text-danger btn btn-none" type="submit">
+                                                <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </form>
                                     </td>
@@ -194,29 +189,29 @@
     </script>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const forms = document.querySelectorAll('.form-eliminar');
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('.form-eliminar');
 
-        forms.forEach(form => {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault(); // Previene el envío inmediato
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault(); // Previene el envío inmediato
 
-                Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: "¡No podrás revertir esto!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Sí, ¡eliminar!"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit(); // Envía el formulario si se confirma
-                    }
+                    Swal.fire({
+                        title: "¿Estás seguro?",
+                        text: "¡No podrás revertir esto!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Sí, ¡eliminar!"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit(); // Envía el formulario si se confirma
+                        }
+                    });
                 });
             });
         });
-    });
-</script>
+    </script>
 
 @endsection

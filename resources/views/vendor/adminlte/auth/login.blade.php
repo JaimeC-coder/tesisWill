@@ -1,5 +1,5 @@
 @extends('adminlte::auth.auth-page', ['auth_type' => 'login'])
-
+@section('title', 'Login')
 @section('adminlte_css_pre')
     <link rel="stylesheet" href="{{ asset('vendor/icheck-bootstrap/icheck-bootstrap.min.css') }}">
 @stop
@@ -14,7 +14,7 @@
     @php( $password_reset_url = $password_reset_url ? route($password_reset_url) : '' )
 @else
     @php( $login_url = $login_url ? url($login_url) : '' )
-  
+
     @php( $password_reset_url = $password_reset_url ? url($password_reset_url) : '' )
 @endif
 

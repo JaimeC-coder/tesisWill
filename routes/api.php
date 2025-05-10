@@ -67,7 +67,7 @@ Route::group(['prefix' => 'reporte'], function () {
     Route::get('gestion/pdf', [ReportController::class, 'getReportCoursePDF']);
     ///api/reporte/alumno/matricula/pdf
     Route::get('alumno/matricula/pdf', [ReportController::class, 'generarFichaMatricula'])->name('reporte.alumno.matricula.pdf');
-    Route::get('alumno/libreta_notas/pdf', [ReportController::class, 'generarFichaMatricula'])->name('reporte.alumno.libreta_notas.pdf');
+    Route::get('alumno/libreta_notas/pdf', [ReportController::class, 'generarLibretaNotas'])->name('reporte.alumno.libreta_notas.pdf');
 
 });
 Route::group(['prefix' => 'asignacion'], function () {

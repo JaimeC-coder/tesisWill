@@ -100,12 +100,33 @@ class NotaController extends Controller
             $tipoPeriodo = Tipo::where('tp_id', $periodo->per_tp_notas)->first();
 
 
+
             $asignacionesCursos->capacidades = count($capacidades);
 
             $tipoPeriodo = $this->configurarTipoPeriodo($tipoPeriodo);
-            $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $periodo->per_id);
+            if ($tipoPeriodo->tp_tipo == 'Registro de Notas Anuales') {
+                $tipoPeriodo['ab'] = 'A';
+                $tipoPeriodo['can'] = '1';
+            } else if ($tipoPeriodo->tp_tipo == 'REGISTRO DE NOTAS BIMESTRALES') {
+                $tipoPeriodo['ab'] = 'B';
+                $tipoPeriodo['can'] = '4';
+            } else if ($tipoPeriodo->tp_tipo == 'Registro de Notas Trimestrales') {
+                $tipoPeriodo['ab'] = 'T';
+                $tipoPeriodo['can'] = '3';
+            } else if ($tipoPeriodo->tp_tipo == 'Registro de Notas Semestrales') {
+                $tipoPeriodo['ab'] = 'S';
+                $tipoPeriodo['can'] = '2';
+            } else if ($tipoPeriodo->tp_tipo == 'Registro de Notas Semestrales') {
+                $tipoPeriodo['ab'] = 'M';
+                $tipoPeriodo['can'] = '2';
+            } else {
+                $tipoPeriodo['ab'] = 'x';
+                $tipoPeriodo['can'] = '0';
+            }
+            $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $tipoPeriodo['can'], $periodo);
+            //  $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $periodo->per_id);
 
-
+            //return $Gsas;
             return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidades', 'user'));
         }
 
@@ -145,7 +166,7 @@ class NotaController extends Controller
         return $tipoPeriodo;
     }
 
-    public function getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $per_id)
+    public function getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $per_id, $periodo)
     {
         $Gsas1 = Gsa::select('ags_id')
             ->where('niv_id', $nivel)
@@ -154,29 +175,25 @@ class NotaController extends Controller
             ->where('is_deleted', '!=', 1)
             ->get();
 
-        $numeroPeriodos = $tipoPeriodo->cantidad;
-
+        $numeroPeriodos = $per_id;
 
         $capacidadesPlantilla = [];
         foreach ($capacidades as $capacidad) {
             $capacidadesPlantilla[$capacidad->cap_id] = [
                 'descripcion' => $capacidad->cap_descripcion,
-                'orden' => $capacidad->cap_id, // Asumiendo que hay un campo de orden o usamos cap_id
+                'orden' => $capacidad->cap_id,
             ];
         }
+
         $gsaProcesados = [];
 
         foreach ($Gsas1 as $g) {
             $matricula = Matricula::where('ags_id', $g->ags_id)
                 ->where('is_deleted', '!=', 1)
-                ->where('per_id', $per_id)
+                ->where('per_id', $periodo->per_id)
                 ->first();
 
-
-          if (!$matricula) {
-            continue;
-        }
-
+            if (!$matricula) continue;
 
             $alumno = Alumno::where('alu_id', $matricula->alu_id)
                 ->where('is_deleted', '!=', 1)
@@ -195,8 +212,6 @@ class NotaController extends Controller
             $g->dni = $persona->per_dni;
             $g->idAlumno = $alumno->alu_id;
 
-
-
             // Obtener todas las notas del alumno para este curso y docente
             $notas = Nota::select(['nt_bimestre', 'nt_nota', 'nt_id'])
                 ->where('alu_id', $alumno->alu_id)
@@ -205,18 +220,24 @@ class NotaController extends Controller
                 ->where('nt_is_deleted', 0)
                 ->get();
 
+            // Mapear nt_bimestre a los periodos P1, P2, ..., según orden
+            $bimestresUnicos = $notas->pluck('nt_bimestre')->unique()->sort()->values();
+            $mapaPeriodos = [];
+            foreach ($bimestresUnicos as $index => $bimestre) {
+                if ($index < $numeroPeriodos) {
+                    $mapaPeriodos[$bimestre] = "P" . ($index + 1);
+                }
+            }
 
             // Inicializar la estructura de notas por capacidad
             $notasOrganizadas = [];
             foreach ($capacidadesPlantilla as $capId => $capInfo) {
                 $notasOrganizadas[$capId] = [
                     'descripcion' => $capInfo['descripcion'],
-
                     'orden' => $capInfo['orden'],
                     'periodos' => []
                 ];
 
-                // Inicializar periodos con valores vacíos
                 for ($i = 1; $i <= $numeroPeriodos; $i++) {
                     $notasOrganizadas[$capId]['periodos']["P" . $i] = [
                         "nota" => NULL,
@@ -225,34 +246,28 @@ class NotaController extends Controller
                 }
             }
 
-
             // Rellenar con las notas existentes
             foreach ($notas as $nota) {
-                // Buscar las capacidades asociadas a esta nota
-                $notasCapacidades = NotaCapacidad::where('nt_id', $nota->nt_id)
-                    ->get();
-                Log::info($notasCapacidades);
+                $notasCapacidades = NotaCapacidad::where('nt_id', $nota->nt_id)->get();
 
                 foreach ($notasCapacidades as $notaCapacidad) {
                     $capId = $notaCapacidad->cap_id;
 
-                    // Verificar si esta capacidad existe en nuestra plantilla
                     if (isset($notasOrganizadas[$capId])) {
-                        $periodoKey = "P" . $nota->nt_bimestre;
+                        $periodoKey = $mapaPeriodos[$nota->nt_bimestre] ?? null;
+                        if (!$periodoKey) continue;
 
-                        // Solo actualizar si el período es válido
-                        if ($nota->nt_bimestre <= $numeroPeriodos) {
-                            $notasOrganizadas[$capId]['periodos'][$periodoKey] = [
-                                "nota" => $notaCapacidad->nc_nota ?? '--',
-                                "idNotaPadre" => $nota->nt_id
-                            ];
-                        }
+                        $notasOrganizadas[$capId]['periodos'][$periodoKey] = [
+                            "nota" => $notaCapacidad->nc_nota ?? '--',
+                            "idNotaPadre" => $nota->nt_id
+                        ];
                     }
                 }
             }
 
             // Calcular promedios por capacidad
             foreach ($notasOrganizadas as $capId => &$capacidadData) {
+                ksort($capacidadData['periodos']);
                 $notasValues = array_column($capacidadData['periodos'], 'nota');
                 $notasFiltradas = array_filter($notasValues, function ($nota) {
                     return $nota !== '0' && $nota !== '--' && $nota !== NULL;
@@ -264,7 +279,7 @@ class NotaController extends Controller
 
             $g->notas = $notasOrganizadas;
 
-            // Calcular promedio general (opcional)
+            // Calcular promedio general
             $promediosCapacidades = array_column($notasOrganizadas, 'promedio');
             $promediosFiltrados = array_filter($promediosCapacidades, function ($prom) {
                 return $prom !== '' && $prom !== NULL;
@@ -276,6 +291,7 @@ class NotaController extends Controller
 
         return $gsaProcesados;
     }
+
 
     private function limpiarGsa(&$gsa)
     {
@@ -450,9 +466,9 @@ class NotaController extends Controller
             $idNota = $request->idNota;
 
             $idCapacidad = $request->idCapacidad;
-            $idPeriodo = $request->idPeriodo;
+            $idPeriodo = $request->idPeriodo; //todo
             $notaSeleccionada = $request->notaSeleccionada;
-            if ($idNota != 0) {
+            if ($idNota != -1 || $idNota != null || $idNota != 0) {
                 Log::info("entro 1: ");
                 //$NotaPromoedio = Nota::where('nt_id', $idNota)->first();
                 $notaCapacidad  = NotaCapacidad::where('nt_id', $idNota)->where('cap_id', $idCapacidad)->first();

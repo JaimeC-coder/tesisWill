@@ -17,6 +17,7 @@ class Aula extends Model
         'ala_aforo',
         'ala_ubicacion',
         'ala_estado',
+        'is_multiuse',
         'ala_is_delete',
         'ala_en_uso'
     ];

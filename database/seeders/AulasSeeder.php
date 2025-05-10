@@ -72,6 +72,7 @@ class AulasSeeder extends Seeder
                 'ala_estado' => $aula[5],
                 'ala_is_delete' => $aula[6],
                 'ala_en_uso' => $aula[7],
+                'is_multiuse' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
                 'deleted_at' => NULL

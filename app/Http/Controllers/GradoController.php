@@ -17,7 +17,7 @@ class GradoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public $nivel ;
+    public $nivel;
     public function __construct()
     {
         $this->nivel = Nivel::all();
@@ -35,9 +35,7 @@ class GradoController extends Controller
         //
         $grado = new Grado();
         $niveles = $this->nivel;
-        return view('view.gradoSeccion.create' , compact('grado','niveles'));
-
-
+        return view('view.gradoSeccion.create', compact('grado', 'niveles'));
     }
 
     /**
@@ -48,14 +46,13 @@ class GradoController extends Controller
         $newRequest = $request->all();
 
         DB::transaction(function () use ($newRequest) {
-            $datos = explode(',',$newRequest['gra_descripcion']);
-            foreach ($datos as $dato){
-                 Grado::create([
+            $datos = explode(',', $newRequest['gra_descripcion']);
+            foreach ($datos as $dato) {
+                Grado::create([
                     'gra_descripcion' => $dato,
                     'niv_id' => $newRequest['niv_id'],
                 ]);
             }
-
         });
 
         return redirect()->route('gradoSeccion.inicio');
@@ -77,7 +74,7 @@ class GradoController extends Controller
         //
         $niveles = $this->nivel;
         $grado = $gradoSeccion;
-        return view('view.gradoSeccion.edit', compact('grado' , 'niveles'));
+        return view('view.gradoSeccion.edit', compact('grado', 'niveles'));
     }
 
     /**
@@ -97,12 +94,12 @@ class GradoController extends Controller
     public function destroy(Grado $gradoSeccion)
     {
         //
-Log::info($gradoSeccion);
+        Log::info($gradoSeccion);
         $gradoSeccion->update([
             'gra_is_delete' => 1
         ]);
-        $secciones = Seccion::where('gra_id',$gradoSeccion->gra_id)->get();
-        foreach ($secciones as $seccion){
+        $secciones = Seccion::where('gra_id', $gradoSeccion->gra_id)->get();
+        foreach ($secciones as $seccion) {
             $seccion->update([
                 'sec_is_delete' => 1
             ]);
@@ -112,27 +109,27 @@ Log::info($gradoSeccion);
 
     public function inicio()
     {
-        $grados = Grado::where('gra_is_delete','!=',1)->orderBy('niv_id', 'desc')->get();
+        $grados = Grado::where('gra_is_delete', '!=', 1)->orderBy('niv_id', 'desc')->get();
 
         return view('view.gradoSeccion.inicio', compact('grados'));
     }
 
-    public function secciongrado(Request $request ,Grado $seccionAdd2)
+    public function secciongrado(Request $request, Grado $seccionAdd2)
     {
 
-        $periodos = Periodo::where('is_deleted',0)->where('per_estado',1)->get();
-        $aulas = Aula::orderBy('ala_id','asc')->where('ala_en_uso','!=',1)->where('ala_tipo','!=','Oficina')->where('ala_tipo','!=','Extra')->where('ala_is_delete','!=',1)->get();
-        $tutores = PersonalAcademico::where('pa_is_tutor',1)->where('is_deleted','!=',1)->get();
-         return view('view.gradoSeccion.addIfoGrado', compact('seccionAdd2','periodos','aulas','tutores'));
+        $periodos = Periodo::where('is_deleted', 0)->where('per_estado', 1)->get();
+        $aulas = Aula::orderBy('ala_id', 'asc')->where('ala_en_uso', '!=', 1)->where('ala_tipo', '!=', 'Oficina')->where('ala_tipo', '!=', 'Extra')->where('ala_is_delete', '!=', 1)->get();
+        $tutores = PersonalAcademico::where('pa_is_tutor', 1)->where('is_deleted', '!=', 1)->get();
+        return view('view.gradoSeccion.addIfoGrado', compact('seccionAdd2', 'periodos', 'aulas', 'tutores'));
     }
-    public function secciongradoRegister(Request $request , $seccionAdd2)
+    public function secciongradoRegister(Request $request, $seccionAdd2)
     {
 
         $newRequest = $request->all();
         $newRequest['seccion_id'] = $seccionAdd2;
 
         DB::transaction(function () use ($newRequest) {
-            $datos = explode(',',$newRequest['descripcion']);
+            $datos = explode(',', $newRequest['descripcion']);
             foreach ($datos as $value) {
                 Seccion::create([
                     'sec_descripcion' => $value,
@@ -147,7 +144,6 @@ Log::info($gradoSeccion);
                 $aula->ala_en_uso = 1;
                 $aula->save();
             }
-
         });
 
         return redirect()->route('gradoSeccion.inicio');

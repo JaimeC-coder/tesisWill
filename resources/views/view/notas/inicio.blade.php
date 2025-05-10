@@ -74,6 +74,8 @@
 
 
 
+
+
     <div class="col-lg-12 col-md-12 col-sm-12">
         <div class="card">
             <div class="card-body">
@@ -86,8 +88,8 @@
                                         <th>DNI</th>
                                         <th>Alumno</th>
                                         <th>Capacidades</th>
-                                        @foreach (range(1, $tipoPeriodo['cantidad']) as $index => $item)
-                                            <th>{{ $tipoPeriodo['name'] }} {{ $item }}</th>
+                                        @foreach (range(1, $tipoPeriodo['tp_id']) as $index => $item)
+                                            <th>{{$tipoPeriodo['ab']}} {{ $item }}</th>
                                         @endforeach
                                         <th>Promedio</th>
                                     </tr>
@@ -103,7 +105,8 @@
                                                     @endif
                                                     <td>{{ $capacidades[$capacidadKey] ?? $capacidadData['descripcion'] }}
                                                     </td>
-                                                    @foreach (range(1, $tipoPeriodo['cantidad']) as $periodoIndex)
+                                                    @foreach (range(1, $tipoPeriodo['tp_id']) as $periodoIndex)
+
                                                         @php
                                                             $periodoKeyName = 'P' . $periodoIndex;
                                                             $notaData = $capacidadData['periodos'][$periodoKeyName] ?? [

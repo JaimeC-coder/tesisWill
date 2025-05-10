@@ -241,7 +241,7 @@ class NotaController extends Controller
                 for ($i = 1; $i <= $numeroPeriodos; $i++) {
                     $notasOrganizadas[$capId]['periodos']["P" . $i] = [
                         "nota" => NULL,
-                        "idNotaPadre" => 0
+                        "idNotaPadre" => -1
                     ];
                 }
             }

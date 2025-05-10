@@ -14,7 +14,7 @@ class InstitucionsSeeder extends Seeder
     public function run(): void
     {
         $institucions = [
-            [1, '0444240-0', '0', 'PRIMARIA', '82857 Lives', 'PÚBLICA', '6', '194', '1844', 'AV. SAN MIGUEL S/N', 'DRE SAN MIGUEL', 'UGEL SAN MIGUEL', 'MIXTO', 'MAÑANA - TARDE', 'LUNES - VIERNES', 'PAUCAR IGNACIO, YMELDA AFRODICIA', '456789', NULL, NULL]
+            [1, '0444240-0', '0', 'PRIMARIA', '82857 Lives', 'PÚBLICA', '6', '194', '1844', 'AV. SAN MIGUEL S/N', 'DRE SAN MIGUEL', 'UGEL SAN MIGUEL', 'MIXTO', 'MAÑANA', 'LUNES - VIERNES', 'PAUCAR IGNACIO, YMELDA AFRODICIA', '456789', NULL, NULL]
         ];
 
         foreach ($institucions as $institucion) {

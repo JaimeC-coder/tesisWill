@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AsignarCurso;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -101,7 +102,7 @@ class AsignarCursosSeeder extends Seeder
         ];
 
         foreach ($asignarCursos as $asignarCurso) {
-            DB::table('asignar_cursos')->insert([
+            AsignarCurso::create([
                 'asig_id' => $asignarCurso[0],
                 'pa_id' => $asignarCurso[1],
                 'niv_id' => $asignarCurso[2],

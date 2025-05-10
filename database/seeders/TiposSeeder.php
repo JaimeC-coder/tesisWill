@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Tipo;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,7 @@ class TiposSeeder extends Seeder
         ];
 
         foreach ($tipos as $tipo) {
-            DB::table('tipos')->insert([
+             Tipo::create([
                 'tp_id' => $tipo[0],
                 'tp_tipo' => $tipo[1],
                 'created_at' => now(),

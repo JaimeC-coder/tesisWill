@@ -66,7 +66,7 @@ class MatriculaController extends Controller
     public function create()
     {
         $matricula = new Matricula();
-        $periodos = Periodo::where('per_estado', 1)->get();
+        $periodos = Periodo::where('per_estado', 1)->where('is_deleted',0)->get();
         if ($periodos == null) {
             return redirect()->route('matricula.inicio')->with('error', 'No hay periodo activo');
         }

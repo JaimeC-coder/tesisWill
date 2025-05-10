@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AsignarGrado;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ class AsignarGradosSeeder extends Seeder
         ];
 
         foreach ($asignarGrados as $asignarGrado) {
-            DB::table('asignar_grados')->insert([
+             AsignarGrado::create([
                 'asig_id' => $asignarGrado[0],
                 'pa_id' => $asignarGrado[1],
                 'niv_id' => $asignarGrado[2],

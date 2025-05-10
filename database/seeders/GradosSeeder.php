@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Grado;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class GradosSeeder extends Seeder
         ];
 
         foreach ($grados as $grado) {
-            DB::table('grados')->insert([
+            Grado::create([
                 'gra_id' => $grado[0],
                 'gra_descripcion' => $grado[1],
                 'niv_id' => $grado[2],

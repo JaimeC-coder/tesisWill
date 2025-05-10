@@ -112,7 +112,7 @@ class ApoderadosSeeder extends Seeder
         ];
 
         foreach ($apoderados as $apoderado) {
-            $apoderadofor = Apoderado::create([
+            Apoderado::create([
 
                 'apo_id' => $apoderado[0],
                 'per_id' => $apoderado[1],

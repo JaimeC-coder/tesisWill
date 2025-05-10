@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Curso;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +72,7 @@ class CursosSeeder extends Seeder
         ];
 
         foreach ($cursos as $curso) {
-            DB::table('cursos')->insert([
+             Curso::create([
                 'cur_id' => $curso[0],
                 'cur_nombre' => $curso[1],
                 'cur_abreviatura' => $curso[2],

@@ -43,7 +43,7 @@
                                     <td>{{ $info->tipo->tp_tipo }}</td>
                                     <td>
                                         @if ($info->per_estado == 1)
-                                        <span class="badge badge-success">Activo</span>
+                                        <span class="badge badge-success">{{$info->per_estado}}  Activo</span>
                                         @else
                                             <span class="badge badge-danger">Inactivo</span>
                                         @endif

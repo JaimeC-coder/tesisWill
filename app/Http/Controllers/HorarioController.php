@@ -175,6 +175,8 @@ class HorarioController extends Controller
         $anios =  Periodo::where('per_estado', '!=', 0)
             ->join('anios', 'periodos.anio_id', '=', 'anios.anio_id')
             ->select('anios.anio_id', 'anios.anio_descripcion')
+            ->where('periodos.is_deleted',0)
+            ->where('anios.is_deleted',0)
             ->get();
         Log::info($anios);
 

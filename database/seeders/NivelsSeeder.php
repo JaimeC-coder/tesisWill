@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Nivel;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class NivelsSeeder extends Seeder
             ];
 
             foreach ($nivels as $nivel) {
-                DB::table('nivels')->insert([
+                 Nivel::create([
                     'niv_id' => $nivel[0],
                     'niv_descripcion' => $nivel[1]
                 ]);

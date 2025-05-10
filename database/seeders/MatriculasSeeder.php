@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Matricula;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -107,7 +108,7 @@ class MatriculasSeeder extends Seeder
         ];
 
         foreach ($matriculas as $matricula) {
-            DB::table('matriculas')->insert([
+            Matricula::create([
                 'mat_id' => $matricula[0],
                 'per_id' => $matricula[1],
                 'alu_id' => $matricula[2],

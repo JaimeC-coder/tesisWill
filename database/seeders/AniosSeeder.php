@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Anio;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class AniosSeeder extends Seeder
         ];
 
         foreach ($anios as $anio) {
-            DB::table('anios')->insert([
+            Anio::create([
                 'anio_id' => $anio[0],
                 'anio_descripcion' => $anio[1],
                 'anio_fechaInicio' => $anio[2],

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Horario;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -53,7 +54,7 @@ class HorariosSeeder extends Seeder
         ];
 
         foreach ($horarios as $horario) {
-            DB::table('horarios')->insert([
+             Horario::create([
                 'hor_id' => $horario[0],
                 'per_id' => $horario[1],
                 'ags_id' => $horario[2],

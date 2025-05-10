@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Aula;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -62,7 +63,7 @@ class AulasSeeder extends Seeder
         ];
 
         foreach ($aulas as $aula) {
-            DB::table('aulas')->insert([
+             Aula::create([
                 'ala_id' => $aula[0],
                 'ala_descripcion' => $aula[1],
                 'ala_tipo' => $aula[2],

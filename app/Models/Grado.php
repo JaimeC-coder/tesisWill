@@ -46,6 +46,6 @@ class Grado extends Model
 
     public function setGraDescripcionAttribute($value)
     {
-        $this->attributes['gra_descripcion'] = ucwords(strtolower($value));
+        $this->attributes['gra_descripcion'] = strtoupper($value);
     }
 }

@@ -43,7 +43,7 @@
                                     <td>{{ $info->tipo->tp_tipo }}</td>
                                     <td>
                                         @if ($info->per_estado == 1)
-                                        <span class="badge badge-success">{{$info->per_estado}}  Activo</span>
+                                        <span class="badge badge-success">Activo</span>
                                         @else
                                             <span class="badge badge-danger">Inactivo</span>
                                         @endif
@@ -53,7 +53,7 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('periodo.destroy', $info) }}" method="POST"
-                                            style="display: inline-block">
+                                            style="display: inline-block"  class="form-eliminar">
                                             @csrf
                                             @method('DELETE')
                                             <button class="text-danger btn btn-none" type="submit">
@@ -99,4 +99,31 @@
             });
         });
     </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const forms = document.querySelectorAll('.form-eliminar');
+
+        forms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); // Previene el envío inmediato
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "¡No podrás revertir esto!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Sí, ¡eliminar!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); // Envía el formulario si se confirma
+                    }
+                });
+            });
+        });
+    });
+</script>
+
 @endsection

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class PeriodoController extends Controller
 {
     public $estado = [
-        '0' => 'Finalizado',
+        '2' => 'Finalizado',
         '1' => 'Aperturado'
     ];
     public $anio;
@@ -55,7 +55,7 @@ class PeriodoController extends Controller
                 'per_final_matricula' => $request->per_final_matricula,
                 'per_limite_cierre' => $request->per_limite_cierre,
                 'per_tp_notas' => $request->per_tp_notas,
-                'per_estado' => $request->per_estado,
+                'per_estado' => $request->per_estado == 1 ? 1 : 0,
             ]);
 
             DB::commit();
@@ -104,7 +104,7 @@ class PeriodoController extends Controller
                 'per_final_matricula' => $request->per_final_matricula,
                 'per_limite_cierre' => $request->per_limite_cierre,
                 'per_tp_notas' => $request->per_tp_notas,
-                'per_estado' => $request->per_estado,
+                'per_estado' => $request->per_estado == 1 ? 1 : 0,
             ]);
 
             DB::commit();

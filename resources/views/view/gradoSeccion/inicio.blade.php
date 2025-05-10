@@ -74,7 +74,7 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('gradoSeccion.destroy', $info) }}" method="POST"
-                                            class="d-inline">
+                                            class="d-inline"  class="form-eliminar">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-danger btn btn-none"
@@ -192,4 +192,31 @@
             });
         });
     </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const forms = document.querySelectorAll('.form-eliminar');
+
+        forms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); // Previene el envío inmediato
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "¡No podrás revertir esto!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Sí, ¡eliminar!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); // Envía el formulario si se confirma
+                    }
+                });
+            });
+        });
+    });
+</script>
+
 @endsection

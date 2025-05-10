@@ -34,7 +34,7 @@ class MatriculaController extends Controller
             $apoderado = Apoderado::where('apo_id', $alumno->apo_id)->first();
             $apo_persona = Persona::where('per_id', $apoderado->per_id)->first();
             $periodo = Periodo::where('per_id', $m->per_id)->first();
-            $anio = Anio::where('anio_id', $periodo->anio_id)->where('anio_estado', '!=', 0)->first();
+            $anio = Anio::where('anio_id', $periodo->anio_id)->first();
             $gsa = Gsa::where('ags_id', $m->ags_id)->first();
             $aula = Aula::where('ala_id', $gsa->ala_id)->first();
             $nivel = Nivel::where('niv_id', $gsa->niv_id)->first();

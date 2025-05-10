@@ -16,4 +16,10 @@ class Tipo extends Model
         'is_deleted'
     ];
 
+
+       public function setTpTipoAttribute($value)
+    {
+        $this->attributes['tp_tipo'] = strtoupper($value);
+    }
+
 }

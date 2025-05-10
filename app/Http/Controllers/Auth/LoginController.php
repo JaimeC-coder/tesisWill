@@ -43,7 +43,7 @@ class LoginController extends Controller
     }
     protected function validateLogin(Request $request)
     {
-       
+
         $request->validate(
             [
                 $this->username() => 'required|string',
@@ -56,7 +56,7 @@ class LoginController extends Controller
         );
 
         // Buscar usuario por email
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->where('is_deleted',0)->first();
 
         if (!$user) {
             return back()->withErrors(['email' => 'El correo no fue encontrado.'])->withInput();

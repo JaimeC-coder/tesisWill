@@ -60,7 +60,7 @@ class NotaController extends Controller
                 $query->select('anio_id')
                     ->from('periodos')
                     ->where('per_estado', 1)
-                    ->where('is_deleted', '!=', 1);
+                    ->where('is_deleted', 0);
             })
             ->get();
 
@@ -105,7 +105,7 @@ class NotaController extends Controller
             $tipoPeriodo = $this->configurarTipoPeriodo($tipoPeriodo);
             $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $periodo->per_id);
 
-        
+
             return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidades', 'user'));
         }
 

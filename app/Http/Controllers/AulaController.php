@@ -37,7 +37,7 @@ class AulaController extends Controller
      */
     public function store(Request $request)
     {
-       
+
         DB::beginTransaction();
         try {
 
@@ -46,6 +46,7 @@ class AulaController extends Controller
                     'ala_tipo' => $request->ala_tipo,
                     'ala_aforo' => $request->ala_aforo,
                     'ala_ubicacion' => $request->ala_ubicacion,
+                    'is_multiuse' => $request->is_multiuse == 'on' ? 1 : 0
                 ]);
 
             DB::commit();
@@ -54,6 +55,7 @@ class AulaController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            dd($e);
             return redirect()->route('ambiente.create')->with('error', 'Error al crear el aula');
         }
     }
@@ -88,6 +90,7 @@ class AulaController extends Controller
                 'ala_tipo' => $request->ala_tipo,
                 'ala_aforo' => $request->ala_aforo,
                 'ala_ubicacion' => $request->ala_ubicacion,
+                'is_multiuse' => $request->is_multiuse == 'on' ? 1 : 0,
             ]);
 
             DB::commit();

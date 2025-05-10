@@ -468,7 +468,7 @@ class NotaController extends Controller
             $idCapacidad = $request->idCapacidad;
             $idPeriodo = $request->idPeriodo; //todo
             $notaSeleccionada = $request->notaSeleccionada;
-            if ($idNota != -1 ) {
+            if ($idNota != -1) {
                 Log::info("entro 1: ");
                 //$NotaPromoedio = Nota::where('nt_id', $idNota)->first();
                 $notaCapacidad  = NotaCapacidad::where('nt_id', $idNota)->where('cap_id', $idCapacidad)->first();
@@ -535,10 +535,13 @@ class NotaController extends Controller
 
                     $NotaCapacidadRegistro = NotaCapacidad::Create([
                         'nc_descripcion' => $idCapacidad,
+                        'cap_id' => $idCapacidad,
                         'nc_nota' => $notaSeleccionada,
                         'nt_id' => $NotaPromoedio->nt_id,
                         'nc_is_deleted' => 0
                     ]);
+
+                    Log::info($NotaPromoedio);
 
 
                     $NotaPromoedio->estadoPromedio = 0;

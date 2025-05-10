@@ -118,7 +118,18 @@ class GradoController extends Controller
     {
 
         $periodos = Periodo::where('is_deleted', 0)->where('per_estado', 1)->get();
-        $aulas = Aula::orderBy('ala_id', 'asc')->where('ala_en_uso', '!=', 1)->where('ala_tipo', '!=', 'Oficina')->where('ala_tipo', '!=', 'Extra')->where('ala_is_delete', '!=', 1)->get();
+        //$aulas = Aula::orderBy('ala_id', 'asc')->where('ala_en_uso', '!=', 1)->orwhere('is_multiuse',1)->where('ala_tipo', '!=', 'Oficina')->where('ala_tipo', '!=', 'Extra')->where('ala_is_delete', '!=', 1)->get();
+
+        $aulas = Aula::where(function ($query) {
+            $query->where('ala_en_uso', '!=', 1)
+                ->orWhere('is_multiuse', 1);
+        })
+            ->where('ala_tipo', '!=', 'OFICINA')
+            ->where('ala_tipo', '!=', 'EXTRA')
+            ->where('ala_is_delete', '!=', 1)
+            ->orderBy('ala_id', 'asc')
+            ->get();
+
         $tutores = PersonalAcademico::where('pa_is_tutor', 1)->where('is_deleted', '!=', 1)->get();
         return view('view.gradoSeccion.addIfoGrado', compact('seccionAdd2', 'periodos', 'aulas', 'tutores'));
     }

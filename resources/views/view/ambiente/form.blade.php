@@ -33,8 +33,22 @@
         <div class="mb-3 row">
             <label for="ubicacion" class="col-sm-2 col-form-label">Ubicación <span class="text-danger">*</span></label>
             <div class="col-sm-10">
-                <input type="text" data-required="true" data-type="letters" class="form-control" id="ubicacion" name="ala_ubicacion"
-                    placeholder="Ingrese ubicación del aula" value="{{ $ambiente->ala_ubicacion }}">
+                <input type="text" data-required="true"  class="form-control" id="ubicacion"
+                    name="ala_ubicacion" placeholder="Ingrese ubicación del aula"
+                    value="{{ $ambiente->ala_ubicacion }}">
+            </div>
+        </div>
+        <div class="mb-3 row">
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-10 offset-sm-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="is_multiuse" name="is_multiuse"
+                        @if ($ambiente->is_multiuse) checked @endif>
+                    <label class="form-check-label" for="is_multiuse">
+                        Es multi aula?
+                    </label>
+                </div>
             </div>
         </div>
         <div class="d-inline row p-2 float-right">
@@ -53,6 +67,5 @@
 
 
 @section('js')
-  
     <script src="{{ asset('js/validate.js') }}"></script>
 @endsection

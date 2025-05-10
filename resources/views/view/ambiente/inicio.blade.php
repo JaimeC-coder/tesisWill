@@ -25,6 +25,7 @@
                                 <th scope="col">Tipo de ambiente</th>
                                 <th scope="col">ubicacion</th>
                                 <th scope="col">capacidad</th>
+                                <th scope="col">Multiuso</th>
                                 <th scope="col">Estado</th>
                                 <th scope="col">Opciones</th>
 
@@ -38,6 +39,13 @@
                                     <td>{{ $info->ala_tipo }}</td>
                                     <td>{{ $info->ala_ubicacion }}</td>
                                     <td>{{ $info->ala_aforo }}</td>
+                                    <td>
+                                        @if ($info->is_multiuse == 1)
+                                            <span class="badge badge-success">Multiusos</span>
+                                        @else
+                                            <span class="badge badge-danger">Un solo uso </span>
+                                        @endif
+                                    </td>
                                     <td>
                                         @if ($info->ala_estado == 1)
                                             <span class="badge badge-success">Activo</span>

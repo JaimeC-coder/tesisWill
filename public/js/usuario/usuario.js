@@ -63,7 +63,11 @@ function searchInformation(){
             nameUserhidden.value=data.nombres.toLowerCase()+" "+apellidocompleto.toLowerCase();
             usuario.disabled=true;
             emailcorreo.disabled=true;
-            alert("Datos encontrados");
+
+                 mostrarAlerta({
+                titulo:"Datos encontrados",
+                icono: "success"
+            });
             return;
         }else if(data && data.per_dni){
             // Si correo es igual a null, entonces no se encuentra en la base de datos
@@ -141,7 +145,11 @@ function searchInformation(){
             });
             return;
         }else{
-            alert("No se encontraron datos con el DNI ingresado");
+
+                mostrarAlerta({
+                titulo:"No se encontraron datos con el DNI ingresado",
+                icono: "error"
+            });
             blockInput(false);
             nombre.addEventListener("input", syncUser);
             apellido.addEventListener("input", syncUser);
@@ -242,24 +250,20 @@ function dniValidation() {
     }
 }
 
+function mostrarAlerta({
+  titulo = "Operación realizada",
+  icono = "success",
+  posicion = "top-end",
+  mostrarBoton = false,
+  tiempo = 1500
+} = {}) {
+  Swal.fire({
+    position: posicion,
+    icon: icono,
+    title: titulo,
+    showConfirmButton: mostrarBoton,
+    timer: tiempo
+  });
+}
 
-// function verificarEmailExistente(correo) {
-//     fetch('/api/verificar-correo', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({ email: correo })
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-//         console.log(data);
-//         if (data.existe) {
-//             alert("El correo ingresado ya está registrado en el sistema.");
-//         }
-//     })
-//     .catch(error => {
-//         console.error('Error al verificar el correo:', error);
-//     });
-// }
 

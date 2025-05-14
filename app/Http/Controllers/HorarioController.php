@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Alumno;
 use App\Models\Anio;
+use App\Models\AsignarCurso;
 use App\Models\Curso;
 use App\Models\Gsa;
 use App\Models\Horario;
 use App\Models\Matricula;
 use App\Models\Periodo;
+use App\Models\PersonalAcademico;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -193,10 +195,32 @@ class HorarioController extends Controller
         $nivel_id = $request->nivel_id;
         $grado_id = $request->grado_id;
         $seccion_id = $request->seccion_id;
+        $per_id = $request->user_id;
+
+        $personal = PersonalAcademico::where('per_id', $per_id)->first();
+
         $dias = $this->dias;
         $periodo = Periodo::where('anio_id', $anio_id)->where('is_deleted', '!=', 1)->first();
-        Log::info($periodo);
+
         $ags = Gsa::where('niv_id', $nivel_id)->where('gra_id', $grado_id)->where('sec_id', $seccion_id)->first();
+
+        if (!$periodo) {
+            return response()->json([
+                'status' => 400,
+                'mensaje' => 'No se encontro curso para el año seleccionado',
+                'horarios' => [],
+                'cursos' => [],
+                'dias' => $dias
+            ]);
+        }
+        if (!$ags) {
+            return response()->json([
+                'status' => 400,
+                'mensaje' => 'No se encontro cursos para el nivel y grado seleccionado',
+                'cursos' => [],
+                'dias' => $dias
+            ]);
+        }
 
         $horarios = Horario::where('per_id', $periodo->per_id)->where('ags_id', $ags->ags_id)->where('is_deleted', '!=', 1)->get();
         foreach ($horarios as $value) {
@@ -212,25 +236,29 @@ class HorarioController extends Controller
             }
         }
 
-        $cursos = Curso::where('cur_horas', '>', 0)
-            ->where('niv_id', $nivel_id)
-            ->where('gra_id', $grado_id)
-            ->where('is_deleted', '!=', 1)
-            ->select('cur_id', 'cur_nombre', 'cur_horas', 'cur_abreviatura')
+        $asignarCursos = AsignarCurso::where('pa_id', $personal->pa_id)
+            ->where('asignar_cursos.niv_id', $nivel_id)
+            ->where('cursos.gra_id', $grado_id)
+            ->where('cursos.niv_id', $nivel_id)
+            ->where('cursos.is_deleted', '!=', 1)
+            ->where('cursos.cur_horas', '>', 0)
+            ->where('asig_is_deleted', '!=', 1)
+            ->join('cursos', 'asignar_cursos.curso', '=', 'cursos.cur_nombre')
+            ->select('cursos.cur_id', 'cursos.cur_nombre', 'cursos.cur_abreviatura', 'cursos.cur_horas')
             ->get();
+
 
         return response()->json([
             'status' => 200,
             'horarios' => $horarios,
-            'cursos' => $cursos,
+            'cursos' => $asignarCursos,
             'dias' => $dias
         ]);
     }
 
     public function verifyAlumno(Request $request)
     {
-        Log::info('request');
-        Log::info($request->all());
+       
 
         $user = User::Where('per_id', $request->user)
             ->where('is_deleted', '!=', 1)

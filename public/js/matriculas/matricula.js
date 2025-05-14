@@ -40,7 +40,11 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log(infouser1);
             if (infouser1.alumno == 1) {
                 mostrar(false);
-                alert(infouser1.data);
+
+                  mostrarAlerta({
+                titulo: infouser1.data,
+                icono: "success"
+            });
                 return;
             }
 
@@ -53,7 +57,11 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrar(true);
         } else {
             mostrar(false);
-            alert("Ingrese un DNI válido");
+
+             mostrarAlerta({
+                titulo: 'Ingrese un DNI válido',
+                icono: "warning"
+            });
         }
     });
     per_id.addEventListener("change", async function () {
@@ -124,4 +132,22 @@ function mostrar(value) {
         matricula_info3.classList.add("d-none");
         return;
     }
+}
+
+
+
+function mostrarAlerta({
+    titulo = "Operación realizada",
+    icono = "success",
+    posicion = "top-end",
+    mostrarBoton = false,
+    tiempo = 1500
+} = {}) {
+    Swal.fire({
+        position: posicion,
+        icon: icono,
+        title: titulo,
+        showConfirmButton: mostrarBoton,
+        timer: tiempo
+    });
 }

@@ -93,7 +93,7 @@
 
                     <div class="col-sm-12 text-right mt-4">
                         <button type="submit" class="btn btn-primary">
-                            {{ isset($curso->cur_id) ? 'Actualizar' : 'Guardar' }}
+                            {{ isset($curso->cur_id) ? 'Actualizar' : 'Registrar' }}
                         </button>
                         <a href="{{ route('curso.inicio')}}" class="btn btn-outline-secondary">Cancelar</a>
 

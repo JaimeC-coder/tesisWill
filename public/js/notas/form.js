@@ -232,12 +232,19 @@ async function updateNota(idAlumno, idCapacidad, idPeriodo, notaSeleccionada, cu
         });
         console.log(response);
         if (response.status === 200) {
-            alert("Nota actualizada correctamente");
+
+             mostrarAlerta({
+                titulo: "Nota actualizada correctamente",
+                icono: "success"
+            });
             //recargar la pagina
             window.location.reload();
 
         } else {
-            alert("Ocurrio un problema al actualizar la nota");
+             mostrarAlerta({
+                titulo: "Ocurrio un problema al actualizar la nota",
+                icono: "warning"
+            });
             console.log(response);
         }
     } catch (error) {
@@ -259,3 +266,19 @@ async function fetchData(url, data, method = 'POST') {
 }
 
 
+
+function mostrarAlerta({
+  titulo = "Operación realizada",
+  icono = "success",
+  posicion = "top-end",
+  mostrarBoton = false,
+  tiempo = 1500
+} = {}) {
+  Swal.fire({
+    position: posicion,
+    icon: icono,
+    title: titulo,
+    showConfirmButton: mostrarBoton,
+    timer: tiempo
+  });
+}

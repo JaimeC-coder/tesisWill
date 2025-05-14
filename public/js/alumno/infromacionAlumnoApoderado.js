@@ -228,11 +228,18 @@ function inputAlumno(data) {
             per_apellidos_Alumno.value = apellidos || "";
             per_pais_Alumno.value = "Perú";
             per_fecha_nacimiento_Alumno.readonly = false;
-            return alert("El Alumno es nuevo por favor complete los datos");
+
+                return  mostrarAlerta({
+                titulo: "El Alumno es nuevo por favor complete los datos",
+                icono: "warning",
+            });
         }
         return;
     }
-    return alert("No se encontro el DNI");
+    return  mostrarAlerta({
+                titulo: "No se encontro el DNI",
+                icono: "error"
+            });
 
 
 }
@@ -265,10 +272,19 @@ function inputApoderado(data) {
             per_apellidos_Apoderado.value = apellidos || "";
             per_pais_Apoderado.value = "Perú";
 
-            return alert("El Apoderado es nuevo por favor complete los datos");
+
+             mostrarAlerta({
+                titulo: "El Apoderado es nuevo por favor complete los datos",
+                icono: "warning",
+            });
         }
     }
-    return alert("No se encontro el DNI");
+    return  mostrarAlerta({
+                titulo: "No se encontro el DNI",
+                icono: "error"
+            });
+
+
 }
 
 
@@ -287,6 +303,22 @@ function preselectLocation(data, group) {
             distrito.classList.add('form-select-readonly');
         });
     });
+}
+
+function mostrarAlerta({
+  titulo = "Operación realizada",
+  icono = "success",
+  posicion = "top-end",
+  mostrarBoton = false,
+  tiempo = 1500
+} = {}) {
+  Swal.fire({
+    position: posicion,
+    icon: icono,
+    title: titulo,
+    showConfirmButton: mostrarBoton,
+    timer: tiempo
+  });
 }
 
 

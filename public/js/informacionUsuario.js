@@ -46,7 +46,10 @@ function searchInformation(){
             apellido.value=apellidocompleto || "";
             dni.value =data.dni || "";
             pais.value="Perú";
-            alert("Datos encontrados");
+              mostrarAlerta({
+                titulo: "Datos encontrados",
+                icono: "success"
+            });
             return;
         }else if(data && data.per_dni){
 
@@ -74,7 +77,11 @@ function searchInformation(){
             });
             return;
         }else{
-            alert("No se encontraron datos con el DNI ingresado");
+
+              mostrarAlerta({
+                titulo: "No se encontraron datos con el DNI ingresado",
+                icono: "error"
+            });
             blockInput(false);
             return;
         }
@@ -109,7 +116,7 @@ function checked(){
         blockInput(false);
         btnDni.hidden=true;
     }else{
-        
+
         blockInput(false);
         btnDni.hidden=false;
     }
@@ -138,4 +145,20 @@ function blockInput(status){
     fecha.disabled=status;
     sexo.disabled=status;
     estadocivil.disabled=status;
+}
+
+function mostrarAlerta({
+  titulo = "Operación realizada",
+  icono = "success",
+  posicion = "top-end",
+  mostrarBoton = false,
+  tiempo = 1500
+} = {}) {
+  Swal.fire({
+    position: posicion,
+    icon: icono,
+    title: titulo,
+    showConfirmButton: mostrarBoton,
+    timer: tiempo
+  });
 }

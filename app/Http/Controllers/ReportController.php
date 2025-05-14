@@ -2417,8 +2417,8 @@ class ReportController extends Controller
 
     public function generarLibretaNotas(Request $request)
     {
-        // $data = $request->per_id;
-        $data = 93;
+         $data = $request->per_id;
+        //$data = 93;
 
         $institucion = Institucion::where('ie_id', 1)->first();
         $Persona = Persona::where('per_id', $data)->first();
@@ -2499,14 +2499,14 @@ class ReportController extends Controller
 
         // Obtener todas las notas del alumno
         $notas = Nota::where('alu_id', $Persona->alumno->alu_id)->get();
-
+       // Log::info($notas);
         // Procesar cada nota para llenar los cursos que sí tienen datos
         foreach ($notas as $value) {
             $asignacion = AsignarCurso::where('pa_id', $personalAcademicoId->pa_id)->where('niv_id', $idNivel)->first();
             // $asignacion = AsignarCurso::where('pa_id', $value->pa_id)->where('niv_id', $idNivel)->first();
             if ($asignacion) {
                 $curso = Curso::where('cur_nombre', $asignacion->curso)->where('gra_id', $idGrado)->where('niv_id', $idNivel)->first();
-
+                Log::info($curso);
                 if ($curso) {
                     $cursoNombre = $curso->cur_nombre;
 
@@ -2585,7 +2585,7 @@ class ReportController extends Controller
         $imagenSello = base64_encode($contenidoBinario3);
 
         $nombreDocumento = "LIBRETA_NOTAS_" . str_replace(' ', '_', $alumno) . ".pdf";
-
+        return $datosCursos;
         // Generando HTML del documento
         $html = $this->generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion);
 

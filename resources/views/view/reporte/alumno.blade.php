@@ -160,11 +160,12 @@
                                                     <span><b>Libreta de Notas </b></span>
                                                     <div class="msg p-2">
                                                         <button id="generar_libreta_notas"
-
-                                                        class="mr-20 btn btn-outline-primary "><i class="fa fa-folder-plus"></i> Generar</button>
-                                                        <a  target="_blank"
+                                                            class="mr-20 btn btn-outline-primary "><i
+                                                                class="fa fa-folder-plus"></i> Generar</button>
+                                                        <a target="_blank"
                                                             href="{{ route('reporte.alumno.libreta_notas.pdf', ['per_id' => $alumno->persona->per_id]) }}"
-                                                            class="mr-20 btn btn-outline-primary "><i class="fa-solid fa-eye"></i> Ver</a>
+                                                            class="mr-20 btn btn-outline-primary "><i
+                                                                class="fa-solid fa-eye"></i> Ver</a>
 
                                                     </div>
                                                 </div>
@@ -201,22 +202,46 @@
     {{-- <script src="{{ asset('js/reportes/general.js') }}"></script> --}}
 
     <script>
-        let button = document.getElementById('generar_ficha_matricula');
-        button.addEventListener('click', function() {
-            alert('Generando PDF...');
-            let per_id = document.getElementById('per_id').value;
+        // Reutilizable función SweetAlert
+        function mostrarSwich() {
+            let timerInterval;
+            Swal.fire({
+                title: "Generando PDF...!",
+                html: "Procesando en <b></b> milisegundos.",
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const timer = Swal.getPopup().querySelector("b");
+                    timerInterval = setInterval(() => {
+                        timer.textContent = `${Swal.getTimerLeft()}`;
+                    }, 100);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            });
+        }
 
-            // Redirigir a la URL con los parámetros
-            window.open('/api/reporte/alumno/matricula/pdf?per_id=' + per_id, '_blank');
-        });
-        let button2 = document.getElementById('generar_libreta_notas');
-        button2.addEventListener('click', function() {
-            alert('Generando PDF...');
+        // Escuchar evento del botón de ficha de matrícula
+        document.getElementById('generar_ficha_matricula').addEventListener('click', function() {
+            mostrarSwich();
             let per_id = document.getElementById('per_id').value;
+            setTimeout(() => {
+                window.open('/api/reporte/alumno/matricula/pdf?per_id=' + per_id, '_blank');
+            }, 2000); // 2000 ms = duración del Swal
 
-            // Redirigir a la URL con los parámetros
-            window.open('/api/reporte/alumno/libreta_notas/pdf?per_id=' + per_id, '_blank');
         });
-        //obtener los datos de la url
+
+        // Escuchar evento del botón de libreta de notas
+        document.getElementById('generar_libreta_notas').addEventListener('click', function() {
+            mostrarSwich(); // reemplaza alert
+            let per_id = document.getElementById('per_id').value;
+            setTimeout(() => {
+                window.open('/api/reporte/alumno/libreta_notas/pdf?per_id=' + per_id, '_blank');
+            }, 2000); // 2000 ms = duración del Swal
+
+        });
     </script>
+
 @endsection

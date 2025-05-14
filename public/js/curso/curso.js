@@ -44,7 +44,11 @@ document.addEventListener("DOMContentLoaded", function () {
         // Validar si hay al menos una capacidad
         if (capacidades.length === 0) {
             event.preventDefault();
-            alert("Por favor, agrega al menos una capacidad antes de enviar el formulario.");
+
+            mostrarAlerta({
+                titulo: 'Por favor, agrega al menos una capacidad antes de enviar el formulario',
+                icono: "warning",
+            });
         }
     }
     );
@@ -55,12 +59,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
         //validamos que no este vacio
         if (capacidadTexto === "") {
-            alert("Por favor, ingresa una capacidad.");
+
+            mostrarAlerta({
+                titulo: 'Por favor, ingresa una capacidad.',
+                icono: "warning",
+            });
             return;
         }
         // Verificamos si la capacidad ya existe
         if (capacidades.includes(capacidadTexto)) {
-            alert("Esta capacidad ya ha sido agregada.");
+
+            mostrarAlerta({
+                titulo: 'Esta capacidad ya ha sido agregada',
+                icono: "warning",
+            });
             return;
         }
 
@@ -113,3 +125,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+
+function mostrarAlerta({
+    titulo = "Operación realizada",
+    icono = "success",
+    posicion = "top-end",
+    mostrarBoton = false,
+    tiempo = 1500
+} = {}) {
+    Swal.fire({
+        position: posicion,
+        icon: icono,
+        title: titulo,
+        showConfirmButton: mostrarBoton,
+        timer: tiempo
+    });
+}

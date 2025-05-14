@@ -92,7 +92,7 @@
                                                         <div class="dropdown-menu">
                                                             <button class="dropdown-item" id="buttonrepor"
                                                                 type="button">Generar PDF</button>
-                                                         
+
                                                         </div>
                                                     </div>
 
@@ -215,16 +215,44 @@
     <script>
         let button = document.getElementById('buttonrepor');
         button.addEventListener('click', function() {
-            alert('Generando PDF...');
-            let urlParams = new URLSearchParams(window.location.search);
-            let anio = urlParams.get('anio');
-            let nivel = urlParams.get('nivel');
-            let grado = urlParams.get('grado');
-            let seccion = urlParams.get('seccion');
+
+            mostrarSwich();
             // Redirigir a la URL con los parámetros
-            window.open('/api/reporte/gestion/pdf?anio=' + anio + '&nivel=' + nivel + '&grado=' + grado + '&seccion=' +
-                seccion, '_blank');
+
         });
         //obtener los datos de la url
+    </script>
+
+
+    <script>
+        function mostrarSwich() {
+            let timerInterval;
+            Swal.fire({
+                title: "Generando PDF...!",
+                html: "Procesando en <b></b> millisegundos.",
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const timer = Swal.getPopup().querySelector("b");
+                    timerInterval = setInterval(() => {
+                        timer.textContent = `${Swal.getTimerLeft()}`;
+                    }, 100);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            }).then((result) => {
+                /* Read more about handling dismissals below */
+                let urlParams = new URLSearchParams(window.location.search);
+                let anio = urlParams.get('anio');
+                let nivel = urlParams.get('nivel');
+                let grado = urlParams.get('grado');
+                let seccion = urlParams.get('seccion');
+                window.open('/api/reporte/gestion/pdf?anio=' + anio + '&nivel=' + nivel + '&grado=' + grado +
+                    '&seccion=' +
+                    seccion, '_blank');
+            });
+        }
     </script>
 @endsection

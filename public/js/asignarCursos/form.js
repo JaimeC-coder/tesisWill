@@ -5,11 +5,15 @@ const urlParams = new URLSearchParams(window.location.search);
 const niv_id = urlParams.get('niv_id');
 
 
-function asignacionMasivaCurso(docente){
+function asignacionMasivaCurso(docente) {
     let newcheckboxes = handleCheckboxChange(docente);
     let oldcheckboxes = initialCheckboxValues[docente] || [];
-    if(newcheckboxes.length === 0 || newcheckboxes.length === oldcheckboxes.length){
-        alert("No ha seleccionado nuevos cursos a asignar.");
+    if (newcheckboxes.length === 0 || newcheckboxes.length === oldcheckboxes.length) {
+
+        mostrarAlerta({
+            titulo: "No ha seleccionado nuevos cursos a asignar",
+            icono: "error"
+        });
         return;
     }
     fetch('/api/asignacionMasivaCurso', {
@@ -21,24 +25,32 @@ function asignacionMasivaCurso(docente){
             docente: docente,
             cursos: newcheckboxes,
             niv_id: niv_id
-            }),
+        }),
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        console.log(data.status);
-        if(data.status === 1){
-            alert("Cursos asignados correctamente.");
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            console.log(data.status);
+            if (data.status === 1) {
+                mostrarAlerta({
+                    titulo: "Cursos asignados correctamente.",
+                    icono: "success"
+                });
+
+                location.reload();
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+
+            mostrarAlerta({
+                titulo: "Error al asignar cursos.",
+                icono: "error"
+            });
             location.reload();
-        }
-    })
-    .catch((error) => {
-        console.error( error);
-        alert("Error al asignar cursos.");
-        location.reload();
-    });
+        });
 }
-function eliminacionMasivaCurso(aux){
+function eliminacionMasivaCurso(aux) {
     fetch('/api/EliminacionMasivaCurso', {
         method: "POST",
         headers: {
@@ -47,23 +59,31 @@ function eliminacionMasivaCurso(aux){
         body: JSON.stringify({
             docente: aux,
             niv_id: niv_id
-         }),
+        }),
     })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data);
-        console.log(data.status);
-        if(data.status === 1){
-            alert("Cursos eliminados correctamente.");
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            console.log(data.status);
+            if (data.status === 1) {
+
+                mostrarAlerta({
+                    titulo: "Cursos eliminados correctamente.",
+                    icono: "success"
+                });
+                location.reload();
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+
+            mostrarAlerta({
+                titulo: "Error al eliminar cursos.",
+                icono: "success"
+            });
             location.reload();
         }
-    })
-    .catch((error) => {
-        console.error( error);
-        alert("Error al eliminar cursos.");
-        location.reload();
-    }
-    );
+        );
 
 }
 
@@ -74,7 +94,7 @@ function handleCheckboxChange(docenteId) {
     if (!row) return;
     const selectedCheckboxes = Array.from(row.querySelectorAll('input[type="checkbox"]:checked'))
         .map(checkbox => checkbox.value);
-  return selectedCheckboxes;
+    return selectedCheckboxes;
 
 }
 
@@ -102,3 +122,19 @@ initializeCheckboxValues();
 
 
 
+
+function mostrarAlerta({
+    titulo = "Operación realizada",
+    icono = "success",
+    posicion = "top-end",
+    mostrarBoton = false,
+    tiempo = 1500
+} = {}) {
+    Swal.fire({
+        position: posicion,
+        icon: icono,
+        title: titulo,
+        showConfirmButton: mostrarBoton,
+        timer: tiempo
+    });
+}

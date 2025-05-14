@@ -7,22 +7,23 @@ use App\Models\Grado;
 use App\Models\Nivel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CursoController extends Controller
 {
-    public $nivel ;
-    public $grado ;
+    public $nivel;
+    public $grado;
     public $estado = [1 => 'Activo', 2 => 'Inactivo'];
     /**
      * Display a listing of the resource.
      */
 
 
-     public function __construct()
-     {
-         $this->nivel = Nivel::all();
-         $this->grado = Grado::where('gra_is_delete', '!=', 1)->get();
-     }
+    public function __construct()
+    {
+        $this->nivel = Nivel::all();
+        $this->grado = Grado::where('gra_is_delete', '!=', 1)->get();
+    }
 
     public function index()
     {
@@ -48,6 +49,7 @@ class CursoController extends Controller
     {
 
         $newRequest = $request->all();
+        Log::info($newRequest);
 
         DB::transaction(function () use ($newRequest) {
             if ($newRequest['grado_id'] == -1) {
@@ -76,7 +78,6 @@ class CursoController extends Controller
                         ]);
                     }
                 }
-
             } else {
                 $curso = Curso::create([
                     'cur_nombre' => $newRequest['curso'],
@@ -101,11 +102,8 @@ class CursoController extends Controller
                     ]);
                 }
             }
-
         });
         return redirect()->route('curso.inicio')->with('success', 'Alumno registrado correctamente');
-
-
     }
 
     /**
@@ -132,6 +130,8 @@ class CursoController extends Controller
      */
     public function update(Request $request, Curso $curso)
     {
+        Log::info('request');
+        Log::info($request->all());
         $curso->update([
             'cur_nombre' => $request['curso'],
             'cur_abreviatura' => $request['abreviatura'],
@@ -141,22 +141,29 @@ class CursoController extends Controller
             'cur_estado' => $request['estado']
         ]);
         $curso->capacidad()->delete();
-        $capacidades = $request['capacidades'];
-        $capacidades = str_replace('[', '', $capacidades);
-        $capacidades = str_replace(']', '', $capacidades);
-        // quitar el "" de las capacidades
-        $capacidades = str_replace('"', '', $capacidades);
+        $capacidades = json_decode($request['capacidades'], true);
 
-        $capacidades = explode(',', $capacidades);
-        foreach ($capacidades as $capacidad) {
-            $curso->capacidad()->create([
-                'cap_descripcion' => $capacidad,
-                'cap_is_deleted' => 0
-            ]);
-        }
+        if (is_array($capacidades)) {
+            foreach ($capacidades as $capacidad) {
+                // Si la capacidad es un array (ej. con 'cap_descripcion'), lo tomamos
+                if (is_array($capacidad) && isset($capacidad['cap_descripcion'])) {
+                    $descripcion = $capacidad['cap_descripcion'];
+                } else {
+                    // Si es un string simple
+                    $descripcion = $capacidad;
+                }
+
+                $curso->capacidad()->create([
+                    'cap_descripcion' => $descripcion,
+                    'cap_is_deleted' => 0
+                ]);
+            }
+        } else {
+            Log::error('Error al decodificar las capacidades');
+        };
+
 
         return redirect()->route('curso.inicio')->with('success', 'Año escolar actualizado correctamente');
-
     }
 
     /**
@@ -173,7 +180,6 @@ class CursoController extends Controller
             DB::commit();
 
             return redirect()->route('curso.inicio')->with('success', 'Año escolar eliminado correctamente');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('curso.inicio')->with('error', 'Error al eliminar el año escolar');
@@ -182,7 +188,7 @@ class CursoController extends Controller
 
     public function inicio()
     {
-        $cursos = Curso::where('is_deleted','!=',1)->orderBy('cur_id', 'desc')->get();
+        $cursos = Curso::where('is_deleted', '!=', 1)->orderBy('cur_id', 'desc')->get();
         //return $cursos[0]->capacidad;
 
         return view('view.curso.inicio', compact('cursos'));

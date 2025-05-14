@@ -158,14 +158,20 @@ async function loadSecciones(gradoId, userId = user.value) {
     }
 }
 
-async function loadHorarios(seccionId = seccionss.value, anioId = anio.value, nivelId = nivel.value, gradoId = grado.value) {
+async function loadHorarios(seccionId = seccionss.value, anioId = anio.value, nivelId = nivel.value, gradoId = grado.value, userId = user.value) {
     try {
         const horarios = await fetchData('/api/horario/search', {
             seccion_id: seccionId,
             anio_id: anioId,
             nivel_id: nivelId,
-            grado_id: gradoId
+            grado_id: gradoId,
+            user_id: userId
         });
+
+        if (horarios.status === 400) {
+            showNotification(horarios.mensaje, 'info');
+            return;
+        }
 
         mostrar_info.hidden = false;
 
@@ -391,7 +397,7 @@ async function verififyHorario() {
                 btnregister.disabled = true;
             }
 
-            loadHorarios(seccionId, anioId, nivelId, gradoId);
+            loadHorarios(seccionId, anioId, nivelId, gradoId, user.value);
             return;
         } else if (horarios.alumno === 2) {
             showNotification(horarios.data, 'info');

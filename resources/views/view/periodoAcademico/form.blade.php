@@ -66,7 +66,7 @@
                     min="1777-01-01" max="2025-12-31" id="per_limite_cierre" name="per_limite_cierre" value="{{$periodo->per_limite_cierre}}">
                 </div>
             </div>
-            <div class="form-group col-md-6">
+            {{-- <div class="form-group col-md-6">
                 <div class="form-group">
                     <label for="per_tp_notas">Tipo de Registro de Notas *</label>
 
@@ -79,7 +79,7 @@
                     </select>
                 </div>
 
-            </div>
+            </div> --}}
         </div>
 
         <div class="d-inline row p-2 float-right">

@@ -15,7 +15,7 @@ return [
     */
 
     'title' => '',
-    'title_prefix' => 'I.E.P 82857 LIVES |',
+    'title_prefix' => 'I.E 82857 LIVES |',
     'title_postfix' => '',
 
     /*
@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => '<b>I.E.P 82857 </b>LIVES',
+    'logo' => '<b>I.E 82857 </b>LIVES',
     'logo_img' => 'insig.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -87,7 +87,7 @@ return [
         'enabled' => false,
         'img' => [
             'path' => 'insig.png',
-            'alt' => 'I.E.P 82857 LIVES',
+            'alt' => 'I.E 82857 LIVES',
             'class' => '',
             'width' => 50,
             'height' => 50,
@@ -352,8 +352,8 @@ return [
             'icon_color' => 'green',
             'can'  => 'reportes.alumno',
         ],
-        ['header' => 'Admin'],
-        ['header' => 'Actividades Adminitrativas'],
+      //  ['header' => 'Admin'],
+        ['header' => 'ACTIVIDADES ADMINISTRATIVAS'],
         [
             'text' => 'Ambientes',
             'icon'=>'fas fa-table',

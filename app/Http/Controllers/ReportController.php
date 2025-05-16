@@ -2415,10 +2415,10 @@ class ReportController extends Controller
         return response()->file(storage_path('app/public/FichaMatricula/' . $nombreDocumento));
     }
 
+
     public function generarLibretaNotas(Request $request)
     {
-         $data = $request->per_id;
-        //$data = 93;
+        $data = $request->per_id;
 
         $institucion = Institucion::where('ie_id', 1)->first();
         $Persona = Persona::where('per_id', $data)->first();
@@ -2445,7 +2445,8 @@ class ReportController extends Controller
             $cursos[$cursoNombre] = [
                 'capacidades' => [],
                 'bimestres' => [],
-                'promedio_final' => ''
+                'promedio_final' => '',
+                'promedio_calculado' => false // Flag para evitar cálculos repetidos
             ];
 
             // NUEVO: Obtener capacidades para este curso desde la base de datos
@@ -2497,68 +2498,107 @@ class ReportController extends Controller
             }
         }
 
+        // Funciones para convertir entre letras y números
+        function convertirLetraANumero($letra)
+        {
+            switch (trim(strtoupper($letra))) {
+                case 'AD':
+                    return 4;
+                case 'A':
+                    return 3;
+                case 'B':
+                    return 2;
+                case 'C':
+                    return 1;
+                default:
+                    return 0; // En caso de valor no reconocido
+            }
+        }
+
+        function convertirNumeroALetra($numero)
+        {
+            if ($numero >= 3.5) return 'AD';
+            if ($numero >= 2.5) return 'A';
+            if ($numero >= 1.5) return 'B';
+            return 'C';
+        }
+
         // Obtener todas las notas del alumno
         $notas = Nota::where('alu_id', $Persona->alumno->alu_id)->get();
-       // Log::info($notas);
+
         // Procesar cada nota para llenar los cursos que sí tienen datos
         foreach ($notas as $value) {
-            $asignacion = AsignarCurso::where('pa_id', $personalAcademicoId->pa_id)->where('niv_id', $idNivel)->first();
-            // $asignacion = AsignarCurso::where('pa_id', $value->pa_id)->where('niv_id', $idNivel)->first();
-            if ($asignacion) {
-                $curso = Curso::where('cur_nombre', $asignacion->curso)->where('gra_id', $idGrado)->where('niv_id', $idNivel)->first();
-                Log::info($curso);
-                if ($curso) {
-                    $cursoNombre = $curso->cur_nombre;
+            $curso = Curso::where('cur_nombre', $value->curso->cur_nombre)
+                ->where('gra_id', $idGrado)
+                ->where('niv_id', $idNivel)
+                ->first();
 
-                    // Obtener las notas de capacidades
-                    $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
+            if ($curso) {
+                $cursoNombre = $curso->cur_nombre;
 
-                    // No sobreescribimos las capacidades aquí, ya las hemos obtenido antes
-                    // Solo asignamos las notas a las capacidades correspondientes
+                $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
+                // No sobreescribimos las capacidades aquí, ya las hemos obtenido antes
+                $bimestre = $value->nt_bimestre;
 
-                    // Guardar las notas según el bimestre
-                    $bimestre = $value->nt_bimestre;
+                // Inicializar array de notas para este bimestre si no existe
+                if (!isset($cursos[$cursoNombre]['bimestres'][$bimestre])) {
+                    $cursos[$cursoNombre]['bimestres'][$bimestre] = [
+                        'capacidades' => [],
+                        'promedio' => ''
+                    ];
+                }
 
-                    // Inicializar array de notas para este bimestre si no existe
-                    if (!isset($cursos[$cursoNombre]['bimestres'][$bimestre])) {
-                        $cursos[$cursoNombre]['bimestres'][$bimestre] = [
-                            'capacidades' => [],
-                            'promedio' => ''
-                        ];
+                // Guardar notas de capacidades
+                foreach ($notasCapacidades as $index => $capacidad) {
+                    // Asegurar que el índice existe en el array de capacidades
+                    if (isset($cursos[$cursoNombre]['capacidades'][$index])) {
+                        $cursos[$cursoNombre]['bimestres'][$bimestre]['capacidades'][$index] =
+                            !empty($capacidad->nc_nota) ? $capacidad->nc_nota : '';
                     }
+                }
 
-                    // Guardar notas de capacidades
-                    foreach ($notasCapacidades as $index => $capacidad) {
-                        // Asegurar que el índice existe en el array de capacidades
-                        if (isset($cursos[$cursoNombre]['capacidades'][$index])) {
-                            $cursos[$cursoNombre]['bimestres'][$bimestre]['capacidades'][$index] =
-                                !empty($capacidad->nc_nota) ? $capacidad->nc_nota : '';
-                        }
-                    }
+                // Guardar promedio bimestral
+                $cursos[$cursoNombre]['bimestres'][$bimestre]['promedio'] =
+                    !empty($value->nt_nota) ? $value->nt_nota : '';
 
-                    // Guardar promedio bimestral
-                    $cursos[$cursoNombre]['bimestres'][$bimestre]['promedio'] =
-                        !empty($value->nt_nota) ? $value->nt_nota : '';
+                // Calcular el promedio final para cada curso con todas las notas disponibles
+                // Esto se ejecuta para cada nota, así que usamos un flag para evitar cálculos repetidos
+                if (!isset($cursos[$cursoNombre]['promedio_calculado']) || $cursos[$cursoNombre]['promedio_calculado'] === false) {
+                    // Obtener todas las notas del alumno para este curso específico
+                    $notasFinales = Nota::where('alu_id', $Persona->alumno->alu_id)
+                        ->where('pa_id', $value->pa_id)
+                        ->get();
 
-                    // Si es el último bimestre, calcular el promedio final
-                    if ($bimestre == 4) {
-                        $notasFinales = Nota::where('alu_id', $Persona->alumno->alu_id)
-                            ->where('pa_id', $value->pa_id)
-                            ->get();
+                    $suma = 0;
+                    $total = $notasFinales->count();
+                    $notasValidas = 0;
 
-                        $suma = 0;
-                        $total = $notasFinales->count();
+                    if ($total > 0) {
+                        foreach ($notasFinales as $notaFinal) {
+                            $notaLetra = $notaFinal->nt_nota;
 
-                        if ($total > 0) {
-                            foreach ($notasFinales as $notaFinal) {
-                                $suma += $notaFinal->nt_nota;
+                            // Solo procesar si la nota tiene un valor
+                            if (!empty($notaLetra)) {
+                                $valorNumerico = convertirLetraANumero($notaLetra);
+                                $suma += $valorNumerico;
+                                $notasValidas++;
                             }
-                            $promedio = $suma / $total;
-                            $cursos[$cursoNombre]['promedio_final'] = $promedio;
+                        }
+
+                        // Calcular el promedio solo si hay notas válidas
+                        if ($notasValidas > 0) {
+                            $promedioNumerico = $suma / $notasValidas;
+                            $promedioLetra = convertirNumeroALetra($promedioNumerico);
+                            $cursos[$cursoNombre]['promedio_final'] = $promedioLetra;
                         } else {
                             $cursos[$cursoNombre]['promedio_final'] = '';
                         }
+                    } else {
+                        $cursos[$cursoNombre]['promedio_final'] = '';
                     }
+
+                    // Marcar este curso como ya calculado
+                    $cursos[$cursoNombre]['promedio_calculado'] = true;
                 }
             }
         }
@@ -2573,7 +2613,7 @@ class ReportController extends Controller
             ];
         }
 
-        // Obteniendo imagen y convintiendolo a base64
+        // Obteniendo imagen y convirtiendolo a base64
         $cao = public_path('insig.png');
         $educacion = public_path('escudoMinedu.png');
         $sello = public_path('sello.png');
@@ -2585,7 +2625,7 @@ class ReportController extends Controller
         $imagenSello = base64_encode($contenidoBinario3);
 
         $nombreDocumento = "LIBRETA_NOTAS_" . str_replace(' ', '_', $alumno) . ".pdf";
-        return $datosCursos;
+
         // Generando HTML del documento
         $html = $this->generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion);
 
@@ -2602,6 +2642,7 @@ class ReportController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="' . $nombreDocumento . '"');
     }
+
     /**
      * Genera el HTML para la libreta de notas
      */
@@ -2721,8 +2762,8 @@ class ReportController extends Controller
                                     </tbody>
                                 </table>';
 
-                            $contadorCursos = 0;
-                            $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 2rem;">
+        $contadorCursos = 0;
+        $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 2rem;">
                                     <thead>
                                         <tr>
                                             <th rowspan="2" class="bg-gray" width="15%">Área Curricular</th>
@@ -2739,54 +2780,54 @@ class ReportController extends Controller
                                     </thead>
                                     <tbody>';
 
-                            foreach ($datosCursos as $nombreCurso => $curso) {
-                                $contadorCursos++;
-                                $numCapacidades = max(1, count($curso['capacidades']));
-                                $rowspan = $numCapacidades + 2;
+        foreach ($datosCursos as $nombreCurso => $curso) {
+            $contadorCursos++;
+            $numCapacidades = max(1, count($curso['capacidades']));
+            $rowspan = $numCapacidades + 1;
 
-                                $html .= '<tr>
+            $html .= '<tr>
                                 <td rowspan="' . $rowspan . '" style="vertical-align: middle;">' . $nombreCurso . '</td>';
 
-                                for ($i = 0; $i < $numCapacidades; $i++) {
-                                    if ($i > 0) $html .= '<tr>';
+            for ($i = 0; $i < $numCapacidades; $i++) {
+                if ($i > 0) $html .= '<tr>';
 
-                                    $capacidad = isset($curso['capacidades'][$i]) ? $curso['capacidades'][$i]['nombre'] : '';
-                                    $html .= '<td>' . $capacidad . '</td>';
+                $capacidad = isset($curso['capacidades'][$i]) ? $curso['capacidades'][$i]['nombre'] : '';
+                $html .= '<td>' . $capacidad . '</td>';
 
-                                    for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
-                                        $nota = $curso['bimestres'][$bimestre]['capacidades'][$i] ?? '';
-                                        $html .= '<td align="center">' . $nota . '</td>';
-                                    }
+                for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
+                    $nota = $curso['bimestres'][$bimestre]['capacidades'][$i] ?? '';
+                    $html .= '<td align="center">' . $nota . '</td>';
+                }
 
-                                    if ($i == 0) {
-                                        $promedioFinal = $curso['promedio_final'] ?? '';
-                                        $html .= '<td rowspan="' . $rowspan . '" align="center" style="vertical-align: middle;">' . $promedioFinal . '</td>';
-                                    }
+                if ($i == 0) {
+                    $promedioFinal = $curso['promedio_final'] ?? '';
+                    $html .= '<td rowspan="' . $rowspan . '" align="center" style="vertical-align: middle;">' . $promedioFinal . '</td>';
+                }
 
-                                    $html .= '</tr>';
-                                }
+                $html .= '</tr>';
+            }
 
-                                $html .= '<tr>
-                                <td class="bg-gray">CALIFICATIVO DE CAPACIDADES</td>';
-                                for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
-                                    $promedioCap = $curso['bimestres'][$bimestre]['promedio_capacidades'] ?? $curso['bimestres'][$bimestre]['promedio'] ?? '';
-                                    $html .= '<td align="center">' . $promedioCap . '</td>';
-                                }
-                                $html .= '</tr>';
+            // $html .= '<tr>
+            //                     <td class="bg-gray">CALIFICATIVO DE CAPACIDADES</td>';
+            // for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
+            //     $promedioCap = $curso['bimestres'][$bimestre]['promedio_capacidades'] ?? $curso['bimestres'][$bimestre]['promedio'] ?? '';
+            //     $html .= '<td align="center">' . $promedioCap . '</td>';
+            // }
+            // $html .= '</tr>';
 
-                                $html .= '<tr>
+            $html .= '<tr>
                                 <td class="bg-gray">CALIFICATIVO DE AREA</td>';
-                                for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
-                                    $promedio = $curso['bimestres'][$bimestre]['promedio'] ?? '';
-                                    $html .= '<td align="center">' . $promedio . '</td>';
-                                }
-                                $html .= '</tr>';
+            for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
+                $promedio = $curso['bimestres'][$bimestre]['promedio'] ?? '';
+                $html .= '<td align="center">' . $promedio . '</td>';
+            }
+            $html .= '</tr>';
 
-                                // 👇 Insertar salto de página cada 3 cursos
-                                if ($contadorCursos % 3 == 0 && $contadorCursos < count($datosCursos)) {
-                                    $html .= '</tbody></table>';
-                                    $html .= '<div style="page-break-after: always;"></div>';
-                                    $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 2rem;">
+            // 👇 Insertar salto de página cada 3 cursos
+            if ($contadorCursos % 3 == 0 && $contadorCursos < count($datosCursos)) {
+                $html .= '</tbody></table>';
+                $html .= '<div style="page-break-after: always;"></div>';
+                $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 2rem;">
                                             <thead>
                                                 <tr>
                                                     <th rowspan="2" class="bg-gray" width="15%">Área Curricular</th>
@@ -2802,11 +2843,11 @@ class ReportController extends Controller
                                                 </tr>
                                             </thead>
                                             <tbody>';
-                                }
-                            }
+            }
+        }
 
-                            // Competencias transversales
-                            $html .= '<tr>
+        // Competencias transversales
+        $html .= '<tr>
                             <td rowspan="2">Competencias transversales</td>
                             <td>Se desenvuelve en entornos virtuales generados por las TIC</td>
                             <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
@@ -2816,10 +2857,10 @@ class ReportController extends Controller
                             <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
                         </tr>';
 
-                            $html .= '</tbody></table>';
+        $html .= '</tbody></table>';
 
-                            // Situación final
-                            $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
+        // Situación final
+        $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
                             <thead>
                                 <tr>
                                     <th colspan="3" class="bg-gray">Situación final del estudiante al término del periodo lectivo</th>
@@ -2839,7 +2880,7 @@ class ReportController extends Controller
                             </tbody>
                         </table>';
 
-                            $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 3rem;">
+        $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 3rem;">
                             <thead>
                                 <tr><th colspan="3" class="bg-gray">Área(a) y/o taller(es) que pasan a recuperación pedagógica</th></tr>
                             </thead>
@@ -2848,19 +2889,25 @@ class ReportController extends Controller
                             </tbody>
                         </table>';
 
-                            $html .= '<table width="100%" style="margin-top: 2rem;">
+        $html .= '<table width="100%" style="margin-top: 1rem;">
                             <tbody>
                                 <tr>
-                                    <td width="33%" align="center">
-                                        <div style="border-top: 1px solid #000; padding-top: 5px; width: 80%; margin: 0 auto;">
+                                    <td width="50%" align="center">
+                                        <img src="data:image/jpg;base64,' . $imagenSello . '" alt="sello" class="sello" />
+                                    </td>
+                                    <td width="50%" align="raight">
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="30%" align="center">
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; width: 40%; margin: 0 auto;">
                                             DIRECTOR
                                         </div>
                                     </td>
-                                    <td width="33%" align="center">
-                                        <img src="data:image/jpg;base64,' . $imagenSello . '" alt="sello" class="sello" />
-                                    </td>
-                                    <td width="33%" align="center">
-                                        <div style="border-top: 1px solid #000; padding-top: 5px; width: 80%; margin: 0 auto;">
+
+                                    <td width="30%" align="center">
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; width: 40%; margin: 0 auto;">
                                             DOCENTE DE AULA
                                         </div>
                                     </td>

@@ -171,7 +171,7 @@ class RolesPermissonSeeder extends Seeder
         Permission::create(
             [
                 'name' => 'actividades.roles',
-                'description' => 'Acceso al modulo de Alumnos',
+                'description' => 'Acceso al modulo de roles',
                 'tipo' => 'panel'
             ]
         )->syncRoles([$role, $role1]);
@@ -179,7 +179,7 @@ class RolesPermissonSeeder extends Seeder
         Permission::create(
             [
                 'name' => 'actividades.usuarios',
-                'description' => 'Acceso al modulo de Alumnos',
+                'description' => 'Acceso al modulo de usuarios',
                 'tipo' => 'panel'
             ]
         )->syncRoles([$role, $role1]);
@@ -187,7 +187,7 @@ class RolesPermissonSeeder extends Seeder
         Permission::create(
             [
                 'name' => 'actividades.institucion',
-                'description' => 'Acceso al modulo de Alumnos',
+                'description' => 'Acceso al modulo de institucion',
                 'tipo' => 'panel'
             ]
         )->syncRoles([$role, $role1,  $role4]);

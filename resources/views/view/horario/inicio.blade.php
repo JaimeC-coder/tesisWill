@@ -80,7 +80,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-lg-12 col-md-6 col-sm-12">
-                                                <div class="form-group"><label>Fecha</label>
+                                                <div class="form-group"><label>Día</label>
                                                     <select id="SelectDia" class="form-control show-tick" data-required="true" >
                                                         <option value="0" selected disabled>-- Selecciona --</option>
 

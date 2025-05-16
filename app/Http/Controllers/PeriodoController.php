@@ -54,7 +54,7 @@ class PeriodoController extends Controller
                 'per_inicio_matriculas' => $request->per_inicio_matriculas,
                 'per_final_matricula' => $request->per_final_matricula,
                 'per_limite_cierre' => $request->per_limite_cierre,
-                'per_tp_notas' => $request->per_tp_notas,
+                 'per_tp_notas' => 4,
                 'per_estado' => $request->per_estado == 1 ? 1 : 0,
             ]);
 
@@ -103,7 +103,7 @@ class PeriodoController extends Controller
                 'per_inicio_matriculas' => $request->per_inicio_matriculas,
                 'per_final_matricula' => $request->per_final_matricula,
                 'per_limite_cierre' => $request->per_limite_cierre,
-                'per_tp_notas' => $request->per_tp_notas,
+                'per_tp_notas' => 4,
                 'per_estado' => $request->per_estado == 1 ? 1 : 0,
             ]);
 

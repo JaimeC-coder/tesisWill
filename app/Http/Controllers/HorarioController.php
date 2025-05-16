@@ -177,8 +177,8 @@ class HorarioController extends Controller
         $anios =  Periodo::where('per_estado', '!=', 0)
             ->join('anios', 'periodos.anio_id', '=', 'anios.anio_id')
             ->select('anios.anio_id', 'anios.anio_descripcion')
-            ->where('periodos.is_deleted',0)
-            ->where('anios.is_deleted',0)
+            ->where('periodos.is_deleted', 0)
+            ->where('anios.is_deleted', 0)
             ->get();
         Log::info($anios);
 
@@ -197,7 +197,9 @@ class HorarioController extends Controller
         $seccion_id = $request->seccion_id;
         $per_id = $request->user_id;
 
-        $personal = PersonalAcademico::where('per_id', $per_id)->first();
+        $personal = PersonalAcademico::where('per_id', $per_id)->where('is_deleted', '!=', 1)->first();
+        $usuario = User::Where('per_id', $per_id)->where('is_deleted', '!=', 1)->first();
+
 
         $dias = $this->dias;
         $periodo = Periodo::where('anio_id', $anio_id)->where('is_deleted', '!=', 1)->first();
@@ -236,16 +238,28 @@ class HorarioController extends Controller
             }
         }
 
-        $asignarCursos = AsignarCurso::where('pa_id', $personal->pa_id)
-            ->where('asignar_cursos.niv_id', $nivel_id)
-            ->where('cursos.gra_id', $grado_id)
-            ->where('cursos.niv_id', $nivel_id)
-            ->where('cursos.is_deleted', '!=', 1)
-            ->where('cursos.cur_horas', '>', 0)
-            ->where('asig_is_deleted', '!=', 1)
-            ->join('cursos', 'asignar_cursos.curso', '=', 'cursos.cur_nombre')
-            ->select('cursos.cur_id', 'cursos.cur_nombre', 'cursos.cur_abreviatura', 'cursos.cur_horas')
-            ->get();
+
+
+        if ($usuario->roles[0]->name == "Alumno" or $usuario->roles[0]->name == "Administrador" or $usuario->roles[0]->name == "Secretaria" or $usuario->roles[0]->name == "Director") {
+            $asignarCursos = Curso::where('cur_horas', '>', 0)
+                ->where('niv_id', $nivel_id)
+                ->where('gra_id', $grado_id)
+                ->where('is_deleted', '!=', 1)
+                ->select('cur_id', 'cur_nombre', 'cur_horas', 'cur_abreviatura')
+                ->get();
+        } elseif ($usuario->roles[0]->name == "Docente" ) {
+
+            $asignarCursos = AsignarCurso::where('pa_id', $personal->pa_id)
+                ->where('asignar_cursos.niv_id', $nivel_id)
+                ->where('cursos.gra_id', $grado_id)
+                ->where('cursos.niv_id', $nivel_id)
+                ->where('cursos.is_deleted', '!=', 1)
+                ->where('cursos.cur_horas', '>', 0)
+                ->where('asig_is_deleted', '!=', 1)
+                ->join('cursos', 'asignar_cursos.curso', '=', 'cursos.cur_nombre')
+                ->select('cursos.cur_id', 'cursos.cur_nombre', 'cursos.cur_abreviatura', 'cursos.cur_horas')
+                ->get();
+        }
 
 
         return response()->json([
@@ -258,7 +272,7 @@ class HorarioController extends Controller
 
     public function verifyAlumno(Request $request)
     {
-       
+
 
         $user = User::Where('per_id', $request->user)
             ->where('is_deleted', '!=', 1)

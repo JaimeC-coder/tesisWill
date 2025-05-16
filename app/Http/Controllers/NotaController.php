@@ -104,29 +104,25 @@ class NotaController extends Controller
             $asignacionesCursos->capacidades = count($capacidades);
 
             $tipoPeriodo = $this->configurarTipoPeriodo($tipoPeriodo);
-            if ($tipoPeriodo->tp_tipo == 'Registro de Notas Anuales') {
+            Log::info($tipoPeriodo);
+            if ($tipoPeriodo->tp_tipo === "REGISTRO DE NOTAS ANUALES") {
                 $tipoPeriodo['ab'] = 'A';
                 $tipoPeriodo['can'] = '1';
-            } else if ($tipoPeriodo->tp_tipo == 'REGISTRO DE NOTAS BIMESTRALES') {
+            } else if ($tipoPeriodo->tp_tipo === 'REGISTRO DE NOTAS BIMESTRALES') {
                 $tipoPeriodo['ab'] = 'B';
                 $tipoPeriodo['can'] = '4';
-            } else if ($tipoPeriodo->tp_tipo == 'Registro de Notas Trimestrales') {
+            } else if ($tipoPeriodo->tp_tipo === "REGISTRO DE NOTAS TRIMESTRALES") {
                 $tipoPeriodo['ab'] = 'T';
                 $tipoPeriodo['can'] = '3';
-            } else if ($tipoPeriodo->tp_tipo == 'Registro de Notas Semestrales') {
+            } else if ($tipoPeriodo->tp_tipo === "REGISTRO DE NOTAS SEMESTRALES") {
                 $tipoPeriodo['ab'] = 'S';
                 $tipoPeriodo['can'] = '2';
-            } else if ($tipoPeriodo->tp_tipo == 'Registro de Notas Semestrales') {
-                $tipoPeriodo['ab'] = 'M';
-                $tipoPeriodo['can'] = '2';
-            } else {
+            }else {
                 $tipoPeriodo['ab'] = 'x';
                 $tipoPeriodo['can'] = '0';
             }
             $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $tipoPeriodo['can'], $periodo);
-            //  $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $periodo->per_id);
-
-            //return $Gsas;
+           
             return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidades', 'user'));
         }
 

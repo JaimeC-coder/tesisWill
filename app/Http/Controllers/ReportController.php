@@ -279,7 +279,7 @@ class ReportController extends Controller
         if (is_null($dni)) {
             Log::info('DNI no proporcionado');
             return view('view.reporte.alumno', compact('dni', 'persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))
-                ->with('error', 'Debe proporcionar un DNI.');
+                ->with('errors', 'Debe proporcionar un DNI.');
         }
 
         // Buscar al alumno por DNI
@@ -370,7 +370,7 @@ class ReportController extends Controller
         $apoderadoNombre = $Persona->alumno->apoderado->persona->per_nombres;
         $apoderadoApellidos = explode(" ", $Persona->alumno->apoderado->persona->per_apellidos);
 
-        $parentesco = $Persona->alumno->apoderado->apo_parentesco;
+        $parentesco = strtoupper($Persona->alumno->apoderado->apo_parentesco);
         $vive = $Persona->alumno->apoderado->apo_vive_con_estudiante == 'No' ? 2 : 1;
         $fechaNacimientoApo = explode("-", $Persona->alumno->apoderado->persona->per_fecha_nacimiento);
         // $parentesco = $Persona->alumno->apoderado->apo_id;
@@ -2735,7 +2735,7 @@ class ReportController extends Controller
                                                     </tr>
                                                     <tr>
                                                         <td class="bg-gray">Nivel:</td>
-                                                        <td>SECUNDARIA</td>
+                                                        <td>PRIMARIA</td>
                                                         <td class="bg-gray">Código Modular:</td>
                                                         <td>' . $institucion->ie_codigo_modular . '</td>
                                                     </tr>

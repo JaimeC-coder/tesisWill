@@ -29,26 +29,30 @@
             <div class="container-fluid">
                 <div class="tab-content">
                     <form action="{{ route('reporte.gestion') }}" method="GET" role="form"
-                        enctype="multipart/form-data">
+                        enctype="multipart/form-data" id="form-all-request">
                         <div class="tab-pane active" id="aula-all">
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row mb-4">
                                         <div class="row col-md-4">
                                             <div class="col-md-10">
-                                                <label class="col-form-label">Año </label>
-                                                <select class="form-control show-tick ml-3" name="anio" id="anio">
-                                                    <option value="0" selected disabled>-- Selecciona --</option>
-                                                    @foreach ($anios as $anio)
-                                                        <option value="{{ $anio->anio_id }}">{{ $anio->anio_descripcion }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
+                                                <div class="forr-group">
+                                                    <label class="col-form-label">Año </label>
+                                                    <select class="form-control show-tick ml-3" name="anio"
+                                                        id="anio" data-required="true">
+                                                        <option selected value="0" >-- Selecciona --</option>
+                                                        @foreach ($anios as $anio)
+                                                            <option value="{{ $anio->anio_id }}">
+                                                                {{ $anio->anio_descripcion }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                             </div>
                                             <div class="col-md-10">
                                                 <label class="col-form-label">Nivel </label>
                                                 <select class="form-control show-tick ml-3" name="nivel" id="nivel"
-                                                    disabled>
+                                                    disabled data-required="true">
                                                     <option value="0" selected disabled>-- Selecciona --</option>
                                                 </select>
                                             </div>
@@ -57,7 +61,7 @@
                                             <div class="col-md-10">
                                                 <label class="col-form-label">Grado </label>
                                                 <select class="form-control show-tick ml-3" name="grado" id="grado"
-                                                    disabled>
+                                                    disabled data-required="true">
                                                     <option value="0" selected disabled>-- Selecciona --</option>
 
                                                 </select>
@@ -66,7 +70,7 @@
                                                 <label class="col-form-label">Secciones </label>
 
                                                 <select class="form-control show-tick ml-3" name="seccion" id="seccion"
-                                                    disabled>
+                                                    disabled data-required="true">
                                                     <option value="0" selected disabled>-- Selecciona --</option>
                                                 </select>
                                             </div>
@@ -210,6 +214,7 @@
 
 
 @section('js')
+    <script src="{{ asset('js/validate.js') }}"></script>
     <script src="{{ asset('js/reportes/gestion.js') }}"></script>
 
     <script>

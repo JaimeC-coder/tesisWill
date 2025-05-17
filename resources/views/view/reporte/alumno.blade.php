@@ -4,7 +4,21 @@
 @section('content_header', 'Inicio')
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Reportes por Alumno')
+@section('css')
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+        // Reutilizable función SweetAlert
+        function mostrarmensaje(mensaje) {
 
+            Swal.fire({
+                title: "Error",
+                text: mensaje,
+                icon: "error",
+            });
+            document.getElementById('buscar').disabled = false;
+        }
+    </script>
+@endsection
 
 
 @section('content')
@@ -18,13 +32,13 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-12 col-md-6 col-sm-12">
-                                        <form action="{{ route('reporte.alumno') }}" method="GET">
+                                        <form action="{{ route('reporte.alumno') }}" method="GET" id="form-all-request">
 
                                             <div class="input-group">
                                                 <input type="text" name="buscar" class="form-control"
-                                                    value=" {{ $dni ?? '' }}"
+                                                    value=" {{ $dni ?? '' }}" id="buscar"
                                                     @isset($dni)   disabled @endisset
-                                                    placeholder="Ingresar DNI del alumno" required />
+                                                    placeholder="Ingresar DNI del alumno" data-type="numbers" data-length="9" data-required="true">
                                                 <div class="input-group-append">
                                                     <button class="btn btn-primary" type="submit">
 
@@ -180,12 +194,24 @@
                             <div id="listar-info" v-else>
                                 <div class="card-body text-center">
                                     <div class="display-1 text-muted mb-2">
-                                        <img src={{ asset('assets/images/NotData.png') }} alt="error" width="30%">
-                                        <h1 class="h3 mb-3">
-                                            @if (isset($error))
-                                                {{ $error }}
-                                            @endif
-                                        </h1>
+                                        @if (isset($errors) && $errors != null && $errors != '' && $errors != '[]')
+                                            <img src={{ asset('assets/images/NotData.png') }} alt="error"
+                                                width="30%">
+                                            <h1 class="h3 mb-3">
+                                                {{ $errors }}
+                                            </h1>
+                                        @endif
+                                        @if (isset($error) && $error != null && $error != '' && $error != '[]')
+                                             <script>
+                                                mostrarmensaje('{{ $error }}');
+                                             </script>
+                                            <div class="text-center my-3">
+                                                <img src="{{ asset('assets/images/NotData.png') }}" alt="error"
+                                                    width="30%">
+                                                <h1 class="h3 mb-3">{{ $error }}</h1>
+                                            </div>
+                                        @endif
+
                                     </div>
                                 </div>
                             </div>
@@ -200,6 +226,7 @@
 
 @section('js')
     {{-- <script src="{{ asset('js/reportes/general.js') }}"></script> --}}
+    <script src="{{ asset('js/validate.js') }}"></script>
 
     <script>
         // Reutilizable función SweetAlert
@@ -223,7 +250,13 @@
             });
         }
 
-        // Escuchar evento del botón de ficha de matrícula
+    </script>
+
+@endsection
+
+@if(isset($matricula))
+<script>
+      // Escuchar evento del botón de ficha de matrícula
         document.getElementById('generar_ficha_matricula').addEventListener('click', function() {
             mostrarSwich();
             let per_id = document.getElementById('per_id').value;
@@ -242,6 +275,7 @@
             }, 2000); // 2000 ms = duración del Swal
 
         });
-    </script>
+</script>
+@endif
 
-@endsection
+

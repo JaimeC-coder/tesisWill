@@ -5,8 +5,8 @@
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Reportes por Alumno')
 @section('css')
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
         // Reutilizable función SweetAlert
         function mostrarmensaje(mensaje) {
 
@@ -38,7 +38,8 @@
                                                 <input type="text" name="buscar" class="form-control"
                                                     value=" {{ $dni ?? '' }}" id="buscar"
                                                     @isset($dni)   disabled @endisset
-                                                    placeholder="Ingresar DNI del alumno" data-type="numbers" data-length="9" data-required="true">
+                                                    placeholder="Ingresar DNI del alumno" data-type="numbers"
+                                                    data-length="8" data-required="true">
                                                 <div class="input-group-append">
                                                     <button class="btn btn-primary" type="submit">
 
@@ -59,7 +60,7 @@
                             </div>
                         </div>
                         @if (isset($matricula))
-                            <div id="listar-info" v-if="cargarInfo">
+                            <div id="listar-info">
                                 <div class="row">
                                     <div class="col-xl-4 col-md-12">
                                         <div class="card">
@@ -157,8 +158,9 @@
                                                     <span><b>Ficha de Matricula </b></span>
                                                     <div class="msg p-2">
                                                         <button id="generar_ficha_matricula"
-                                                            class="mr-20 btn btn-outline-primary "><i
-                                                                class="fa fa-folder-plus"></i> Generar</button>
+                                                            class="mr-20 btn btn-outline-primary">
+                                                            <i class="fa fa-folder-plus"></i> Generar
+                                                        </button>
                                                         <a target="_blank"
                                                             href="{{ route('reporte.alumno.matricula.pdf', ['per_id' => $alumno->persona->per_id]) }}"
                                                             class="mr-20 btn btn-outline-primary "><i
@@ -191,7 +193,7 @@
                                 </div>
                             </div>
                         @else
-                            <div id="listar-info" v-else>
+                            <div id="listar-info">
                                 <div class="card-body text-center">
                                     <div class="display-1 text-muted mb-2">
                                         @if (isset($errors) && $errors != null && $errors != '' && $errors != '[]')
@@ -202,9 +204,9 @@
                                             </h1>
                                         @endif
                                         @if (isset($error) && $error != null && $error != '' && $error != '[]')
-                                             <script>
+                                            <script>
                                                 mostrarmensaje('{{ $error }}');
-                                             </script>
+                                            </script>
                                             <div class="text-center my-3">
                                                 <img src="{{ asset('assets/images/NotData.png') }}" alt="error"
                                                     width="30%">
@@ -228,54 +230,61 @@
     {{-- <script src="{{ asset('js/reportes/general.js') }}"></script> --}}
     <script src="{{ asset('js/validate.js') }}"></script>
 
-    <script>
-        // Reutilizable función SweetAlert
-        function mostrarSwich() {
-            let timerInterval;
-            Swal.fire({
-                title: "Generando PDF...!",
-                html: "Procesando en <b></b> milisegundos.",
-                timer: 2000,
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading();
-                    const timer = Swal.getPopup().querySelector("b");
-                    timerInterval = setInterval(() => {
-                        timer.textContent = `${Swal.getTimerLeft()}`;
-                    }, 100);
-                },
-                willClose: () => {
-                    clearInterval(timerInterval);
-                }
+
+    @if (isset($matricula))
+        <script>
+            // Reutilizable función SweetAlert
+            function mostrarSwich() {
+                let timerInterval;
+                Swal.fire({
+                    title: "Generando PDF...!",
+                    html: "Procesando en <b></b> milisegundos.",
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        const timer = Swal.getPopup().querySelector("b");
+                        timerInterval = setInterval(() => {
+                            timer.textContent = `${Swal.getTimerLeft()}`;
+                        }, 100);
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval);
+                    }
+                });
+            }
+
+            function mostrarmensaje(mensaje) {
+                Swal.fire({
+                    title: "Generado ....!",
+                    text: mensaje,
+                    icon: "success"
+                });
+            }
+        </script>
+
+        <script>
+            // Escuchar evento del botón de ficha de matrícula
+            document.getElementById('generar_ficha_matricula').addEventListener('click', function() {
+                mostrarSwich();
+                // let per_id = document.getElementById('per_id').value;
+                setTimeout(() => {
+                    mostrarmensaje('Ficha de matrícula generada con éxito');
+                    //window.open('/api/reporte/alumno/matricula/pdf?per_id=' + per_id, '_blank');
+                }, 2000); // 2000 ms = duración del Swal
+
             });
-        }
 
-    </script>
+            // Escuchar evento del botón de libreta de notas
+            document.getElementById('generar_libreta_notas').addEventListener('click', function() {
+                mostrarSwich(); // reemplaza alert
+                // let per_id = document.getElementById('per_id').value;
+                setTimeout(() => {
+                    mostrarmensaje('Libreta de notas generada con éxito');
+                    //window.open('/api/reporte/alumno/libreta_notas/pdf?per_id=' + per_id, '_blank');
+                }, 2000); // 2000 ms = duración del Swal
 
+            });
+        </script>
+    @endif
 @endsection
-
-@if(isset($matricula))
-<script>
-      // Escuchar evento del botón de ficha de matrícula
-        document.getElementById('generar_ficha_matricula').addEventListener('click', function() {
-            mostrarSwich();
-            let per_id = document.getElementById('per_id').value;
-            setTimeout(() => {
-                window.open('/api/reporte/alumno/matricula/pdf?per_id=' + per_id, '_blank');
-            }, 2000); // 2000 ms = duración del Swal
-
-        });
-
-        // Escuchar evento del botón de libreta de notas
-        document.getElementById('generar_libreta_notas').addEventListener('click', function() {
-            mostrarSwich(); // reemplaza alert
-            let per_id = document.getElementById('per_id').value;
-            setTimeout(() => {
-                window.open('/api/reporte/alumno/libreta_notas/pdf?per_id=' + per_id, '_blank');
-            }, 2000); // 2000 ms = duración del Swal
-
-        });
-</script>
-@endif
-
-

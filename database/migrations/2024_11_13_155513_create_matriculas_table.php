@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('mat_observacion', 255)->nullable();
             $table->char('mat_estado', 1)->default('1')->comment('1: Activa; 2: Inactiva');
             $table->char('is_deleted', 1)->default('0')->comment('1: Eliminado; 0:No Eliminado');
-            $table->foreign('per_id')->references('per_id')->on('personas');
+            $table->foreign('per_id')->references('per_id')->on('periodos');
             $table->foreign('alu_id')->references('alu_id')->on('alumnos');
             $table->foreign('ags_id')->references('ags_id')->on('gsas');
             $table->timestamps();

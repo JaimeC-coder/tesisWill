@@ -198,15 +198,29 @@ class HorarioController extends Controller
         $per_id = $request->user_id;
 
         $personal = PersonalAcademico::where('per_id', $per_id)->where('is_deleted', '!=', 1)->first();
+        Log::info('---Personal---');
+        Log::info($personal);
+        Log::info('-------------');
         $usuario = User::Where('per_id', $per_id)->where('is_deleted', '!=', 1)->first();
+        Log::info('---Usuario---');
+        Log::info($usuario);
+        Log::info('-------------');
 
 
         $dias = $this->dias;
+        Log::info($dias);
         $periodo = Periodo::where('anio_id', $anio_id)->where('is_deleted', '!=', 1)->first();
+        Log::info('---Periodo---');
+        Log::info($periodo);
+        Log::info('-------------');
 
         $ags = Gsa::where('niv_id', $nivel_id)->where('gra_id', $grado_id)->where('sec_id', $seccion_id)->first();
+        Log::info('---GSA---');
+        Log::info($ags);
+        Log::info('-------------');
 
         if (!$periodo) {
+            Log::info('No se encontro curso para el año seleccionado PERIODO');
             return response()->json([
                 'status' => 400,
                 'mensaje' => 'No se encontro curso para el año seleccionado',
@@ -216,6 +230,7 @@ class HorarioController extends Controller
             ]);
         }
         if (!$ags) {
+            Log::info('No se encontro curso para el nivel y grado seleccionado GSA');
             return response()->json([
                 'status' => 400,
                 'mensaje' => 'No se encontro cursos para el nivel y grado seleccionado',
@@ -225,6 +240,9 @@ class HorarioController extends Controller
         }
 
         $horarios = Horario::where('per_id', $periodo->per_id)->where('ags_id', $ags->ags_id)->where('is_deleted', '!=', 1)->get();
+        Log::info('---Horarios---');
+        Log::info($horarios);
+        Log::info('-------------');
         foreach ($horarios as $value) {
             $curso = Curso::where('cur_id', $value->cur_id)->where('is_deleted', '!=', 1)->first();
             if (!$curso) {
@@ -237,6 +255,9 @@ class HorarioController extends Controller
                 $value->end = $value->fecha . ' ' . substr($value->hora_fin, 0, 5);
             }
         }
+        Log::info('---Horarios Modificados---');
+        Log::info($horarios);
+        Log::info('-------------');
 
 
 
@@ -247,7 +268,13 @@ class HorarioController extends Controller
                 ->where('is_deleted', '!=', 1)
                 ->select('cur_id', 'cur_nombre', 'cur_horas', 'cur_abreviatura')
                 ->get();
+                Log::info('---Asignar Cursos---');
+                Log::info($asignarCursos);
+                Log::info('-------------');
         } elseif ($usuario->roles[0]->name == "Docente" ) {
+            Log::info('---Docente---');
+            Log::info($usuario->roles[0]->name);
+            Log::info('-------------');
 
             $asignarCursos = AsignarCurso::where('pa_id', $personal->pa_id)
                 ->where('asignar_cursos.niv_id', $nivel_id)

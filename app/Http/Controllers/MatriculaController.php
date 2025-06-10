@@ -79,6 +79,7 @@ class MatriculaController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info($request->all());
 
 
         DB::beginTransaction();

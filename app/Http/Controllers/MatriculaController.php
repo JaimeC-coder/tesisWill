@@ -198,6 +198,7 @@ class MatriculaController extends Controller
 
         $nrodoc = $request->dni;
         $persona = Persona::where('per_dni', $nrodoc)->first();
+        Log::info($persona);
 
         $peridos = Periodo::where('per_estado', 1)->orderBy('per_id', 'desc')->first();
         Log::info($peridos);

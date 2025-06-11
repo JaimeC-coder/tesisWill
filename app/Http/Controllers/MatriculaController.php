@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WhatsAppHelper;
 use App\Models\Alumno;
 use App\Models\Anio;
 use App\Models\Apoderado;
@@ -26,7 +27,9 @@ class MatriculaController extends Controller
     public function inicio()
     {
 
-        $informacion = Matricula::where('is_deleted', '!=', 1)->get();
+
+        try {
+                $informacion = Matricula::where('is_deleted', '!=', 1)->get();
         foreach ($informacion as $value => $m) {
             $id = $value + 1;
             $alumno = Alumno::where('alu_id', $m->alu_id)->first();
@@ -57,6 +60,14 @@ class MatriculaController extends Controller
             $m->seccion = $seccion->sec_descripcion;
         }
         return view('view.matricula.inicio', compact('informacion'));
+        } catch (\Throwable $th) {
+            Log::error('Error al cargar la vista de matricula: ' . $th->getMessage());
+            WhatsAppHelper::enviarMensaje(
+                'Error al cargar la vista de matricula: ' . $th->getMessage(),
+            );
+            return redirect()->route('matricula.inicio')->with('error', 'Tuvimos un problema, inténtelo nuevamente');
+        } 
+
     }
 
 
@@ -65,13 +76,21 @@ class MatriculaController extends Controller
      */
     public function create()
     {
-        $matricula = new Matricula();
-        $periodos = Periodo::where('per_estado', 1)->where('is_deleted', 0)->get();
-        if ($periodos == null) {
-            return redirect()->route('matricula.inicio')->with('error', 'No hay periodo activo');
+        try {
+            $matricula = new Matricula();
+            $periodos = Periodo::where('per_estado', 1)->where('is_deleted', 0)->get();
+            if ($periodos == null) {
+                return redirect()->route('matricula.inicio')->with('error', 'No hay periodo activo');
+            }
+            $niveles = Nivel::get();
+            return view('view.matricula.create', compact('matricula', 'niveles', 'periodos'));
+        } catch (\Throwable $th) {
+            Log::error('Error al cargar la vista de matricula: ' . $th->getMessage());
+            WhatsAppHelper::enviarMensaje(
+                'Error al cargar la vista de matricula: ' . $th->getMessage(),
+            );
+            return redirect()->route('matricula.inicio')->with('error', 'Tuvimos un problema, inténtelo nuevamente');
         }
-        $niveles = Nivel::get();
-        return view('view.matricula.create', compact('matricula', 'niveles', 'periodos'));
     }
 
     /**
@@ -108,7 +127,10 @@ class MatriculaController extends Controller
             return redirect()->route('matricula.inicio')->with('success', 'Matricula creado correctamente');
         } catch (\Exception $e) {
             DB::rollBack();
-            dd($e);
+            WhatsAppHelper::enviarMensaje(
+                'Error al crear la matricula: ' . $e->getMessage(),
+            );
+
             return redirect()->route('matricula.inicio')->with('success', 'Tuvimos un problema, inténtelo nuevamente');
         }
     }
@@ -150,111 +172,146 @@ class MatriculaController extends Controller
 
     public function showGrados(Request $request)
     {
+        try {
+            Log::info($request);
+            $nivel = $request->niv_id;
+            $alumno = $request->alu_id;
+            //si es que el alumno existe debuelveme los grados que tiene
 
-        Log::info($request);
-        $nivel = $request->niv_id;
-        $alumno = $request->alu_id;
-        //si es que el alumno existe debuelveme los grados que tiene
+            if ($alumno != null) {
+                $matricula  = DB::table('matriculas as ma')
+                    ->join('gsas as gsa', 'ma.ags_id', '=', 'gsa.ags_id')
+                    ->join('grados as gr', 'gsa.gra_id', '=', 'gr.gra_id')
+                    ->where('ma.alu_id', $alumno)
+                    ->pluck('gr.gra_id');
 
-        if ($alumno != null) {
-            $matricula  = DB::table('matriculas as ma')
-                ->join('gsas as gsa', 'ma.ags_id', '=', 'gsa.ags_id')
-                ->join('grados as gr', 'gsa.gra_id', '=', 'gr.gra_id')
-                ->where('ma.alu_id', $alumno)
-                ->pluck('gr.gra_id');
+                // $descripcion = $matricula?->gsa?->grado?->gra_id;
+                $gradosRestantes = Grado::where('niv_id', $nivel)
+                    ->where('gra_is_delete', 0)
+                    ->where('gra_estado', 1)
+                    ->whereNotIn('gra_id', $matricula)
+                    ->get();
+                return response()->json($gradosRestantes);
+            }
 
-            // $descripcion = $matricula?->gsa?->grado?->gra_id;
-            $gradosRestantes = Grado::where('niv_id', $nivel)
-                ->where('gra_is_delete', 0)
-                ->where('gra_estado', 1)
-                ->whereNotIn('gra_id', $matricula)
-                ->get();
-            return response()->json($gradosRestantes);
+            $grados = Grado::where('niv_id', $nivel)->get();
+            return response()->json($grados);
+        } catch (\Throwable $th) {
+            Log::error('Error al obtener los grados: ' . $th->getMessage());
+            WhatsAppHelper::enviarMensaje(
+                'Error al obtener los grados: ' . $th->getMessage(),
+            );
+            return response()->json("error");
         }
-
-        $grados = Grado::where('niv_id', $nivel)->get();
-        return response()->json($grados);
     }
 
     public function showSecciones(Request $request)
     {
-        $grado = $request->gra_id;
-        $secciones = Seccion::where('gra_id', $grado)->get();
-        return response()->json($secciones);
+        try {
+            $grado = $request->gra_id;
+            $secciones = Seccion::where('gra_id', $grado)->get();
+            return response()->json($secciones);
+        } catch (\Throwable $th) {
+            //throw $th;
+            Log::error('Error al obtener las secciones: ' . $th->getMessage());
+            WhatsAppHelper::enviarMensaje(
+                'Error al obtener las secciones: ' . $th->getMessage(),
+            );
+            return response()->json("error");
+        }
     }
 
     public function infoSecciones(Request $request)
     {
-        $data = $request->seccion;
-        $seccion = Seccion::where('sec_id', $data)->first();
-        $aula = Aula::where('ala_id', $seccion->sec_aula)->first();
-        $seccion->aula = $aula->ala_descripcion;
-        $seccion->ala_id = $aula->ala_id;
-        return response()->json($seccion);
+        try {
+            $data = $request->seccion;
+            $seccion = Seccion::where('sec_id', $data)->first();
+            $aula = Aula::where('ala_id', $seccion->sec_aula)->first();
+            $seccion->aula = $aula->ala_descripcion;
+            $seccion->ala_id = $aula->ala_id;
+            return response()->json($seccion);
+        } catch (\Throwable $th) {
+            Log::error('Error al obtener la seccion: ' . $th->getMessage());
+            WhatsAppHelper::enviarMensaje(
+                'Error al obtener la seccion: ' . $th->getMessage(),
+            );
+            return response()->json("error");
+        }
     }
 
 
     public function searchAlumno(Request $request)
     {
+        try {
+            $nrodoc = $request->dni;
+            $persona = Persona::where('per_dni', $nrodoc)->first();
+            Log::info($persona);
 
-        $nrodoc = $request->dni;
-        $persona = Persona::where('per_dni', $nrodoc)->first();
-        Log::info($persona);
+            $peridos = Periodo::where('per_estado', 1)->orderBy('per_id', 'desc')->first();
+            Log::info($peridos);
+            if ($persona) {
 
-        $peridos = Periodo::where('per_estado', 1)->orderBy('per_id', 'desc')->first();
-        Log::info($peridos);
-        if ($persona) {
+                $alumno = Alumno::where('per_id', $persona->per_id)->first();
 
-            $alumno = Alumno::where('per_id', $persona->per_id)->first();
+                if ($alumno) {
+                    $matricula = Matricula::where('alu_id', $persona->alumno->alu_id)
+                        ->where('per_id', $peridos->per_id)
+                        ->first();
 
-            if ($alumno) {
-                $matricula = Matricula::where('alu_id', $persona->alumno->alu_id)
-                    ->where('per_id', $peridos->per_id)
-                    ->first();
+                    if ($matricula) {
+                        return  response()->json([
+                            'status' => 200,
+                            'alumno' => 1,
+                            'data' => 'El alumno ya se encuentra matriculado'
+                        ]);
+                    } else {
+                        $apoderado = Apoderado::where('apo_id', $alumno->apo_id)->first();
+                        $apo_persona = Persona::where('per_id', $apoderado->per_id)->first();
+                        if ($apo_persona->per_nombres == "") {
+                            $persona->apo_nombre_completo = $apo_persona->per_nombre_completo;
+                        } else {
+                            $persona->apo_nombre_completo = $apo_persona->per_apellidos . ' ' . $apo_persona->per_nombres;
+                        }
+                        /* $persona->apo_nombres = $apo_persona->per_nombres;
+                    $persona->apo_apellidos = $apo_persona->per_apellidos; */
+                        $persona->apo_parentesco = $apoderado->apo_parentesco;
+                        $persona->apo_vive_con_estudiante = $apoderado->apo_vive_con_estudiante;
+                        $persona->alu_id = $alumno->alu_id;
+                        $persona->alu_estado = $alumno->alu_estado;
+                        $persona->apo_id = $alumno->apo_id;
+                    }
+                } else {
 
-                if ($matricula) {
                     return  response()->json([
                         'status' => 200,
                         'alumno' => 1,
-                        'data' => 'El alumno ya se encuentra matriculado'
+                        'data' => 'El alumno no se encuentra registrado'
                     ]);
-                } else {
-                    $apoderado = Apoderado::where('apo_id', $alumno->apo_id)->first();
-                    $apo_persona = Persona::where('per_id', $apoderado->per_id)->first();
-                    if ($apo_persona->per_nombres == "") {
-                        $persona->apo_nombre_completo = $apo_persona->per_nombre_completo;
-                    } else {
-                        $persona->apo_nombre_completo = $apo_persona->per_apellidos . ' ' . $apo_persona->per_nombres;
-                    }
-                    /* $persona->apo_nombres = $apo_persona->per_nombres;
-                    $persona->apo_apellidos = $apo_persona->per_apellidos; */
-                    $persona->apo_parentesco = $apoderado->apo_parentesco;
-                    $persona->apo_vive_con_estudiante = $apoderado->apo_vive_con_estudiante;
-                    $persona->alu_id = $alumno->alu_id;
-                    $persona->alu_estado = $alumno->alu_estado;
-                    $persona->apo_id = $alumno->apo_id;
                 }
             } else {
 
                 return  response()->json([
                     'status' => 200,
                     'alumno' => 1,
-                    'data' => 'El alumno no se encuentra registrado'
+                    'data' => 'La persona no se encuentra registrado'
                 ]);
             }
-        } else {
 
+            return  response()->json([
+                'status' => 200,
+                'alumno' => 0,
+                'data' => $persona
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Error al buscar el alumno: ' . $th->getMessage());
+            WhatsAppHelper::enviarMensaje(
+                'Error al buscar el alumno: ' . $th->getMessage(),
+            );
             return  response()->json([
                 'status' => 200,
                 'alumno' => 1,
                 'data' => 'La persona no se encuentra registrado'
             ]);
         }
-
-        return  response()->json([
-            'status' => 200,
-            'alumno' => 0,
-            'data' => $persona
-        ]);
     }
 }

@@ -59,7 +59,7 @@
                                 <div class="form-group">
 
                                     <label>Periodo <span class="text-danger">*</span></label>
-                                    <select name="per_id" id="per_id" class="form-control show-tick">
+                                    <select name="per_id" id="per_id" class="form-control show-tick" data-required="true">
                                         <option value="0" selected>-- Seleccione un periodo --</option>
                                         @foreach ($periodos as $periodo)
                                             <option value="{{ $periodo->per_id }}">
@@ -85,7 +85,7 @@
                                 <div class="form-group">
                                     <label>Grado <span class="text-danger">*</span></label>
                                     <select name="gra_id" id="gra_id" disabled class="form-control show-tick"
-                                        required>
+                                        required data-required="true">
                                         <option value="0" selected>-- Seleccione un grado --</option>
 
                                     </select>
@@ -95,7 +95,7 @@
                                 <div class="form-group">
                                     <label>Sección <span class="text-danger">*</span></label>
                                     <select id="sec_id" name="sec_id" class="form-control show-tick" disabled
-                                        required>
+                                        required data-required="true">
                                         <option value="0" selected>-- Seleccione una sección --</option>
 
                                     </select>
@@ -124,7 +124,7 @@
                             <div class="col-lg-6 col-md-6 col-sm-12">
                                 <div class="form-group">
                                     <label>Situación </label>
-                                    <select id="situacion" name="situacion" class="form-control show-tick" required>
+                                    <select id="situacion" name="situacion" class="form-control show-tick" required data-required="true">
                                         <option value="0" disabled>-- Selecciona --</option>
                                         <option value="Ingresante">Ingresante</option>
                                         <option value="Promovido">Promovido</option>
@@ -216,5 +216,6 @@
     </div>
 </div>
 @section('js')
+    <script src="{{ asset('js/validate.js') }}"></script>
     <script src="{{ asset('js/matriculas/matricula.js') }}"></script>
 @endsection

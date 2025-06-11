@@ -66,7 +66,7 @@ class MatriculaController extends Controller
     public function create()
     {
         $matricula = new Matricula();
-        $periodos = Periodo::where('per_estado', 1)->where('is_deleted',0)->get();
+        $periodos = Periodo::where('per_estado', 1)->where('is_deleted', 0)->get();
         if ($periodos == null) {
             return redirect()->route('matricula.inicio')->with('error', 'No hay periodo activo');
         }
@@ -80,7 +80,7 @@ class MatriculaController extends Controller
     public function store(Request $request)
     {
         Log::info($request->all());
-    
+
         DB::beginTransaction();
         try {
             $gsa = Gsa::create([
@@ -165,6 +165,8 @@ class MatriculaController extends Controller
 
             // $descripcion = $matricula?->gsa?->grado?->gra_id;
             $gradosRestantes = Grado::where('niv_id', $nivel)
+                ->where('gra_is_delete', 0)
+                ->where('gra_estado', 1)
                 ->whereNotIn('gra_id', $matricula)
                 ->get();
             return response()->json($gradosRestantes);
@@ -189,7 +191,6 @@ class MatriculaController extends Controller
         $seccion->aula = $aula->ala_descripcion;
         $seccion->ala_id = $aula->ala_id;
         return response()->json($seccion);
-
     }
 
 

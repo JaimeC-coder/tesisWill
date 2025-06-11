@@ -195,7 +195,10 @@ class AnioController extends Controller
             }
 
             // En todos los otros casos, retornar los grados del nivel directamente
-            $grados = Grado::where('niv_id', $nivelId)->get();
+            $grados = Grado::where('niv_id', $nivelId)
+            ->where('gra_is_delete', 0)
+            ->where('gra_estado', 1)
+            ->get();
             return response()->json($grados);
         } catch (\Throwable $th) {
             Log::error('Error en grado', ['error' => $th->getMessage()]);

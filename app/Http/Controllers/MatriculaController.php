@@ -80,8 +80,7 @@ class MatriculaController extends Controller
     public function store(Request $request)
     {
         Log::info($request->all());
-        return $request;
-
+    
         DB::beginTransaction();
         try {
             $gsa = Gsa::create([

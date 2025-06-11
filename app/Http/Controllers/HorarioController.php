@@ -233,7 +233,7 @@ class HorarioController extends Controller
             Log::info('No se encontro curso para el nivel y grado seleccionado GSA');
             return response()->json([
                 'status' => 400,
-                'mensaje' => 'No se encontro cursos para el nivel y grado seleccionado',
+                'mensaje' => 'No se encontro alumnos registrados para el nivel y grado seleccionado',
                 'cursos' => [],
                 'dias' => $dias
             ]);

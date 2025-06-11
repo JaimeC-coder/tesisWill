@@ -73,7 +73,7 @@
                                 <div class="form-group">
                                     <label>Nivel <span class="text-danger">*</span></label>
                                     <select id="niv_id" name="niv_id" class="form-control show-tick" required
-                                        disabled>
+                                        disabled  data-required="true">
                                         <option value="0" selected>-- Seleccione un nivel --</option>
                                         @foreach ($niveles as $nivel)
                                             <option value="{{ $nivel->niv_id }}">{{ $nivel->niv_descripcion }}</option>

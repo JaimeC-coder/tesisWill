@@ -122,7 +122,9 @@ class NotaController extends Controller
                 $tipoPeriodo['can'] = '0';
             }
             $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $tipoPeriodo['can'], $periodo);
-           
+
+     
+
             return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidades', 'user'));
         }
 
@@ -164,6 +166,7 @@ class NotaController extends Controller
 
     public function getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $per_id, $periodo)
     {
+      //  return $capacidades ;
         $Gsas1 = Gsa::select('ags_id')
             ->where('niv_id', $nivel)
             ->where('gra_id', $grado)
@@ -250,7 +253,11 @@ class NotaController extends Controller
                     $capId = $notaCapacidad->cap_id;
 
                     if (isset($notasOrganizadas[$capId])) {
-                        $periodoKey = $mapaPeriodos[$nota->nt_bimestre] ?? null;
+                        Log::info("Capacidad nt_bimestre: " . $nota->nt_bimestre);
+
+                        // $periodoKey = $mapaPeriodos[$nota->nt_bimestre] ?? null;
+                         $periodoKey ="P".$nota->nt_bimestre;
+                        Log::info("Periodo Key: " . $periodoKey);
                         if (!$periodoKey) continue;
 
                         $notasOrganizadas[$capId]['periodos'][$periodoKey] = [
@@ -489,7 +496,7 @@ class NotaController extends Controller
                 } else {
                     Log::info("entro 2: ");
                     $NotaCapacidadRegistro = NotaCapacidad::Create([
-                        'nc_descripcion' => 'C1',
+                        'nc_descripcion' => $notaCapacidad->nt_bimestre,
                         'cap_id' => $idCapacidad,
                         'nc_nota' => $notaSeleccionada,
                         'nt_id' => $idNota,
@@ -516,7 +523,7 @@ class NotaController extends Controller
                     ]);
 
                     $NotaCapacidadRegistro = NotaCapacidad::Create([
-                        'nc_descripcion' => $idCapacidad,
+                       'nc_descripcion' => $NotaPromoedio->nt_bimestre,
                         'cap_id' => $idCapacidad,
                         'nc_nota' => $notaSeleccionada,
                         'nt_id' => $NotaPromoedio->nt_id,
@@ -530,14 +537,14 @@ class NotaController extends Controller
                     Log::info("entro4: ");
 
                     $NotaCapacidadRegistro = NotaCapacidad::Create([
-                        'nc_descripcion' => $idCapacidad,
+                      'nc_descripcion' => $NotaPromoedio->nt_bimestre,
                         'cap_id' => $idCapacidad,
                         'nc_nota' => $notaSeleccionada,
                         'nt_id' => $NotaPromoedio->nt_id,
                         'nc_is_deleted' => 0
                     ]);
 
-                    Log::info($NotaPromoedio);
+                    Log::info($NotaCapacidadRegistro);
 
 
                     $NotaPromoedio->estadoPromedio = 0;

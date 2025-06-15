@@ -28,37 +28,37 @@ document.addEventListener("DOMContentLoaded", function () {
     // Asignar la fecha formateada al campo de fecha
     fechamatricula.value = fechaFormateada;
 
-        dni.addEventListener("input", async function () {
-            if (dni.value.length == 8) {
-                btnbuscar.disabled = false;
-            }
-        });
+    dni.addEventListener("input", async function () {
+        if (dni.value.length == 8) {
+            btnbuscar.disabled = false;
+        }
+    });
 
     btnbuscar.addEventListener("click", async function () {
         if (dni.value.length == 8) {
-            const infouser1 = await fetchData("/api/alumnoMatricula",{ dni: dni.value });
+            const infouser1 = await fetchData("/api/alumnoMatricula", { dni: dni.value });
             console.log(infouser1);
             if (infouser1.alumno == 1) {
                 mostrar(false);
 
-                  mostrarAlerta({
-                titulo: infouser1.data,
-                icono: "success"
-            });
+                mostrarAlerta({
+                    titulo: infouser1.data,
+                    icono: "success"
+                });
                 return;
             }
 
 
             alu_id.value = infouser1.data.alu_id;
-            nombre.value = infouser1.data.per_nombre_completo == null ? infouser1.data.per_nombres + "  "+infouser1.data.per_apellidos  : infouser1.data.per_nombre_completo;
+            nombre.value = infouser1.data.per_nombre_completo == null ? infouser1.data.per_nombres + "  " + infouser1.data.per_apellidos : infouser1.data.per_nombre_completo;
             apoderado.value = infouser1.data.apo_nombre_completo;
             parentesco.value = infouser1.data.apo_parentesco;
-            vive_con_estudiante.value = infouser1.data.apo_vive_con_estudiante =1 ? "Si" : "No";
+            vive_con_estudiante.value = infouser1.data.apo_vive_con_estudiante = 1 ? "Si" : "No";
             mostrar(true);
         } else {
             mostrar(false);
 
-             mostrarAlerta({
+            mostrarAlerta({
                 titulo: 'Ingrese un DNI válido',
                 icono: "warning"
             });
@@ -71,11 +71,11 @@ document.addEventListener("DOMContentLoaded", function () {
     niv_id.addEventListener("change", async function () {
         const grados = await fetchData("/api/showGrados", {
             niv_id: niv_id.value,
-            alu_id:alu_id.value
+            alu_id: alu_id.value
         });
         gra_id.disabled = false;
         gra_id.innerHTML = "";
-
+        gra_id.innerHTML = `<option value="">Seleccione una sección</option>`;
         grados.forEach((grado) => {
             gra_id.innerHTML += `<option value="${grado.gra_id}">${grado.gra_descripcion}</option>`;
         });
@@ -121,12 +121,12 @@ async function fetchData(url, body) {
 }
 
 function mostrar(value) {
-    if(value){
+    if (value) {
         matricula_info1.classList.remove("d-none");
         matricula_info2.classList.remove("d-none");
         matricula_info3.classList.remove("d-none");
         return;
-    }else{
+    } else {
         matricula_info1.classList.add("d-none");
         matricula_info2.classList.add("d-none");
         matricula_info3.classList.add("d-none");

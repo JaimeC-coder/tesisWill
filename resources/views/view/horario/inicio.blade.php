@@ -181,7 +181,7 @@
 
             $('.timepicker').timepicker({
                 timeFormat: 'h:mm p',
-                interval: 30,
+                interval: 45,
                 minTime: '7',
                 maxTime: '1:00pm',
                 defaultTime: '11',

@@ -17,7 +17,7 @@ use App\Models\Matricula;
 use App\Models\Nivel;
 use App\Models\Nota;
 use App\Models\NotaCapacidad;
-use App\Models\Periodo;
+use App\Models\Apoderado;
 use App\Models\Persona;
 use App\Models\PersonalAcademico;
 use App\Models\Provincia;
@@ -146,7 +146,10 @@ class ReportController extends Controller
 
         $seccion = [];
         $totales = [];
-        $data = Grado::where('niv_id', $nivel_id)->get();
+        $data = Grado::where('niv_id', $nivel_id)
+            ->where('gra_is_delete', 0)
+            ->where('gra_estado', 1)
+            ->get();
         $total = count($data);
         foreach ($data as $d) {
             array_push($seccion, $d->gra_descripcion);
@@ -270,11 +273,29 @@ class ReportController extends Controller
 
         // Determinar si el usuario es un alumno
         $isAlumno = $user->roles[0]->name === "Alumno";
+        $isApoderado = $user->roles[0]->name === "Apoderado";
         $dni = $isAlumno ? $persona->per_dni : $request->buscar;
 
         // Variables para la vista
         $alumno = $gsa = $aula = $matricula = $nivel = $grado = $seccion = null;
 
+        if($isApoderado){
+            //primero buscamos en ta tabla de apoderado el id
+            $apoderado = Apoderado::where('per_id', $persona->per_id)->first();
+            //luego en la tabla de alumnos cuales tiene el id de ese apodero
+            $alumnos = Alumno::where('apo_id', $apoderado->apo_id)->get();
+            // luego buscamos el dni de esos alumnos
+            $dni = $alumnos->pluck('persona.per_dni')->toArray();
+
+            //luego comparamos si el dni ingresa pertene a alguno de los dni de sus hijo si es asi que continue
+            if (!in_array($dni, $alumnos->pluck('persona.per_dni')->toArray())) {
+                Log::info("DNI no pertenece a los hijos del apoderado: $dni");
+                return view('view.reporte.alumno', compact('dni', 'persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))
+                    ->with('error', "El DNI proporcionado no pertenece a ningún hijo del apoderado.");
+            }
+            // si no que que mande un error
+            
+        }
         // Validar si se recibió un DNI (caso: no es alumno y no envió nada)
         if (is_null($dni)) {
             Log::info('DNI no proporcionado');
@@ -2846,16 +2867,7 @@ class ReportController extends Controller
             }
         }
 
-        // Competencias transversales
-        $html .= '<tr>
-                            <td rowspan="2">Competencias transversales</td>
-                            <td>Se desenvuelve en entornos virtuales generados por las TIC</td>
-                            <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
-                        </tr>
-                        <tr>
-                            <td>Gestiona su Aprendizaje de manera autónoma</td>
-                            <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
-                        </tr>';
+
 
         $html .= '</tbody></table>';
 
@@ -2879,6 +2891,198 @@ class ReportController extends Controller
                                 </tr>
                             </tbody>
                         </table>';
+
+        // Tabla de conclusión descriptiva por período
+        $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
+                    <thead>
+                        <tr>
+                            <th width="15%" class="bg-gray">Período</th>
+                            <th width="85%" class="bg-gray">Conclusión descriptiva por período</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td height="30" align="center">1</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td height="30" align="center">2</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td height="30" align="center">3</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td height="30" align="center">4</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>';
+
+
+        $html .= '</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>';
+                // Tabla de resumen de asistencia del estudiante
+        $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
+                    <thead>
+                        <tr>
+                            <th colspan="5" class="bg-gray">Resumen de asistencia del estudiante</th>
+                        </tr>
+                        <tr>
+                            <th rowspan="2" width="15%" class="bg-gray">Período</th>
+                            <th colspan="2" width="42.5%" class="bg-gray">Inasistencias</th>
+                            <th colspan="2" width="42.5%" class="bg-gray">Tardanzas</th>
+                        </tr>
+                        <tr>
+                            <th width="21.25%" class="bg-gray">Justificadas</th>
+                            <th width="21.25%" class="bg-gray">Injustificadas</th>
+                            <th width="21.25%" class="bg-gray">Justificadas</th>
+                            <th width="21.25%" class="bg-gray">Injustificadas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td height="30" align="center">1</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td height="30" align="center">2</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td height="30" align="center">3</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td height="30" align="center">4</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                    </tbody>
+                </table>';
+
+
+                // Título para la sección de participación de padres
+        $html .= '<h3 style="text-align: center; font-weight: bold; margin: 1rem 0;">PARTICIPACIÓN DE LOS PADRES DE FAMILIA</h3>';
+
+        // Tabla de criterios de evaluación (participación de padres)
+        $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
+                    <thead>
+                        <tr>
+                            <th width="70%" class="bg-gray">CRITERIOS DE EVALUACIÓN</th>
+                            <th colspan="4" width="30%" class="bg-gray">BIMESTRE</th>
+                        </tr>
+                        <tr>
+                            <th width="70%"></th>
+                            <th width="7.5%" class="bg-gray">I</th>
+                            <th width="7.5%" class="bg-gray">II</th>
+                            <th width="7.5%" class="bg-gray">III</th>
+                            <th width="7.5%" class="bg-gray">IV</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td height="25" style="padding-left: 10px;">1. Mantiene aseado a su niño(a).</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td height="25" style="padding-left: 10px;">2. Se interesa por el aprendizaje de su hijo(a).</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td height="25" style="padding-left: 10px;">3. Envía oportunamente sus materiales (útiles escolares).</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td height="25" style="padding-left: 10px;">4. Participa en actividades en el aula e Institución Educativa.</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td height="25" style="padding-left: 10px;">5. Envía puntualmente a su hijo(a) a la Institución Educativa.</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td height="25" style="padding-left: 10px;">6. Asiste a la Escuela de Padres.</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td height="25" style="padding-left: 10px;">7. Participa en la vigilancia escolar.</td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                            <td align="center"></td>
+                        </tr>
+                    </tbody>
+                </table>';
+
+
+        $html .= '</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>';
+                // Título de la escala de calificaciones
+
+                $html .= '<h3 style="text-align: center; font-weight: bold; margin: 1rem 0;">ESCALA DE CALIFICACIONES DEL CNEB</h3>';
+
+        // Tabla de escala de calificaciones del CNEB
+        $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
+                    <tbody>
+                        <tr>
+                            <td width="8%" align="center" style="font-weight: bold; vertical-align: middle;">AD</td>
+                            <td width="92%" style="padding: 8px;">
+                                <strong>Logro destacado</strong><br>
+                                Cuando el estudiante evidencia un nivel superior a lo esperado respecto a la competencia. Esto quiere decir que demuestra aprendizajes que van más allá del nivel esperado.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="8%" align="center" style="font-weight: bold; vertical-align: middle;">A</td>
+                            <td width="92%" style="padding: 8px;">
+                                <strong>Logro esperado</strong><br>
+                                Cuando el estudiante evidencia el nivel esperado respecto a la competencia, demostrando manejo satisfactorio en todas las tareas propuestas y en el tiempo programado.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="8%" align="center" style="font-weight: bold; vertical-align: middle;">B</td>
+                            <td width="92%" style="padding: 8px;">
+                                <strong>En proceso</strong><br>
+                                Cuando el estudiante está próximo o cerca al nivel esperado respecto a la competencia, para lo cual requiere acompañamiento durante un tiempo razonable para lograrlo.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="8%" align="center" style="font-weight: bold; vertical-align: middle;">C</td>
+                            <td width="92%" style="padding: 8px;">
+                                <strong>En inicio</strong><br>
+                                Cuando el estudiante muestra un progreso mínimo en una competencia de acuerdo al nivel esperado. Evidencia con frecuencia dificultades en el desarrollo de las tareas, por lo que necesita mayor tiempo de acompañamiento e intervención del docente.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>';
 
         $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 3rem;">
                             <thead>

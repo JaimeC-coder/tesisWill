@@ -259,19 +259,7 @@ class HorarioController extends Controller
         Log::info($horarios);
         Log::info('-------------');
 
-
-
-        if ($usuario->roles[0]->name == "Alumno" or $usuario->roles[0]->name == "Administrador" or $usuario->roles[0]->name == "Secretaria" or $usuario->roles[0]->name == "Director") {
-            $asignarCursos = Curso::where('cur_horas', '>', 0)
-                ->where('niv_id', $nivel_id)
-                ->where('gra_id', $grado_id)
-                ->where('is_deleted', '!=', 1)
-                ->select('cur_id', 'cur_nombre', 'cur_horas', 'cur_abreviatura')
-                ->get();
-                Log::info('---Asignar Cursos---');
-                Log::info($asignarCursos);
-                Log::info('-------------');
-        } elseif ($usuario->roles[0]->name == "Docente" ) {
+        if ($usuario->roles[0]->name == "Docente") {
             Log::info('---Docente---');
             Log::info($usuario->roles[0]->name);
             Log::info('-------------');
@@ -286,7 +274,24 @@ class HorarioController extends Controller
                 ->join('cursos', 'asignar_cursos.curso', '=', 'cursos.cur_nombre')
                 ->select('cursos.cur_id', 'cursos.cur_nombre', 'cursos.cur_abreviatura', 'cursos.cur_horas')
                 ->get();
+        } else {
+            $asignarCursos = Curso::where('cur_horas', '>', 0)
+                ->where('niv_id', $nivel_id)
+                ->where('gra_id', $grado_id)
+                ->where('is_deleted', '!=', 1)
+                ->select('cur_id', 'cur_nombre', 'cur_horas', 'cur_abreviatura')
+                ->get();
+            Log::info('---Asignar Cursos---');
+            Log::info($asignarCursos);
+            Log::info('-------------');
         }
+
+
+        // if ($usuario->roles[0]->name == "Alumno" or $usuario->roles[0]->name == "Administrador" or $usuario->roles[0]->name == "Secretaria" or $usuario->roles[0]->name == "Director") {
+
+        // } elseif ($usuario->roles[0]->name == "Docente" ) {
+
+        // }
 
 
         return response()->json([

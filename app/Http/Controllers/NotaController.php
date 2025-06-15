@@ -123,7 +123,7 @@ class NotaController extends Controller
             }
             $Gsas = $this->getGsas($nivel, $grado, $seccion, $curso, $docente, $tipoPeriodo, $capacidades, $tipoPeriodo['can'], $periodo);
 
-     
+     return $Gsas;
 
             return view('view.notas.inicio', compact('anios', 'asignacionesCursos', 'Gsas', 'tipoPeriodo', 'capacidades', 'user'));
         }

@@ -59,30 +59,48 @@ class AlumnoController extends Controller
 
             // ✅ Actualizar datos si ya existen
             if ($alumnoId) {
+                   WhatsAppHelper::enviarMensaje(
+                "metodo if alumnoId 1 existe"
+            );
                 $this->updatePersona($alumnoId, $data, 'Alumno');
             }
 
             if ($apoderadoId) {
+                        WhatsAppHelper::enviarMensaje(
+                "metodo if apoderadoId 1 existe"
+            );
                 $this->updatePersona($apoderadoId, $data, 'Apoderado');
             }
 
             // 🎯 Crear Persona si no existen
             if (!$alumnoId) {
+                WhatsAppHelper::enviarMensaje(
+                "metodo if alumnoId 2 si no existe existe"
+            );
                 $alumno = $this->createPersona($data, 'Alumno');
                 $alumnoId = $alumno->per_id;
                 $this->createUser($alumno, 'Alumno');
             }
 
             if (!$apoderadoId) {
+                  WhatsAppHelper::enviarMensaje(
+                "metodo if apoderadoId 2  si no existe existe"
+            );
                 $apoderado = $this->createPersona($data, 'Apoderado');
                 $apoderadoId = $apoderado->per_id;
                 $this->createUser($apoderado, 'Apoderado');
             } else {
+                    WhatsAppHelper::enviarMensaje(
+                "metodo if apoderadoId 2  else"
+            );
                 $apoderado = Apoderado::where('per_id', $apoderadoId)->first();
             }
 
             // 🏷️ Crear/Actualizar Apoderado
             if (!$apoderado) {
+                    WhatsAppHelper::enviarMensaje(
+                "metodo if apoderado   si no existe existe"
+            );
                 $apoderado = Apoderado::create([
                     'per_id' => $apoderadoId,
                     'apo_parentesco' => $data['per_parentesco_Apoderado'],
@@ -91,6 +109,9 @@ class AlumnoController extends Controller
             }
 
             // 👦 Crear Alumno
+               WhatsAppHelper::enviarMensaje(
+                "registra al estudiante"
+            );
             Alumno::create([
                 'per_id' => $alumnoId,
                 'apo_id' => $apoderado->apo_id,

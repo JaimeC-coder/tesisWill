@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WhatsAppHelper;
 use App\Models\Alumno;
 use App\Models\Apoderado;
 use App\Models\Departamento;
@@ -49,214 +50,115 @@ class AlumnoController extends Controller
      */
     public function store(Request $request)
     {
-        $newRequest = $request->all();
-        Log::info($newRequest);
-        DB::transaction(function () use ($newRequest) {
-            if (isset($newRequest['per_id_Alumno']) && $newRequest['per_id_Alumno'] != null && isset($newRequest['per_id_Apoderado']) && $newRequest['per_id_Apoderado'] != null) {
+        $data = $request->all();
+        Log::info($data);
 
-                $Persona = Persona::find($newRequest['per_id_Alumno']);
-                $Persona->update(array_filter([
-                    'per_dni' => $newRequest['per_dni_Alumno'] ?? null,
-                    'per_nombres' => $newRequest['per_nombres_Alumno'] ?? null,
-                    'per_apellidos' => $newRequest['per_apellidos_Alumno'] ?? null,
-                    'per_nombre_completo' => isset($newRequest['per_nombres_Alumno'], $newRequest['per_apellidos_Alumno']) ? $newRequest['per_nombres_Alumno'] . ' ' . $newRequest['per_apellidos_Alumno'] : null,
-                    'per_email' => $newRequest['per_email_Alumno'] ?? null,
-                    'per_sexo' => $newRequest['per_sexo_Alumno'] ?? null,
-                    'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Alumno'] ?? null,
-                    'per_estado_civil' => $newRequest['per_estado_civil_Alumno'] ?? null,
-                    'per_celular' => $newRequest['per_celular_Alumno'] ?? null,
-                    'per_pais' => $newRequest['per_pais_Alumno'] ?? null,
-                    'per_departamento' => $newRequest['per_departamento_Alumno'] ?? null,
-                    'per_provincia' => $newRequest['per_provincia_Alumno'] ?? null,
-                    'per_distrito' => $newRequest['per_distrito_Alumno'] ?? null,
-                    'per_direccion' => $newRequest['per_direccion_Alumno'] ?? null,
-                ], fn($value) => !is_null($value) && $value !== ''));
+        DB::transaction(function () use ($data) {
+            $alumnoId = $data['per_id_Alumno'] ?? null;
+            $apoderadoId = $data['per_id_Apoderado'] ?? null;
 
-                $persona2 = Persona::find($newRequest['per_id_Apoderado']);
-                $persona2->update(array_filter([
-                    'per_dni' => $newRequest['per_dni_Alumno'] ?? null,
-                    'per_nombres' => $newRequest['per_nombres_Alumno'] ?? null,
-                    'per_apellidos' => $newRequest['per_apellidos_Alumno'] ?? null,
-                    'per_nombre_completo' => isset($newRequest['per_nombres_Alumno'], $newRequest['per_apellidos_Alumno']) ? $newRequest['per_nombres_Alumno'] . ' ' . $newRequest['per_apellidos_Alumno'] : null,
-                    'per_email' => $newRequest['per_email_Alumno'] ?? null,
-                    'per_sexo' => $newRequest['per_sexo_Alumno'] ?? null,
-                    'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Alumno'] ?? null,
-                    'per_estado_civil' => $newRequest['per_estado_civil_Alumno'] ?? null,
-                    'per_celular' => $newRequest['per_celular_Alumno'] ?? null,
-                    'per_pais' => $newRequest['per_pais_Alumno'] ?? null,
-                    'per_departamento' => $newRequest['per_departamento_Alumno'] ?? null,
-                    'per_provincia' => $newRequest['per_provincia_Alumno'] ?? null,
-                    'per_distrito' => $newRequest['per_distrito_Alumno'] ?? null,
-                    'per_direccion' => $newRequest['per_direccion_Alumno'] ?? null,
-                ], fn($value) => !is_null($value) && $value !== ''));
+            // ✅ Actualizar datos si ya existen
+            if ($alumnoId) {
+                $this->updatePersona($alumnoId, $data, 'Alumno');
+            }
 
-                $Apoderado = Apoderado::create([
-                    'per_id' => $newRequest['per_id_Apoderado'],
-                    'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-                    'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
-                ]);
-            } else if ($newRequest['per_id_Alumno'] && $newRequest['per_id_Alumno'] != null && !$newRequest['per_id_Apoderado'] && $newRequest['per_id_Apoderado'] == null) { //apoderado
-                log('entro else if 2');
-                $per_id_Apoderado = Persona::create([
-                    'per_dni' => $newRequest['per_dni_Apoderado'],
-                    'per_nombres' => $newRequest['per_nombres_Apoderado'],
-                    'per_apellidos' => $newRequest['per_apellidos_Apoderado'],
-                    'per_nombre_completo' => $newRequest['per_nombres_Apoderado'] . ' ' . $newRequest['per_apellidos_Apoderado'],
-                    'per_email' => $newRequest['per_email_Apoderado'],
-                    'per_sexo' => $newRequest['per_sexo_Apoderado'],
-                    'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Apoderado'],
-                    'per_estado_civil' => $newRequest['per_estado_civil_Apoderado'],
-                    'per_celular' => $newRequest['per_celular_Apoderado'],
-                    'per_pais' => $newRequest['per_pais_Apoderado'],
-                    'per_departamento' => $newRequest['per_departamento_Apoderado'],
-                    'per_provincia' => $newRequest['per_provincia_Apoderado'],
-                    'per_distrito' => $newRequest['per_distrito_Apoderado'],
-                    'per_direccion' => $newRequest['per_direccion_Apoderado']
-                ]);
+            if ($apoderadoId) {
+                $this->updatePersona($apoderadoId, $data, 'Apoderado');
+            }
 
-                $Persona = Persona::find($newRequest['per_id_Alumno']);
-                $Persona->update(array_filter([
-                    'per_dni' => $newRequest['per_dni_Alumno'] ?? null,
-                    'per_nombres' => $newRequest['per_nombres_Alumno'] ?? null,
-                    'per_apellidos' => $newRequest['per_apellidos_Alumno'] ?? null,
-                    'per_nombre_completo' => isset($newRequest['per_nombres_Alumno'], $newRequest['per_apellidos_Alumno']) ? $newRequest['per_nombres_Alumno'] . ' ' . $newRequest['per_apellidos_Alumno'] : null,
-                    'per_email' => $newRequest['per_email_Alumno'] ?? null,
-                    'per_sexo' => $newRequest['per_sexo_Alumno'] ?? null,
-                    'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Alumno'] ?? null,
-                    'per_estado_civil' => $newRequest['per_estado_civil_Alumno'] ?? null,
-                    'per_celular' => $newRequest['per_celular_Alumno'] ?? null,
-                    'per_pais' => $newRequest['per_pais_Alumno'] ?? null,
-                    'per_departamento' => $newRequest['per_departamento_Alumno'] ?? null,
-                    'per_provincia' => $newRequest['per_provincia_Alumno'] ?? null,
-                    'per_distrito' => $newRequest['per_distrito_Alumno'] ?? null,
-                    'per_direccion' => $newRequest['per_direccion_Alumno'] ?? null,
-                ], fn($value) => !is_null($value) && $value !== ''));
+            // 🎯 Crear Persona si no existen
+            if (!$alumnoId) {
+                $alumno = $this->createPersona($data, 'Alumno');
+                $alumnoId = $alumno->per_id;
+                $this->createUser($alumno, 'Alumno');
+            }
 
-
-
-                $Apoderado = Apoderado::create([
-                    'per_id' => $per_id_Apoderado->per_id,
-                    'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-                    'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
-                ]);
-                Log::info($per_id_Apoderado);
-                $perUser = User::create([
-                    'per_id' => $per_id_Apoderado->per_id,
-                    'email' => $newRequest['per_email_Apoderado'],
-                    'password' => bcrypt($newRequest['per_dni_Apoderado']),
-                    'name' => $per_id_Apoderado->per_nombre_completo,
-                    'rol_id' => 1
-                ]);
-                $perUser->assignRole('Apoderado');
-            } else if (!isset($newRequest['per_id_Alumno']) && $newRequest['per_id_Alumno'] == null && isset($newRequest['per_id_Apoderado']) && $newRequest['per_id_Apoderado'] != null) { //alumno
-                log('entro else if 3');
-                $per_id_alumno = Persona::create([
-                    'per_dni' => $newRequest['per_dni_Alumno'],
-                    'per_nombres' => $newRequest['per_nombres_Alumno'],
-                    'per_apellidos' => $newRequest['per_apellidos_Alumno'],
-                    'per_nombre_completo' => $newRequest['per_nombres_Alumno'] . ' ' . $newRequest['per_apellidos_Alumno'],
-                    'per_email' => $newRequest['per_email_Alumno'],
-                    'per_sexo' => $newRequest['per_sexo_Alumno'],
-                    'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Alumno'],
-                    'per_estado_civil' => $newRequest['per_estado_civil_Alumno'],
-                    'per_celular' => $newRequest['per_celular_Alumno'],
-                    'per_pais' => $newRequest['per_pais_Alumno'],
-                    'per_departamento' => $newRequest['per_departamento_Alumno'],
-                    'per_provincia' => $newRequest['per_provincia_Alumno'],
-                    'per_distrito' => $newRequest['per_distrito_Alumno'],
-                    'per_direccion' => $newRequest['per_direccion_Alumno'],
-                ]);
-                $perAlumnoUser = User::create([
-                    'per_id' => $per_id_alumno->per_id,
-                    'email' => $newRequest['per_email_Alumno'],
-                    'password' => bcrypt($newRequest['per_dni_Alumno']),
-                    'name' => $per_id_alumno->per_nombre_completo,
-                    'rol_id' => 1
-                ]);
-                $perAlumnoUser->assignRole('Alumno');
-
-
-                $newRequest['per_id_Alumno'] = $per_id_alumno->per_id;
-
-                $Apoderado = Apoderado::create([
-                    'per_id' => $newRequest['per_id_Apoderado'],
-                    'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-                    'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
-                ]);
+            if (!$apoderadoId) {
+                $apoderado = $this->createPersona($data, 'Apoderado');
+                $apoderadoId = $apoderado->per_id;
+                $this->createUser($apoderado, 'Apoderado');
             } else {
-                log('entro else');
-                $per_id_Apoderado = Persona::create([
-                    'per_dni' => $newRequest['per_dni_Apoderado'],
-                    'per_nombres' => $newRequest['per_nombres_Apoderado'],
-                    'per_apellidos' => $newRequest['per_apellidos_Apoderado'],
-                    'per_nombre_completo' => $newRequest['per_nombres_Apoderado'] . ' ' . $newRequest['per_apellidos_Apoderado'],
-                    'per_email' => $newRequest['per_email_Apoderado'],
-                    'per_sexo' => $newRequest['per_sexo_Apoderado'],
-                    'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Apoderado'],
-                    'per_estado_civil' => $newRequest['per_estado_civil_Apoderado'],
-                    'per_celular' => $newRequest['per_celular_Apoderado'],
-                    'per_pais' => $newRequest['per_pais_Apoderado'],
-                    'per_departamento' => $newRequest['per_departamento_Apoderado'],
-                    'per_provincia' => $newRequest['per_provincia_Apoderado'],
-                    'per_distrito' => $newRequest['per_distrito_Apoderado'],
-                    'per_direccion' => $newRequest['per_direccion_Apoderado']
-                ]);
-                $newRequest['per_id_Alumno'] = $per_id_Apoderado->per_id;
-                $perUser = User::create([
-                    'per_id' => $per_id_Apoderado->per_id,
-                    'email' => $newRequest['per_email_Apoderado'],
-                    'password' => bcrypt($newRequest['per_dni_Apoderado']),
-                    'name' => $per_id_Apoderado->per_nombre_completo,
-                    'rol_id' => 1
-                ]);
-                $perUser->assignRole('Apoderado');
+                $apoderado = Apoderado::where('per_id', $apoderadoId)->first();
+            }
 
-
-
-                $per_id_alumno = Persona::create([
-                    'per_dni' => $newRequest['per_dni_Alumno'],
-                    'per_nombres' => $newRequest['per_nombres_Alumno'],
-                    'per_apellidos' => $newRequest['per_apellidos_Alumno'],
-                    'per_nombre_completo' => $newRequest['per_nombres_Alumno'] . ' ' . $newRequest['per_apellidos_Alumno'],
-                    'per_email' => $newRequest['per_email_Alumno'],
-                    'per_sexo' => $newRequest['per_sexo_Alumno'],
-                    'per_fecha_nacimiento' => $newRequest['per_fecha_nacimiento_Alumno'],
-                    'per_estado_civil' => $newRequest['per_estado_civil_Alumno'],
-                    'per_celular' => $newRequest['per_celular_Alumno'],
-                    'per_pais' => $newRequest['per_pais_Alumno'],
-                    'per_departamento' => $newRequest['per_departamento_Alumno'],
-                    'per_provincia' => $newRequest['per_provincia_Alumno'],
-                    'per_distrito' => $newRequest['per_distrito_Alumno'],
-                    'per_direccion' => $newRequest['per_direccion_Alumno']
-                ]);
-
-                $perAlumnoUser = User::create([
-                    'per_id' => $per_id_alumno->per_id,
-                    'email' => $newRequest['per_email_Alumno'],
-                    'password' => bcrypt($newRequest['per_dni_Alumno']),
-                    'name' => $per_id_alumno->per_nombre_completo,
-                    'rol_id' => 1
-                ]);
-                $perAlumnoUser->assignRole('Alumno');
-                $newRequest['per_id_Alumno'] = $per_id_alumno->per_id;
-
-
-                $Apoderado = Apoderado::create([
-                    'per_id' => $per_id_Apoderado->per_id,
-                    'apo_parentesco' => $newRequest['per_parentesco_Apoderado'],
-                    'apo_vive_con_estudiante' => $newRequest['per_vive_con_estudiante_Apoderado'],
+            // 🏷️ Crear/Actualizar Apoderado
+            if (!$apoderado) {
+                $apoderado = Apoderado::create([
+                    'per_id' => $apoderadoId,
+                    'apo_parentesco' => $data['per_parentesco_Apoderado'],
+                    'apo_vive_con_estudiante' => $data['per_vive_con_estudiante_Apoderado'],
                 ]);
             }
-            log('salio');
 
+            // 👦 Crear Alumno
             Alumno::create([
-                'per_id' => $newRequest['per_id_Alumno'],
-                'apo_id' => $Apoderado ? $Apoderado->apo_id : null,
+                'per_id' => $alumnoId,
+                'apo_id' => $apoderado->apo_id,
                 'alu_estado' => 1
             ]);
         });
+
         return redirect()->route('alumno.inicio')->with('success', 'Alumno registrado correctamente');
     }
+
+    private function updatePersona($id, $data, $tipo)
+    {
+        $persona = Persona::find($id);
+        if (!$persona) return;
+
+        $prefix = strtolower($tipo);
+        $persona->update(array_filter([
+            'per_dni' => $data["per_dni_{$tipo}"] ?? null,
+            'per_nombres' => $data["per_nombres_{$tipo}"] ?? null,
+            'per_apellidos' => $data["per_apellidos_{$tipo}"] ?? null,
+            'per_nombre_completo' => isset($data["per_nombres_{$tipo}"], $data["per_apellidos_{$tipo}"]) ?
+                $data["per_nombres_{$tipo}"] . ' ' . $data["per_apellidos_{$tipo}"] : null,
+            'per_email' => $data["per_email_{$tipo}"] ?? null,
+            'per_sexo' => $data["per_sexo_{$tipo}"] ?? null,
+            'per_fecha_nacimiento' => $data["per_fecha_nacimiento_{$tipo}"] ?? null,
+            'per_estado_civil' => $data["per_estado_civil_{$tipo}"] ?? null,
+            'per_celular' => $data["per_celular_{$tipo}"] ?? null,
+            'per_pais' => $data["per_pais_{$tipo}"] ?? null,
+            'per_departamento' => $data["per_departamento_{$tipo}"] ?? null,
+            'per_provincia' => $data["per_provincia_{$tipo}"] ?? null,
+            'per_distrito' => $data["per_distrito_{$tipo}"] ?? null,
+            'per_direccion' => $data["per_direccion_{$tipo}"] ?? null,
+        ], fn($val) => !is_null($val) && $val !== ''));
+    }
+
+    private function createPersona($data, $tipo)
+    {
+        return Persona::create([
+            'per_dni' => $data["per_dni_{$tipo}"],
+            'per_nombres' => $data["per_nombres_{$tipo}"],
+            'per_apellidos' => $data["per_apellidos_{$tipo}"],
+            'per_nombre_completo' => $data["per_nombres_{$tipo}"] . ' ' . $data["per_apellidos_{$tipo}"],
+            'per_email' => $data["per_email_{$tipo}"],
+            'per_sexo' => $data["per_sexo_{$tipo}"],
+            'per_fecha_nacimiento' => $data["per_fecha_nacimiento_{$tipo}"],
+            'per_estado_civil' => $data["per_estado_civil_{$tipo}"],
+            'per_celular' => $data["per_celular_{$tipo}"],
+            'per_pais' => $data["per_pais_{$tipo}"],
+            'per_departamento' => $data["per_departamento_{$tipo}"],
+            'per_provincia' => $data["per_provincia_{$tipo}"],
+            'per_distrito' => $data["per_distrito_{$tipo}"],
+            'per_direccion' => $data["per_direccion_{$tipo}"],
+        ]);
+    }
+
+    private function createUser($persona, $rol)
+    {
+        $user = User::create([
+            'per_id' => $persona->per_id,
+            'email' => $persona->per_email,
+            'password' => bcrypt($persona->per_dni),
+            'name' => $persona->per_nombre_completo,
+            'rol_id' => 1
+        ]);
+        $user->assignRole($rol);
+    }
+
+
 
     /**
      * Display the specified resource.

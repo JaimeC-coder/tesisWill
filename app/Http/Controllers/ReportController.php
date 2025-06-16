@@ -248,6 +248,7 @@ class ReportController extends Controller
         $grado = Grado::where('gra_id', $grado)->select('gra_descripcion')->first();
         $seccion = Seccion::where('sec_id', $seccion)->select('sec_descripcion')->first();
         $perido = Anio::where('anio_id', $anio)->select('anio_descripcion')->first();
+        $infoColegio = Institucion::where('ie_id', 1)->first();
 
 
         $headers = [
@@ -255,6 +256,7 @@ class ReportController extends Controller
             'grado' => $grado->gra_descripcion,
             'seccion' => $seccion->sec_descripcion,
             'anio' => $perido->anio_descripcion,
+            'infoColegio' => $infoColegio,
         ];
         $pdf = Pdf::loadView('view.reporte.promediosCursos', compact('cursosList', 'headers'));
         return $pdf->stream();
@@ -279,22 +281,27 @@ class ReportController extends Controller
         // Variables para la vista
         $alumno = $gsa = $aula = $matricula = $nivel = $grado = $seccion = null;
 
-        if($isApoderado){
+        if ($isApoderado &&  $request->buscar) {
             //primero buscamos en ta tabla de apoderado el id
             $apoderado = Apoderado::where('per_id', $persona->per_id)->first();
             //luego en la tabla de alumnos cuales tiene el id de ese apodero
-            $alumnos = Alumno::where('apo_id', $apoderado->apo_id)->get();
+           // return $apoderado;
+            $alumnos = Alumno::where('apo_id', $apoderado->apo_id)
+                ->with(['persona'])
+            ->get();
+            //return $alumnos;
             // luego buscamos el dni de esos alumnos
-            $dni = $alumnos->pluck('persona.per_dni')->toArray();
+            $dnis = $alumnos->pluck('persona.per_dni')->toArray();
+           // return $dnis;
 
             //luego comparamos si el dni ingresa pertene a alguno de los dni de sus hijo si es asi que continue
-            if (!in_array($dni, $alumnos->pluck('persona.per_dni')->toArray())) {
+            if (!in_array( $request->buscar, $dnis)) {
                 Log::info("DNI no pertenece a los hijos del apoderado: $dni");
                 return view('view.reporte.alumno', compact('dni', 'persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))
                     ->with('error', "El DNI proporcionado no pertenece a ningún hijo del apoderado.");
             }
             // si no que que mande un error
-            
+
         }
         // Validar si se recibió un DNI (caso: no es alumno y no envió nada)
         if (is_null($dni)) {
@@ -2444,6 +2451,7 @@ class ReportController extends Controller
         $institucion = Institucion::where('ie_id', 1)->first();
         $Persona = Persona::where('per_id', $data)->first();
         $alumno = $Persona["per_nombres"] . " " . $Persona["per_apellidos"];
+        $dni = $Persona["per_dni"];
         $idNivel  = $Persona->alumno->ultimaMatricula?->gsa?->niv_id; //TODO $data["idNivel"];
         $idGrado  = $Persona->alumno->ultimaMatricula?->gsa?->gra_id; //TODO $data["idGrado"];
 
@@ -2648,7 +2656,7 @@ class ReportController extends Controller
         $nombreDocumento = "LIBRETA_NOTAS_" . str_replace(' ', '_', $alumno) . ".pdf";
 
         // Generando HTML del documento
-        $html = $this->generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion);
+        $html = $this->generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion, $dni);
 
         // Creando Pdf
         include_once "../vendor/autoload.php";
@@ -2667,7 +2675,7 @@ class ReportController extends Controller
     /**
      * Genera el HTML para la libreta de notas
      */
-    private function generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion)
+    private function generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion, $dni)
     {
         // Iniciar construcción del HTML
         $html = '<!DOCTYPE html>
@@ -2774,6 +2782,12 @@ class ReportController extends Controller
                                                         <td class="bg-gray">Apellidos y nombres del estudiante:</td>
                                                         <td colspan="3">' . $alumno . '</td>
                                                     </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">Código del estudiante:</td>
+                                                        <td >' . '</td>
+                                                        <td class="bg-gray">DNI:</td>
+                                                        <td>' . $dni . '</td>
+                                                    </tr>
                                                 </table>
                                             </td>
                                             <td align="center" width="15%">
@@ -2845,7 +2859,7 @@ class ReportController extends Controller
             $html .= '</tr>';
 
             // 👇 Insertar salto de página cada 3 cursos
-            if ($contadorCursos % 3 == 0 && $contadorCursos < count($datosCursos)) {
+            if ($contadorCursos % 4 == 0 && $contadorCursos < count($datosCursos)) {
                 $html .= '</tbody></table>';
                 $html .= '<div style="page-break-after: always;"></div>';
                 $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 2rem;">
@@ -2871,27 +2885,28 @@ class ReportController extends Controller
 
         $html .= '</tbody></table>';
 
-        // Situación final
-        $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
-                            <thead>
-                                <tr>
-                                    <th colspan="3" class="bg-gray">Situación final del estudiante al término del periodo lectivo</th>
-                                </tr>
-                                <tr>
-                                    <th width="33%">Promovido de grado</th>
-                                    <th width="33%">Requiere recuperación pedagógica</th>
-                                    <th width="34%">Permanece en el grado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td height="30" align="center"></td>
-                                    <td align="center"></td>
-                                    <td align="center"></td>
-                                </tr>
-                            </tbody>
-                        </table>';
+        // // Situación final
+        // $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
+        //                     <thead>
+        //                         <tr>
+        //                             <th colspan="3" class="bg-gray">Situación final del estudiante al término del periodo lectivo</th>
+        //                         </tr>
+        //                         <tr>
+        //                             <th width="33%">Promovido de grado</th>
+        //                             <th width="33%">Requiere recuperación pedagógica</th>
+        //                             <th width="34%">Permanece en el grado</th>
+        //                         </tr>
+        //                     </thead>
+        //                     <tbody>
+        //                         <tr>
+        //                             <td height="30" align="center"></td>
+        //                             <td align="center"></td>
+        //                             <td align="center"></td>
+        //                         </tr>
+        //                     </tbody>
+        //                 </table>';
 
+            $html .= '</br></br></br></br></br></br></br></br>';
         // Tabla de conclusión descriptiva por período
         $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
                     <thead>
@@ -2921,13 +2936,12 @@ class ReportController extends Controller
                 </table>';
 
 
-        $html .= '</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>';
-                // Tabla de resumen de asistencia del estudiante
+        $html .= '</br></br></br></br></br></br></br>';
+        // Tabla de resumen de asistencia del estudiante
+        $html .= '<h3 style="text-align: center; font-weight: bold; margin: 1rem 0;">RESUMEN DE ASISTENCIA DEL ESTUDIANTE</h3>';
         $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
                     <thead>
-                        <tr>
-                            <th colspan="5" class="bg-gray">Resumen de asistencia del estudiante</th>
-                        </tr>
+
                         <tr>
                             <th rowspan="2" width="15%" class="bg-gray">Período</th>
                             <th colspan="2" width="42.5%" class="bg-gray">Inasistencias</th>
@@ -2973,7 +2987,8 @@ class ReportController extends Controller
                 </table>';
 
 
-                // Título para la sección de participación de padres
+        // Título para la sección de participación de padres
+        $html .= '</br></br></br></br></br></br></br></br>';
         $html .= '<h3 style="text-align: center; font-weight: bold; margin: 1rem 0;">PARTICIPACIÓN DE LOS PADRES DE FAMILIA</h3>';
 
         // Tabla de criterios de evaluación (participación de padres)
@@ -3045,10 +3060,10 @@ class ReportController extends Controller
                 </table>';
 
 
-        $html .= '</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>';
-                // Título de la escala de calificaciones
+        $html .= '</br></br></br></br></br>';
+        // Título de la escala de calificaciones
 
-                $html .= '<h3 style="text-align: center; font-weight: bold; margin: 1rem 0;">ESCALA DE CALIFICACIONES DEL CNEB</h3>';
+        $html .= '<h3 style="text-align: center; font-weight: bold; margin: 1rem 0;">ESCALA DE CALIFICACIONES DEL CNEB</h3>';
 
         // Tabla de escala de calificaciones del CNEB
         $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
@@ -3084,37 +3099,40 @@ class ReportController extends Controller
                     </tbody>
                 </table>';
 
-        $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 3rem;">
-                            <thead>
-                                <tr><th colspan="3" class="bg-gray">Área(a) y/o taller(es) que pasan a recuperación pedagógica</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td height="30" colspan="3" align="center"></td></tr>
-                            </tbody>
-                        </table>';
-
-        $html .= '<table width="100%" style="margin-top: 1rem;">
+        // $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 3rem;">
+        //                     <thead>
+        //                         <tr><th colspan="3" class="bg-gray">Área(a) y/o taller(es) que pasan a recuperación pedagógica</th></tr>
+        //                     </thead>
+        //                     <tbody>
+        //                         <tr><td height="30" colspan="3" align="center"></td></tr>
+        //                     </tbody>
+        //                 </table>';
+       // $html .= '</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>';
+        $html .= '</br></br></br></br></br></br></br></br></br>';
+       $html .= '<table width="100%" style="margin-top: 1rem;">
                             <tbody>
                                 <tr>
-                                    <td width="50%" align="center">
-                                        <img src="data:image/jpg;base64,' . $imagenSello . '" alt="sello" class="sello" />
-                                    </td>
-                                    <td width="50%" align="raight">
+                                   <td width="50%" align="raight">
 
                                     </td>
+                                    <td width="50%" align="center">
+                                        <img src="data:image/jpg;base64,' . $imagenSello . '" alt="sello" class="sello" style="width: 300px" />
+                                    </td>
+
                                 </tr>
                                 <tr>
+                                 <td width="30%" align="center">
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; width: 40%; margin: 0 auto;">
+                                            DOCENTE DE AULA
+                                        </div>
+                                    </td>
                                     <td width="30%" align="center">
                                         <div style="border-top: 1px solid #000; padding-top: 5px; width: 40%; margin: 0 auto;">
                                             DIRECTOR
                                         </div>
                                     </td>
 
-                                    <td width="30%" align="center">
-                                        <div style="border-top: 1px solid #000; padding-top: 5px; width: 40%; margin: 0 auto;">
-                                            DOCENTE DE AULA
-                                        </div>
-                                    </td>
+
                                 </tr>
                             </tbody>
                         </table>

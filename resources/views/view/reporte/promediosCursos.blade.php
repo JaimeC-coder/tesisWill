@@ -69,9 +69,9 @@
                     <table width="100%" border="1" class="table">
                         <tr>
                             <td class="bg-gray">DRE:</td>
-                            <td>DRE SAN MIGUEL</td>
+                            <td>{{$headers['infoColegio']['ie_dre']}}</td>
                             <td class="bg-gray">UGEL:</td>
-                            <td>UGEL SAN MIGUEL</td>
+                            <td>{{$headers['infoColegio']['ie_ugel']}}</td>
                         </tr>
                         <tr>
                             <td class="bg-gray">Nivel:</td>
@@ -81,7 +81,7 @@
                         </tr>
                         <tr>
                             <td class="bg-gray">Institución Educativa:</td>
-                            <td colspan="3">I.E. 82857 LIVES</td>
+                            <td colspan="3">{{$headers['infoColegio']['ie_ugel']}}</td>
                         </tr>
                         <tr>
                             <td class="bg-gray">Grado:</td>

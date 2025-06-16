@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const secciones = await fetchData("/api/showSecciones", { gra_id: gra_id.value });
         sec_id.disabled = false;
         sec_id.innerHTML = "";
-        sec_id.innerHTML = `<option value="">Seleccione una sección</option>`;
+        sec_id.innerHTML = `<option value="">Seleccione una grado</option>`;
         secciones.forEach((seccion) => {
             sec_id.innerHTML += `<option value="${seccion.sec_id}">${seccion.sec_descripcion}</option>`;
         });

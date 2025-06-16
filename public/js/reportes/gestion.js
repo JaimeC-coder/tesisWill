@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded',async  function () {
     nivel.addEventListener("change", handleNivelChange);
     grado.addEventListener("change", handleGradoChange);
     seccion.addEventListener("change", function () { btnHorario.disabled = !seccion.value;
-        btnregister.disabled = !seccion.value; }
+        btnregister.disabled = seccion.value; }
     );
     await selectFromURL();
 }
@@ -26,7 +26,7 @@ function activateButton(){
 
     let seccion = urlParams.get('seccion');
     //Si no hay seccion seleccionada, deshabilitar el boton
-    if (seccion) {
+    if (seccion || seccion === null || seccion === undefined || seccion === "" ) {
         btnHorario.disabled = false;
         btnregister.disabled = false;
     } else {

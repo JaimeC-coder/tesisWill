@@ -181,11 +181,11 @@
 
             $('.timepicker').timepicker({
                 timeFormat: 'h:mm p',
-                interval: 45,
+                interval: 15,
                 minTime: '7',
                 maxTime: '1:00pm',
-                defaultTime: '11',
-                startTime: '10:00',
+                defaultTime: '7:00',
+                startTime: '7:00',
                 dynamic: false,
                 dropdown: true,
                 scrollbar: true

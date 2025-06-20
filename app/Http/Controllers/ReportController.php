@@ -2479,7 +2479,8 @@ class ReportController extends Controller
             ];
 
             // NUEVO: Obtener capacidades para este curso desde la base de datos
-            $capacidadesCurso = Capacidad::where('cur_id', $curso->cur_id)->get();
+            $capacidadesCurso = Capacidad::where('cur_id', $curso->cur_id)
+            ->get();
             foreach ($capacidadesCurso as $index => $cursoCapacidad) {
                 $capacidad = Capacidad::where('cap_id', $cursoCapacidad->cap_id)->first();
                 if ($capacidad) {
@@ -2565,7 +2566,9 @@ class ReportController extends Controller
             if ($curso) {
                 $cursoNombre = $curso->cur_nombre;
 
-                $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)->get();
+                $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)
+                ->orderBy('cap_id')
+                ->get();
                 // No sobreescribimos las capacidades aquí, ya las hemos obtenido antes
                 $bimestre = $value->nt_bimestre;
 
@@ -2655,6 +2658,7 @@ class ReportController extends Controller
 
         $nombreDocumento = "LIBRETA_NOTAS_" . str_replace(' ', '_', $alumno) . ".pdf";
 
+      //  return $datosCursos;
         // Generando HTML del documento
         $html = $this->generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion, $dni);
 

@@ -52,55 +52,55 @@ class AlumnoController extends Controller
     {
         $data = $request->all();
         Log::info($data);
+        // Validación previa por DNI
+        $dniAlumno = $data['per_dni_Alumno'] ?? null;
+        $dniApoderado = $data['per_dni_Apoderado'] ?? null;
 
+        $alumnoExistente = Persona::where('per_dni', $dniAlumno)->first();
+        $apoderadoExistente = Persona::where('per_dni', $dniApoderado)->first();
+
+        // Si ya existen ambos, redireccionar directamente
+        if ($alumnoExistente && $apoderadoExistente) {
+            WhatsAppHelper::enviarMensaje("Alumno y Apoderado ya existen, redirigiendo...");
+            return redirect()->route('alumno.inicio')->with('info', 'El alumno y el apoderado ya están registrados.');
+        }
         DB::transaction(function () use ($data) {
             $alumnoId = $data['per_id_Alumno'] ?? null;
             $apoderadoId = $data['per_id_Apoderado'] ?? null;
 
             // ✅ Actualizar datos si ya existen
             if ($alumnoId) {
-                   WhatsAppHelper::enviarMensaje(
-                "metodo if alumnoId 1 existe"
-            );
+                WhatsAppHelper::enviarMensaje("metodo if alumnoId 1 existe");
                 $this->updatePersona($alumnoId, $data, 'Alumno');
             }
 
             if ($apoderadoId) {
-                        WhatsAppHelper::enviarMensaje(
-                "metodo if apoderadoId 1 existe"
-            );
+                WhatsAppHelper::enviarMensaje("metodo if apoderadoId 1 existe");
                 $this->updatePersona($apoderadoId, $data, 'Apoderado');
             }
 
             // 🎯 Crear Persona si no existen
             if (!$alumnoId) {
-                WhatsAppHelper::enviarMensaje(
-                "metodo if alumnoId 2 si no existe existe"
-            );
+                WhatsAppHelper::enviarMensaje("metodo if alumnoId 2 si no existe existe");
                 $alumno = $this->createPersona($data, 'Alumno');
                 $alumnoId = $alumno->per_id;
                 $this->createUser($alumno, 'Alumno');
             }
 
             if (!$apoderadoId) {
-                  WhatsAppHelper::enviarMensaje(
-                "metodo if apoderadoId 2  si no existe existe"
-            );
+                WhatsAppHelper::enviarMensaje("metodo if apoderadoId 2  si no existe existe");
                 $apoderado = $this->createPersona($data, 'Apoderado');
                 $apoderadoId = $apoderado->per_id;
                 $this->createUser($apoderado, 'Apoderado');
             } else {
-                    WhatsAppHelper::enviarMensaje(
-                "metodo if apoderadoId 2  else"
-            );
+                WhatsAppHelper::enviarMensaje("metodo if apoderadoId 2  else");
                 $apoderado = Apoderado::where('per_id', $apoderadoId)->first();
             }
 
             // 🏷️ Crear/Actualizar Apoderado
-            if (!$apoderado) {
-                    WhatsAppHelper::enviarMensaje(
-                "metodo if apoderado   si no existe existe"
-            );
+            if (!$apoderado->apo_id) {
+                Log::info("entro ");
+                WhatsAppHelper::enviarMensaje("metodo if apoderado   si no existe existe");
                 $apoderado = Apoderado::create([
                     'per_id' => $apoderadoId,
                     'apo_parentesco' => $data['per_parentesco_Apoderado'],
@@ -108,10 +108,9 @@ class AlumnoController extends Controller
                 ]);
             }
 
+
             // 👦 Crear Alumno
-               WhatsAppHelper::enviarMensaje(
-                "registra al estudiante"
-            );
+            WhatsAppHelper::enviarMensaje("registra al estudiante");
             Alumno::create([
                 'per_id' => $alumnoId,
                 'apo_id' => $apoderado->apo_id,

@@ -81,7 +81,7 @@
                         </tr>
                         <tr>
                             <td class="bg-gray">Institución Educativa:</td>
-                            <td colspan="3">{{$headers['infoColegio']['ie_ugel']}}</td>
+                            <td colspan="3">{{$headers['infoColegio']['ie_nombre']}}</td>
                         </tr>
                         <tr>
                             <td class="bg-gray">Grado:</td>

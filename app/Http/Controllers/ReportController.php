@@ -285,17 +285,17 @@ class ReportController extends Controller
             //primero buscamos en ta tabla de apoderado el id
             $apoderado = Apoderado::where('per_id', $persona->per_id)->first();
             //luego en la tabla de alumnos cuales tiene el id de ese apodero
-           // return $apoderado;
+            // return $apoderado;
             $alumnos = Alumno::where('apo_id', $apoderado->apo_id)
                 ->with(['persona'])
-            ->get();
+                ->get();
             //return $alumnos;
             // luego buscamos el dni de esos alumnos
             $dnis = $alumnos->pluck('persona.per_dni')->toArray();
-           // return $dnis;
+            // return $dnis;
 
             //luego comparamos si el dni ingresa pertene a alguno de los dni de sus hijo si es asi que continue
-            if (!in_array( $request->buscar, $dnis)) {
+            if (!in_array($request->buscar, $dnis)) {
                 Log::info("DNI no pertenece a los hijos del apoderado: $dni");
                 return view('view.reporte.alumno', compact('dni', 'persona', 'alumno', 'gsa', 'matricula', 'nivel', 'grado', 'seccion'))
                     ->with('error', "El DNI proporcionado no pertenece a ningún hijo del apoderado.");
@@ -2480,7 +2480,7 @@ class ReportController extends Controller
 
             // NUEVO: Obtener capacidades para este curso desde la base de datos
             $capacidadesCurso = Capacidad::where('cur_id', $curso->cur_id)
-            ->get();
+                ->get();
             foreach ($capacidadesCurso as $index => $cursoCapacidad) {
                 $capacidad = Capacidad::where('cap_id', $cursoCapacidad->cap_id)->first();
                 if ($capacidad) {
@@ -2567,8 +2567,8 @@ class ReportController extends Controller
                 $cursoNombre = $curso->cur_nombre;
 
                 $notasCapacidades = NotaCapacidad::where('nt_id', $value->nt_id)
-                ->orderBy('cap_id')
-                ->get();
+                    ->orderBy('cap_id')
+                    ->get();
                 // No sobreescribimos las capacidades aquí, ya las hemos obtenido antes
                 $bimestre = $value->nt_bimestre;
 
@@ -2581,13 +2581,12 @@ class ReportController extends Controller
                 }
 
                 // Guardar notas de capacidades
-                foreach ($notasCapacidades as $index => $capacidad) {
-                    // Asegurar que el índice existe en el array de capacidades
-                    if (isset($cursos[$cursoNombre]['capacidades'][$index])) {
-                        $cursos[$cursoNombre]['bimestres'][$bimestre]['capacidades'][$index] =
-                            !empty($capacidad->nc_nota) ? $capacidad->nc_nota : '';
-                    }
+                foreach ($notasCapacidades as $capacidad) {
+                    $capacidadId = $capacidad->cap_id;
+                    $cursos[$cursoNombre]['bimestres'][$bimestre]['capacidades'][$capacidadId] =
+                        !empty($capacidad->nc_nota) ? $capacidad->nc_nota : '';
                 }
+
 
                 // Guardar promedio bimestral
                 $cursos[$cursoNombre]['bimestres'][$bimestre]['promedio'] =
@@ -2658,7 +2657,7 @@ class ReportController extends Controller
 
         $nombreDocumento = "LIBRETA_NOTAS_" . str_replace(' ', '_', $alumno) . ".pdf";
 
-      //  return $datosCursos;
+        //return $datosCursos;
         // Generando HTML del documento
         $html = $this->generarHtmlLibreta($alumno, $grado, $seccion, $datosCursos, $imagenEducacion, $imagenCAO, $imagenSello, $institucion, $dni);
 
@@ -2834,7 +2833,15 @@ class ReportController extends Controller
                 $html .= '<td>' . $capacidad . '</td>';
 
                 for ($bimestre = 1; $bimestre <= 4; $bimestre++) {
-                    $nota = $curso['bimestres'][$bimestre]['capacidades'][$i] ?? '';
+                    $capacidadId = $curso['capacidades'][$i]['id'] ?? null;
+                    $nota = $capacidadId && isset($curso['bimestres'][$bimestre]['capacidades'][$capacidadId])
+                        ? $curso['bimestres'][$bimestre]['capacidades'][$capacidadId]
+                        : '';
+                    // Convertir nota a letra si es necesario
+                    if (is_numeric($nota)) {
+                        $nota = convertirNumeroALetra($nota);
+                    }
+
                     $html .= '<td align="center">' . $nota . '</td>';
                 }
 
@@ -2910,7 +2917,7 @@ class ReportController extends Controller
         //                     </tbody>
         //                 </table>';
 
-            $html .= '</br></br></br></br></br></br></br></br>';
+        $html .= '</br></br></br></br></br></br></br></br>';
         // Tabla de conclusión descriptiva por período
         $html .= '<table width="100%" border="1" class="table" style="margin-bottom: 1rem;">
                     <thead>
@@ -3111,9 +3118,9 @@ class ReportController extends Controller
         //                         <tr><td height="30" colspan="3" align="center"></td></tr>
         //                     </tbody>
         //                 </table>';
-       // $html .= '</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>';
+        // $html .= '</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>';
         $html .= '</br></br></br></br></br></br></br></br></br>';
-       $html .= '<table width="100%" style="margin-top: 1rem;">
+        $html .= '<table width="100%" style="margin-top: 1rem;">
                             <tbody>
                                 <tr>
                                    <td width="50%" align="raight">

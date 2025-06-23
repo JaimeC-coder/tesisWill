@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         gra_id.disabled = false;
         gra_id.innerHTML = "";
-        gra_id.innerHTML = `<option value="">Seleccione una sección</option>`;
+        gra_id.innerHTML = `<option value="">Seleccione una grado</option>`;
         grados.forEach((grado) => {
             gra_id.innerHTML += `<option value="${grado.gra_id}">${grado.gra_descripcion}</option>`;
         });
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const secciones = await fetchData("/api/showSecciones", { gra_id: gra_id.value });
         sec_id.disabled = false;
         sec_id.innerHTML = "";
-        sec_id.innerHTML = `<option value="">Seleccione una grado</option>`;
+        sec_id.innerHTML = `<option value="">Seleccione una sección</option>`;
         secciones.forEach((seccion) => {
             sec_id.innerHTML += `<option value="${seccion.sec_id}">${seccion.sec_descripcion}</option>`;
         });

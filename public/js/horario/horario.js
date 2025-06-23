@@ -84,10 +84,12 @@ function resetSelect(selectElement) {
     selectElement.disabled = true;
 }
 
-function initCalendar() {
+function initCalendar(anio) {
+    console.log("Inicializando calendario para el año:", anio);
     // Inicializamos el calendario solo una vez
     calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'timeGridWeek',
+        initialDate: anio,
         locale: 'es',
         headerToolbar: {
             left: 'prev,next today',
@@ -112,10 +114,10 @@ function initCalendar() {
     return calendar;
 }
 
-function updateCalendarEvents(events) {
+function updateCalendarEvents(events, anio) {
     // Si el calendario no está inicializado, lo inicializamos
     if (!calendar) {
-        calendar = initCalendar();
+        calendar = initCalendar(anio);
     }
 
     // Eliminamos todos los eventos actuales
@@ -167,6 +169,7 @@ async function loadHorarios(seccionId = seccionss.value, anioId = anio.value, ni
             grado_id: gradoId,
             user_id: userId
         });
+        console.log(horarios);
 
         if (horarios.status === 400) {
             showNotification(horarios.mensaje, 'info');
@@ -181,7 +184,7 @@ async function loadHorarios(seccionId = seccionss.value, anioId = anio.value, ni
         }
 
         // Actualizamos solo los eventos del calendario
-        updateCalendarEvents(horarios.horarios);
+        updateCalendarEvents(horarios.horarios , horarios.anio);
     } catch (error) {
         console.error("Error al cargar horarios:", error);
         showNotification('Error al cargar horarios', 'error');

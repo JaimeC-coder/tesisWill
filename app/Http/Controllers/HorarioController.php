@@ -197,6 +197,9 @@ class HorarioController extends Controller
         $seccion_id = $request->seccion_id;
         $per_id = $request->user_id;
 
+        $anioselect = Anio::where('anio_id', $anio_id)
+            ->first();
+
         $personal = PersonalAcademico::where('per_id', $per_id)->where('is_deleted', '!=', 1)->first();
         Log::info('---Personal---');
         Log::info($personal);
@@ -240,9 +243,6 @@ class HorarioController extends Controller
         }
 
         $horarios = Horario::where('per_id', $periodo->per_id)->where('ags_id', $ags->ags_id)->where('is_deleted', '!=', 1)->get();
-        Log::info('---Horarios---');
-        Log::info($horarios);
-        Log::info('-------------');
         foreach ($horarios as $value) {
             $curso = Curso::where('cur_id', $value->cur_id)->where('is_deleted', '!=', 1)->first();
             if (!$curso) {
@@ -298,7 +298,8 @@ class HorarioController extends Controller
             'status' => 200,
             'horarios' => $horarios,
             'cursos' => $asignarCursos,
-            'dias' => $dias
+            'dias' => $dias,
+            'anio' => $anioselect->anio_fechaInicio,
         ]);
     }
 
